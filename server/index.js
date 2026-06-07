@@ -20,8 +20,13 @@ app.use('/api', apiRoutes);
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '../client/dist')));
 
-  app.get('/(.*)', (req, res) => {
-    res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+  // Fallback for SPA routing (bypasses path-to-regexp errors in Express 5)
+  app.use((req, res, next) => {
+    if (req.method === 'GET' && !req.path.startsWith('/api')) {
+      res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+    } else {
+      next();
+    }
   });
 }
 
