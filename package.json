@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node server/index.js",
-    "build": "cd client && npm install && npm run build && cd .. && npx prisma generate",
+    "build": "cd client && npm install --include=dev && npm run build && cd .. && npx prisma generate",
     "dev": "node start-dev.js"
   },
   "keywords": [],
