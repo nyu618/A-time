@@ -1,0 +1,16 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Queue {
+  id          Int       @id @default(autoincrement())
+  lineUserId  String
+  displayName String?
+  status      String    @default("WAITING") // WAITING, CALLED, ARRIVED, CANCELLED
+  createdAt   DateTime  @default(now())
+  calledAt    DateTime?
+}
