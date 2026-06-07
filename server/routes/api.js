@@ -29,6 +29,12 @@ if (lineConfig.channelAccessToken && lineConfig.channelSecret && lineConfig.chan
   }
 }
 
+// Webhook endpoint for LINE (Used for verification and receiving events)
+router.post('/webhook', (req, res) => {
+  // Return 200 OK to pass the LINE Developers verification.
+  res.status(200).send('OK');
+});
+
 // User: Register for queue
 router.post('/queue', async (req, res) => {
   try {
