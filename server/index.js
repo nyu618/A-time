@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const basicAuth = require('express-basic-auth');
 const apiRoutes = require('./routes/api');
 const { startCron } = require('./cron');
 
@@ -12,6 +13,19 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
+
+// Basic Auth Middleware for Admin Routes
+const adminAuth = basicAuth({
+  users: { [process.env.ADMIN_USER || 'admin']: process.env.ADMIN_PASSWORD || 'password' },
+  challenge: true,
+  realm: 'Admin Area'
+});
+
+// Protect API admin routes
+app.use('/api/admin', adminAuth);
+
+// Protect frontend admin route
+app.use('/admin', adminAuth);
 
 // API Routes
 app.use('/api', apiRoutes);
