@@ -38,13 +38,24 @@ router.post('/webhook', (req, res) => {
 // User: Register for queue
 router.post('/queue', async (req, res) => {
   try {
-    const { lineUserId, displayName } = req.body;
+    const { lineUserId, displayName, targetDate } = req.body;
     if (!lineUserId) return res.status(400).json({ error: 'lineUserId is required' });
 
-    // Check if user is already waiting
+    // Use provided date or today (JST approximation by client, or fallback)
+    const dateStr = targetDate || new Date().toISOString().split('T')[0];
+
+    // Upsert User
+    await prisma.user.upsert({
+      where: { lineUid: lineUserId },
+      update: { displayName },
+      create: { lineUid: lineUserId, displayName, visitCount: 0 }
+    });
+
+    // Check if user is already waiting today
     const existing = await prisma.queue.findFirst({
       where: {
         lineUserId,
+        targetDate: dateStr,
         status: { in: ['WAITING', 'CALLED'] }
       }
     });
@@ -53,7 +64,7 @@ router.post('/queue', async (req, res) => {
     }
 
     const queueItem = await prisma.queue.create({
-      data: { lineUserId, displayName, status: 'WAITING' }
+      data: { lineUserId, displayName, targetDate: dateStr, status: 'WAITING' }
     });
     res.json(queueItem);
   } catch (error) {
@@ -95,10 +106,12 @@ router.get('/queue/status/:lineUserId', async (req, res) => {
 // Admin: Get all queues
 router.get('/admin/queue', async (req, res) => {
   try {
+    const dateStr = req.query.date || new Date().toISOString().split('T')[0];
     const queues = await prisma.queue.findMany({
       where: {
-        status: { in: ['WAITING', 'CALLED'] }
+        targetDate: dateStr
       },
+      include: { user: true },
       orderBy: { createdAt: 'asc' }
     });
     res.json(queues);
@@ -139,14 +152,26 @@ router.post('/admin/queue/:id/call', async (req, res) => {
   }
 });
 
-// Admin: Mark as arrived
+// Admin: Mark as arrived (Completed)
 router.post('/admin/queue/:id/arrive', async (req, res) => {
   try {
     const { id } = req.params;
+    
+    // First find the queue to get the user
+    const queue = await prisma.queue.findUnique({ where: { id: parseInt(id) } });
+    if (!queue) return res.status(404).json({ error: 'Not found' });
+
     const queueItem = await prisma.queue.update({
       where: { id: parseInt(id) },
-      data: { status: 'ARRIVED' }
+      data: { status: 'COMPLETED' }
     });
+
+    // Increment user visit count
+    await prisma.user.update({
+      where: { lineUid: queue.lineUserId },
+      data: { visitCount: { increment: 1 } }
+    });
+
     res.json(queueItem);
   } catch (error) {
     console.error(error);
@@ -160,7 +185,7 @@ router.post('/admin/queue/:id/cancel', async (req, res) => {
     const { id } = req.params;
     const queueItem = await prisma.queue.update({
       where: { id: parseInt(id) },
-      data: { status: 'CANCELLED' }
+      data: { status: 'CANCELED' }
     });
     res.json(queueItem);
   } catch (error) {

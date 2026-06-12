@@ -53,12 +53,16 @@ export default function UserView() {
     if (!profile) return;
     setLoading(true);
     try {
+      const d = new Date();
+      const targetDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      
       await fetch('/api/queue', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           lineUserId: profile.userId,
-          displayName: profile.displayName
+          displayName: profile.displayName,
+          targetDate
         })
       });
       fetchQueueStatus(profile.userId);

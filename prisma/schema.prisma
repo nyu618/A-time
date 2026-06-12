@@ -6,11 +6,20 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model Queue {
-  id          Int       @id @default(autoincrement())
-  lineUserId  String
+model User {
+  lineUid     String   @id
   displayName String?
-  status      String    @default("WAITING") // WAITING, CALLED, ARRIVED, CANCELLED
-  createdAt   DateTime  @default(now())
+  visitCount  Int      @default(0)
+  queues      Queue[]
+}
+
+model Queue {
+  id          Int      @id @default(autoincrement())
+  lineUserId  String
+  user        User     @relation(fields: [lineUserId], references: [lineUid])
+  displayName String?
+  status      String   @default("WAITING") // WAITING, CALLED, COMPLETED, CANCELED
+  targetDate  String   // e.g. "2023-10-01"
+  createdAt   DateTime @default(now())
   calledAt    DateTime?
 }

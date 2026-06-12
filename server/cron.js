@@ -43,7 +43,7 @@ function startCron() {
       for (const q of expiredQueues) {
         await prisma.queue.update({
           where: { id: q.id },
-          data: { status: 'CANCELLED' }
+          data: { status: 'CANCELED' }
         });
         console.log(`Auto-cancelled queue ${q.id} due to timeout.`);
 
