@@ -90,7 +90,7 @@ export default function UserView() {
             </h2>
             <div className="queue-number">
               <span className="label">お客様の受付番号</span>
-              <span className="number">{queueStatus.id}</span>
+              <span className="number">{queueStatus.dailyNumber}</span>
             </div>
             {queueStatus.status === 'WAITING' && (
               <div className="wait-info">

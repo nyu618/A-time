@@ -74,7 +74,7 @@ export default function AdminView() {
                 activeQueues.map((q) => (
                   <div key={q.id} className={`queue-item ${q.status.toLowerCase()}`}>
                     <div className="queue-info">
-                      <span className="q-number">#{q.id}</span>
+                      <span className="q-number">#{q.dailyNumber}</span>
                       <span className="q-name">{q.displayName || '名無しゲスト'}</span>
                       {q.user && <span className="q-visit-count" style={{fontSize: '0.8rem', backgroundColor: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.3)', padding: '2px 8px', borderRadius: '12px', marginLeft: '10px', fontWeight: '500', letterSpacing: '0.5px'}}>来店: {q.user.visitCount}回目</span>}
                       {q.cancelCount > 0 && <span className="q-cancel-count" style={{fontSize: '0.8rem', backgroundColor: 'rgba(249, 115, 22, 0.15)', color: '#f97316', border: '1px solid rgba(249, 115, 22, 0.3)', padding: '2px 8px', borderRadius: '12px', marginLeft: '10px', fontWeight: '500'}}>再受付 (キャンセル{q.cancelCount}回)</span>}
@@ -143,7 +143,7 @@ export default function AdminView() {
                 historyQueues.map((q) => (
                   <div key={q.id} className={`queue-item history ${q.status.toLowerCase()}`} style={{ opacity: 0.8, backgroundColor: q.status === 'CANCELED' ? 'rgba(239, 68, 68, 0.25)' : undefined }}>
                     <div className="queue-info">
-                      <span className="q-number">#{q.id}</span>
+                      <span className="q-number">#{q.dailyNumber}</span>
                       <span className="q-name">{q.displayName || '名無しゲスト'}</span>
                       {q.user && <span className="q-visit-count" style={{fontSize: '0.8rem', backgroundColor: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.3)', padding: '2px 8px', borderRadius: '12px', marginLeft: '10px', fontWeight: '500', letterSpacing: '0.5px'}}>来店累計: {q.user.visitCount}回</span>}
                       <span className={`q-status ${q.status.toLowerCase()}`} style={{

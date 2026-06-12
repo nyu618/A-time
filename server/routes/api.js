@@ -64,8 +64,15 @@ router.post('/queue', async (req, res) => {
       return res.json(existing);
     }
 
+    // Get max dailyNumber for today
+    const maxQueue = await prisma.queue.findFirst({
+      where: { targetDate: dateStr },
+      orderBy: { dailyNumber: 'desc' }
+    });
+    const nextDailyNumber = maxQueue ? maxQueue.dailyNumber + 1 : 1;
+
     const queueItem = await prisma.queue.create({
-      data: { lineUserId, displayName, targetDate: dateStr, status: 'WAITING' }
+      data: { lineUserId, displayName, targetDate: dateStr, status: 'WAITING', dailyNumber: nextDailyNumber }
     });
     res.json(queueItem);
   } catch (error) {

@@ -20,7 +20,7 @@ async function callNextWaitingUser(prisma, lineClient, targetDate) {
             to: nextQueue.lineUserId,
             messages: [{
               type: 'text',
-              text: `順番が来ましたので店舗へお越しください。\n（受付番号: ${nextQueue.id}）`
+              text: `順番が来ましたので店舗へお越しください。\n（受付番号: ${nextQueue.dailyNumber}）`
             }]
           });
         } catch (err) {
@@ -43,6 +43,13 @@ async function handleCancelAndRequeue(prisma, lineClient, queueId) {
     data: { status: 'CANCELED' }
   });
 
+  // Get max dailyNumber for today
+  const maxQueue = await prisma.queue.findFirst({
+    where: { targetDate: queue.targetDate },
+    orderBy: { dailyNumber: 'desc' }
+  });
+  const nextDailyNumber = maxQueue ? maxQueue.dailyNumber + 1 : 1;
+
   // Create new WAITING queue
   const newQueue = await prisma.queue.create({
     data: {
@@ -50,6 +57,7 @@ async function handleCancelAndRequeue(prisma, lineClient, queueId) {
       displayName: queue.displayName,
       targetDate: queue.targetDate,
       status: 'WAITING',
+      dailyNumber: nextDailyNumber,
       cancelCount: queue.cancelCount + 1
     }
   });
@@ -61,7 +69,7 @@ async function handleCancelAndRequeue(prisma, lineClient, queueId) {
         to: queue.lineUserId,
         messages: [{
           type: 'text',
-          text: `お呼び出しから一定時間経過したため、最後尾にて再受付いたしました。\n新たな受付番号は『${newQueue.id}番』です。`
+          text: `お呼び出しから一定時間経過したため、最後尾にて再受付いたしました。\n新たな受付番号は『${newQueue.dailyNumber}番』です。`
         }]
       });
     } catch (err) {
