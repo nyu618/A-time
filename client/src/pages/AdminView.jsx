@@ -74,7 +74,7 @@ export default function AdminView() {
                     <div className="queue-info">
                       <span className="q-number">#{q.id}</span>
                       <span className="q-name">{q.displayName || '名無しゲスト'}</span>
-                      {q.user && <span className="q-visit-count" style={{fontSize: '0.8rem', backgroundColor: '#e0e0e0', padding: '2px 6px', borderRadius: '4px', marginLeft: '8px'}}>来店: {q.user.visitCount}回目</span>}
+                      {q.user && <span className="q-visit-count" style={{fontSize: '0.8rem', backgroundColor: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.3)', padding: '2px 8px', borderRadius: '12px', marginLeft: '10px', fontWeight: '500', letterSpacing: '0.5px'}}>来店: {q.user.visitCount}回目</span>}
                       <span className={`q-status ${q.status.toLowerCase()}`}>
                         {q.status === 'WAITING' ? '待機中' : '呼出中'}
                       </span>
@@ -113,7 +113,7 @@ export default function AdminView() {
                     <div className="queue-info">
                       <span className="q-number">#{q.id}</span>
                       <span className="q-name">{q.displayName || '名無しゲスト'}</span>
-                      {q.user && <span className="q-visit-count" style={{fontSize: '0.8rem', backgroundColor: '#e0e0e0', padding: '2px 6px', borderRadius: '4px', marginLeft: '8px'}}>来店累計: {q.user.visitCount}回</span>}
+                      {q.user && <span className="q-visit-count" style={{fontSize: '0.8rem', backgroundColor: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.3)', padding: '2px 8px', borderRadius: '12px', marginLeft: '10px', fontWeight: '500', letterSpacing: '0.5px'}}>来店累計: {q.user.visitCount}回</span>}
                       <span className={`q-status ${q.status.toLowerCase()}`}>
                         {q.status === 'COMPLETED' ? '案内済' : 'キャンセル'}
                       </span>
