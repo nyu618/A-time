@@ -37,7 +37,7 @@ export default function AdminView() {
     }
   };
 
-  const activeQueues = queues.filter(q => q.status === 'WAITING' || q.status === 'CALLED');
+  const activeQueues = queues.filter(q => q.status === 'WAITING' || q.status === 'CALLED' || q.status === 'IN_STORE' || q.status === 'ASSESSING');
   const historyQueues = queues.filter(q => q.status === 'COMPLETED' || q.status === 'CANCELED');
 
   return (
@@ -53,9 +53,11 @@ export default function AdminView() {
             style={{ padding: '8px', borderRadius: '8px', border: '1px solid #ccc' }}
           />
         </div>
-        <div className="stats">
-          <span className="stat-badge">待ち組数: {activeQueues.filter(q => q.status === 'WAITING').length}</span>
+        <div className="stats" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          <span className="stat-badge">待機中: {activeQueues.filter(q => q.status === 'WAITING').length}</span>
           <span className="stat-badge called">呼出中: {activeQueues.filter(q => q.status === 'CALLED').length}</span>
+          <span className="stat-badge" style={{backgroundColor: '#bae6fd', color: '#0369a1'}}>店内待機: {activeQueues.filter(q => q.status === 'IN_STORE').length}</span>
+          <span className="stat-badge" style={{backgroundColor: '#fed7aa', color: '#c2410c'}}>査定中: {activeQueues.filter(q => q.status === 'ASSESSING').length}</span>
         </div>
       </header>
 
@@ -77,25 +79,50 @@ export default function AdminView() {
                       {q.user && <span className="q-visit-count" style={{fontSize: '0.8rem', backgroundColor: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.3)', padding: '2px 8px', borderRadius: '12px', marginLeft: '10px', fontWeight: '500', letterSpacing: '0.5px'}}>来店: {q.user.visitCount}回目</span>}
                       {q.cancelCount > 0 && <span className="q-cancel-count" style={{fontSize: '0.8rem', backgroundColor: 'rgba(249, 115, 22, 0.15)', color: '#f97316', border: '1px solid rgba(249, 115, 22, 0.3)', padding: '2px 8px', borderRadius: '12px', marginLeft: '10px', fontWeight: '500'}}>再受付 (キャンセル{q.cancelCount}回)</span>}
                       <span className={`q-status ${q.status.toLowerCase()}`}>
-                        {q.status === 'WAITING' ? '待機中' : '呼出中'}
+                        {q.status === 'WAITING' ? '待機中' : 
+                         q.status === 'CALLED' ? '呼出中' : 
+                         q.status === 'IN_STORE' ? '店内待機中' : 
+                         q.status === 'ASSESSING' ? '査定中' : ''}
                       </span>
                       <span className="q-time">{new Date(q.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
                     <div className="queue-actions">
                       {q.status === 'WAITING' && (
-                        <button className="action-btn call" onClick={() => handleAction(q.id, 'call')} title="呼出">
-                          <PhoneCall size={18} />
-                          <span>呼出</span>
+                        <>
+                          <button className="action-btn call" onClick={() => handleAction(q.id, 'call')} title="呼出">
+                            <PhoneCall size={18} />
+                            <span>呼出</span>
+                          </button>
+                          <button className="action-btn cancel" onClick={() => handleAction(q.id, 'cancel')} title="キャンセル">
+                            <XCircle size={18} />
+                            <span>キャンセル</span>
+                          </button>
+                        </>
+                      )}
+                      {q.status === 'CALLED' && (
+                        <>
+                          <button className="action-btn arrive" onClick={() => handleAction(q.id, 'instore')} title="店内待機" style={{backgroundColor: '#0284c7'}}>
+                            <UserCheck size={18} />
+                            <span>店内待機</span>
+                          </button>
+                          <button className="action-btn cancel" onClick={() => handleAction(q.id, 'cancel')} title="キャンセル">
+                            <XCircle size={18} />
+                            <span>キャンセル</span>
+                          </button>
+                        </>
+                      )}
+                      {q.status === 'IN_STORE' && (
+                        <button className="action-btn" onClick={() => handleAction(q.id, 'assess')} title="査定開始" style={{backgroundColor: '#ea580c', color: 'white'}}>
+                          <UserCheck size={18} />
+                          <span>査定開始</span>
                         </button>
                       )}
-                      <button className="action-btn arrive" onClick={() => handleAction(q.id, 'arrive')} title="案内済">
-                        <UserCheck size={18} />
-                        <span>案内済</span>
-                      </button>
-                      <button className="action-btn cancel" onClick={() => handleAction(q.id, 'cancel')} title="キャンセル">
-                        <XCircle size={18} />
-                        <span>キャンセル</span>
-                      </button>
+                      {q.status === 'ASSESSING' && (
+                        <button className="action-btn arrive" onClick={() => handleAction(q.id, 'complete')} title="査定完了">
+                          <UserCheck size={18} />
+                          <span>査定完了</span>
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))

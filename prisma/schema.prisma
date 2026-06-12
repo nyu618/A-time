@@ -18,7 +18,7 @@ model Queue {
   lineUserId  String
   user        User?    @relation(fields: [lineUserId], references: [lineUid])
   displayName String?
-  status      String   @default("WAITING") // WAITING, CALLED, COMPLETED, CANCELED
+  status      String   @default("WAITING") // WAITING, CALLED, IN_STORE, ASSESSING, COMPLETED, CANCELED
   targetDate  String   @default("") // e.g. "2023-10-01"
   cancelCount Int      @default(0)
   createdAt   DateTime @default(now())

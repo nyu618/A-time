@@ -83,7 +83,10 @@ export default function UserView() {
         {queueStatus ? (
           <div className="status-section">
             <h2 className={`status-badge ${queueStatus.status.toLowerCase()}`}>
-              {queueStatus.status === 'CALLED' ? 'お呼び出し中' : '受付完了'}
+              {queueStatus.status === 'CALLED' ? 'お呼び出し中' : 
+               queueStatus.status === 'IN_STORE' ? '店内待機中' : 
+               queueStatus.status === 'ASSESSING' ? '査定中' : 
+               '受付完了'}
             </h2>
             <div className="queue-number">
               <span className="label">お客様の受付番号</span>
@@ -104,6 +107,16 @@ export default function UserView() {
             {queueStatus.status === 'CALLED' && (
               <div className="called-alert">
                 <p>順番が近づきました！店舗までお越しください。</p>
+              </div>
+            )}
+            {queueStatus.status === 'IN_STORE' && (
+              <div className="called-alert" style={{backgroundColor: '#e0f2fe', color: '#0369a1', borderColor: '#bae6fd'}}>
+                <p>店内で順番にお待ちください。</p>
+              </div>
+            )}
+            {queueStatus.status === 'ASSESSING' && (
+              <div className="called-alert" style={{backgroundColor: '#ffedd5', color: '#c2410c', borderColor: '#fed7aa'}}>
+                <p>現在査定中です。しばらくお待ちください。</p>
               </div>
             )}
             <button className="refresh-btn" onClick={() => fetchQueueStatus(profile.userId)}>

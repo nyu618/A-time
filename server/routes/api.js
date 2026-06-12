@@ -57,7 +57,7 @@ router.post('/queue', async (req, res) => {
       where: {
         lineUserId,
         targetDate: dateStr,
-        status: { in: ['WAITING', 'CALLED'] }
+        status: { in: ['WAITING', 'CALLED', 'IN_STORE', 'ASSESSING'] }
       }
     });
     if (existing) {
@@ -81,7 +81,7 @@ router.get('/queue/status/:lineUserId', async (req, res) => {
     const queueItem = await prisma.queue.findFirst({
       where: {
         lineUserId,
-        status: { in: ['WAITING', 'CALLED'] }
+        status: { in: ['WAITING', 'CALLED', 'IN_STORE', 'ASSESSING'] }
       }
     });
 
@@ -153,8 +153,38 @@ router.post('/admin/queue/:id/call', async (req, res) => {
   }
 });
 
-// Admin: Mark as arrived (Completed)
-router.post('/admin/queue/:id/arrive', async (req, res) => {
+// Admin: Mark as IN_STORE
+router.post('/admin/queue/:id/instore', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const queueItem = await prisma.queue.update({
+      where: { id: parseInt(id) },
+      data: { status: 'IN_STORE' }
+    });
+    res.json(queueItem);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Admin: Mark as ASSESSING
+router.post('/admin/queue/:id/assess', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const queueItem = await prisma.queue.update({
+      where: { id: parseInt(id) },
+      data: { status: 'ASSESSING' }
+    });
+    res.json(queueItem);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Admin: Mark as COMPLETED (査定完了)
+router.post('/admin/queue/:id/complete', async (req, res) => {
   try {
     const { id } = req.params;
     
