@@ -4,6 +4,7 @@ const { Pool } = require('pg');
 const { PrismaPg } = require('@prisma/adapter-pg');
 const line = require('@line/bot-sdk');
 const dotenv = require('dotenv');
+const { handleCancelAndRequeue } = require('./queueHelper');
 
 dotenv.config();
 
@@ -41,24 +42,9 @@ function startCron() {
       });
 
       for (const q of expiredQueues) {
-        await prisma.queue.update({
-          where: { id: q.id },
-          data: { status: 'CANCELED' }
-        });
-        console.log(`Auto-cancelled queue ${q.id} due to timeout.`);
-
-        if (lineClient && q.lineUserId) {
-          try {
-            await lineClient.pushMessage({
-              to: q.lineUserId,
-              messages: [{
-                type: 'text',
-                text: `お呼び出しから一定時間（15分）が経過したため、自動的にキャンセルとさせていただきました。\n再度ご希望の場合は、改めて受付をお願いいたします。`
-              }]
-            });
-          } catch (err) {
-            console.error("Failed to send LINE message for auto-cancel:", err);
-          }
+        const newQueue = await handleCancelAndRequeue(prisma, lineClient, q.id);
+        if (newQueue) {
+          console.log(`Auto-cancelled and requeued queue ${q.id} to ${newQueue.id} due to timeout.`);
         }
       }
     } catch (error) {

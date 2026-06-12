@@ -4,6 +4,7 @@ const { Pool } = require('pg');
 const { PrismaPg } = require('@prisma/adapter-pg');
 const line = require('@line/bot-sdk');
 const dotenv = require('dotenv');
+const { callNextWaitingUser, handleCancelAndRequeue } = require('../queueHelper');
 
 dotenv.config();
 
@@ -172,6 +173,9 @@ router.post('/admin/queue/:id/arrive', async (req, res) => {
       data: { visitCount: { increment: 1 } }
     });
 
+    // Auto-call next waiting user
+    await callNextWaitingUser(prisma, lineClient, queue.targetDate);
+
     res.json(queueItem);
   } catch (error) {
     console.error(error);
@@ -183,11 +187,11 @@ router.post('/admin/queue/:id/arrive', async (req, res) => {
 router.post('/admin/queue/:id/cancel', async (req, res) => {
   try {
     const { id } = req.params;
-    const queueItem = await prisma.queue.update({
-      where: { id: parseInt(id) },
-      data: { status: 'CANCELED' }
-    });
-    res.json(queueItem);
+    const newQueue = await handleCancelAndRequeue(prisma, lineClient, id);
+    if (!newQueue) {
+      return res.status(404).json({ error: 'Not found' });
+    }
+    res.json(newQueue);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server error' });

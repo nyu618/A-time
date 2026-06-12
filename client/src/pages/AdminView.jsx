@@ -75,6 +75,7 @@ export default function AdminView() {
                       <span className="q-number">#{q.id}</span>
                       <span className="q-name">{q.displayName || '名無しゲスト'}</span>
                       {q.user && <span className="q-visit-count" style={{fontSize: '0.8rem', backgroundColor: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.3)', padding: '2px 8px', borderRadius: '12px', marginLeft: '10px', fontWeight: '500', letterSpacing: '0.5px'}}>来店: {q.user.visitCount}回目</span>}
+                      {q.cancelCount > 0 && <span className="q-cancel-count" style={{fontSize: '0.8rem', backgroundColor: 'rgba(249, 115, 22, 0.15)', color: '#f97316', border: '1px solid rgba(249, 115, 22, 0.3)', padding: '2px 8px', borderRadius: '12px', marginLeft: '10px', fontWeight: '500'}}>再受付 (キャンセル{q.cancelCount}回)</span>}
                       <span className={`q-status ${q.status.toLowerCase()}`}>
                         {q.status === 'WAITING' ? '待機中' : '呼出中'}
                       </span>
@@ -109,7 +110,7 @@ export default function AdminView() {
                 <p className="empty-state">履歴はありません。</p>
               ) : (
                 historyQueues.map((q) => (
-                  <div key={q.id} className={`queue-item history ${q.status.toLowerCase()}`} style={{ opacity: 0.7 }}>
+                  <div key={q.id} className={`queue-item history ${q.status.toLowerCase()}`} style={{ opacity: 0.7, backgroundColor: q.status === 'CANCELED' ? 'rgba(239, 68, 68, 0.1)' : undefined }}>
                     <div className="queue-info">
                       <span className="q-number">#{q.id}</span>
                       <span className="q-name">{q.displayName || '名無しゲスト'}</span>
