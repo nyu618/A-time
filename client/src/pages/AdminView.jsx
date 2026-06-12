@@ -93,6 +93,10 @@ export default function AdminView() {
                             <PhoneCall size={18} />
                             <span>呼出</span>
                           </button>
+                          <button className="action-btn arrive" onClick={() => handleAction(q.id, 'instore')} title="店内待機" style={{backgroundColor: '#0284c7'}}>
+                            <UserCheck size={18} />
+                            <span>店内待機</span>
+                          </button>
                           <button className="action-btn cancel" onClick={() => handleAction(q.id, 'cancel')} title="キャンセル">
                             <XCircle size={18} />
                             <span>キャンセル</span>
