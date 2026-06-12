@@ -16,10 +16,10 @@ model User {
 model Queue {
   id          Int      @id @default(autoincrement())
   lineUserId  String
-  user        User     @relation(fields: [lineUserId], references: [lineUid])
+  user        User?    @relation(fields: [lineUserId], references: [lineUid])
   displayName String?
   status      String   @default("WAITING") // WAITING, CALLED, COMPLETED, CANCELED
-  targetDate  String   // e.g. "2023-10-01"
+  targetDate  String   @default("") // e.g. "2023-10-01"
   createdAt   DateTime @default(now())
   calledAt    DateTime?
 }
