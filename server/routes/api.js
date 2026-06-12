@@ -210,6 +210,21 @@ router.post('/admin/queue/:id/complete', async (req, res) => {
       data: { visitCount: { increment: 1 } }
     });
 
+    // Send LINE message for completion
+    if (lineClient && queue.lineUserId) {
+      try {
+        await lineClient.pushMessage({
+          to: queue.lineUserId,
+          messages: [{
+            type: 'text',
+            text: `査定が完了いたしました。お手数ですが、レジカウンターまでお越しください。`
+          }]
+        });
+      } catch (err) {
+        console.error("Failed to send LINE message for completion:", err);
+      }
+    }
+
     // Auto-call next waiting user
     await callNextWaitingUser(prisma, lineClient, queue.targetDate);
 
