@@ -1,10 +1,15 @@
-async function callNextWaitingUser(prisma, lineClient, targetDate) {
+async function callNextWaitingUser(prisma, lineClient, targetDate, excludeQueueId = null) {
   try {
+    const whereClause = {
+      status: 'WAITING',
+      targetDate: targetDate
+    };
+    if (excludeQueueId) {
+      whereClause.id = { not: excludeQueueId };
+    }
+
     const nextQueue = await prisma.queue.findFirst({
-      where: {
-        status: 'WAITING',
-        targetDate: targetDate
-      },
+      where: whereClause,
       orderBy: { createdAt: 'asc' }
     });
 
@@ -83,8 +88,8 @@ async function handleCancelAndRequeue(prisma, lineClient, queueId) {
     }
   }
 
-  // Auto-call next waiting user for the same date
-  await callNextWaitingUser(prisma, lineClient, queue.targetDate);
+  // Auto-call next waiting user for the same date, but exclude the newly created queue
+  await callNextWaitingUser(prisma, lineClient, queue.targetDate, newQueue.id);
 
   return newQueue;
 }
