@@ -43,6 +43,27 @@ async function handleCancelAndRequeue(prisma, lineClient, queueId) {
     data: { status: 'CANCELED' }
   });
 
+  if (queue.status === 'IN_STORE') {
+    // Hard cancel for IN_STORE, no requeue
+    if (lineClient && queue.lineUserId) {
+      try {
+        await lineClient.pushMessage({
+          to: queue.lineUserId,
+          messages: [{
+            type: 'text',
+            text: `申し訳ございません。査定のご案内のためお呼び出しいたしましたが、いらっしゃらなかったようなので一度キャンセルとさせていただきました。再度査定希望の場合は、お手数ですが店内スタッフにお声がけください。`
+          }]
+        });
+      } catch (err) {
+        console.error("Failed to send LINE message for hard cancel:", err);
+      }
+    }
+    
+    // Auto-call next waiting user for the same date
+    await callNextWaitingUser(prisma, lineClient, queue.targetDate);
+    return queue;
+  }
+
   // Get max dailyNumber for today
   const maxQueue = await prisma.queue.findFirst({
     where: { targetDate: queue.targetDate },
