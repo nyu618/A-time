@@ -48,6 +48,27 @@ async function handleCancelAndRequeue(prisma, lineClient, queueId) {
     data: { status: 'CANCELED' }
   });
 
+  if (queue.cancelCount >= 1) {
+    // Hard cancel for 2nd time cancel, no requeue
+    if (lineClient && queue.lineUserId) {
+      try {
+        await lineClient.pushMessage({
+          to: queue.lineUserId,
+          messages: [{
+            type: 'text',
+            text: `誠に恐れ入りますが、再度お呼び出ししてもいらっしゃらなかったため、本日の受付を完全にキャンセルとさせていただきました。\n再度査定をご希望の場合は、お手数ですが最初から受付をお願いいたします。`
+          }]
+        });
+      } catch (err) {
+        console.error("Failed to send LINE message for hard cancel:", err);
+      }
+    }
+    
+    // Auto-call next waiting user for the same date
+    await callNextWaitingUser(prisma, lineClient, queue.targetDate);
+    return queue;
+  }
+
   // Get max dailyNumber for today
   const maxQueue = await prisma.queue.findFirst({
     where: { targetDate: queue.targetDate },
