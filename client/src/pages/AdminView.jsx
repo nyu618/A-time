@@ -37,6 +37,7 @@ export default function AdminView() {
     }
   };
 
+  const pendingQueues = queues.filter(q => q.status === 'PENDING');
   const activeQueues = queues.filter(q => q.status === 'WAITING' || q.status === 'CALLED' || q.status === 'IN_STORE' || q.status === 'ASSESSING' || q.status === 'ASSESSMENT_DONE');
   const historyQueues = queues.filter(q => q.status === 'COMPLETED' || q.status === 'CANCELED');
 
@@ -54,6 +55,7 @@ export default function AdminView() {
           />
         </div>
         <div className="stats" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          <span className="stat-badge" style={{backgroundColor: '#fef08a', color: '#854d0e'}}>承認待: {pendingQueues.length}</span>
           <span className="stat-badge">受付済: {activeQueues.filter(q => q.status === 'WAITING').length}</span>
           <span className="stat-badge called">呼出中: {activeQueues.filter(q => q.status === 'CALLED').length}</span>
           <span className="stat-badge" style={{backgroundColor: '#bae6fd', color: '#0369a1'}}>店内待機: {activeQueues.filter(q => q.status === 'IN_STORE').length}</span>
@@ -66,6 +68,39 @@ export default function AdminView() {
         <div className="spinner-container"><div className="spinner"></div></div>
       ) : (
         <div className="admin-content">
+          <section className="queue-section" style={{ marginBottom: '40px' }}>
+            <h2>承認待ちリスト</h2>
+            <div className="queue-list">
+              {pendingQueues.length === 0 ? (
+                <p className="empty-state">現在承認待ちのお客様はいません。</p>
+              ) : (
+                pendingQueues.map((q) => (
+                  <div key={q.id} className="queue-item pending" style={{ borderLeftColor: '#eab308' }}>
+                    <div className="queue-info">
+                      <span className="q-number">#{q.dailyNumber}</span>
+                      <span className="q-name">{q.displayName || '名無しゲスト'}</span>
+                      {q.user && <span className="q-visit-count" style={{fontSize: '0.8rem', backgroundColor: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.3)', padding: '2px 8px', borderRadius: '12px', marginLeft: '10px', fontWeight: '500', letterSpacing: '0.5px'}}>来店: {q.user.visitCount}回目</span>}
+                      <span className="q-status pending" style={{color: '#ca8a04', fontWeight: 'bold'}}>
+                        承認待ち
+                      </span>
+                      <span className="q-time">{new Date(q.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
+                    <div className="queue-actions">
+                      <button className="action-btn" onClick={() => handleAction(q.id, 'approve')} title="承認" style={{backgroundColor: '#10b981', color: 'white'}}>
+                        <UserCheck size={18} />
+                        <span>承認</span>
+                      </button>
+                      <button className="action-btn cancel" onClick={() => handleAction(q.id, 'reject')} title="拒否">
+                        <XCircle size={18} />
+                        <span>拒否</span>
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </section>
+
           <section className="queue-section">
             <h2>待機中・呼出中リスト</h2>
             <div className="queue-list">

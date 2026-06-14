@@ -57,7 +57,7 @@ router.post('/queue', async (req, res) => {
       where: {
         lineUserId,
         targetDate: dateStr,
-        status: { in: ['WAITING', 'CALLED', 'IN_STORE', 'ASSESSING', 'ASSESSMENT_DONE'] }
+        status: { in: ['PENDING', 'WAITING', 'CALLED', 'IN_STORE', 'ASSESSING', 'ASSESSMENT_DONE'] }
       }
     });
     if (existing) {
@@ -72,7 +72,7 @@ router.post('/queue', async (req, res) => {
     const nextDailyNumber = maxQueue ? maxQueue.dailyNumber + 1 : 1;
 
     const queueItem = await prisma.queue.create({
-      data: { lineUserId, displayName, targetDate: dateStr, status: 'WAITING', dailyNumber: nextDailyNumber }
+      data: { lineUserId, displayName, targetDate: dateStr, status: 'PENDING', dailyNumber: nextDailyNumber }
     });
     res.json(queueItem);
   } catch (error) {
@@ -88,7 +88,7 @@ router.get('/queue/status/:lineUserId', async (req, res) => {
     const queueItem = await prisma.queue.findFirst({
       where: {
         lineUserId,
-        status: { in: ['WAITING', 'CALLED', 'IN_STORE', 'ASSESSING', 'ASSESSMENT_DONE'] }
+        status: { in: ['PENDING', 'WAITING', 'CALLED', 'IN_STORE', 'ASSESSING', 'ASSESSMENT_DONE'] }
       }
     });
 
@@ -123,6 +123,59 @@ router.get('/admin/queue', async (req, res) => {
       orderBy: { createdAt: 'asc' }
     });
     res.json(queues);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Admin: Approve a pending queue
+router.post('/admin/queue/:id/approve', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const queue = await prisma.queue.findUnique({ where: { id: parseInt(id) } });
+    if (!queue) return res.status(404).json({ error: 'Not found' });
+
+    const queueItem = await prisma.queue.update({
+      where: { id: parseInt(id) },
+      data: { status: 'WAITING' }
+    });
+
+    if (lineClient && queue.lineUserId) {
+      try {
+        await lineClient.pushMessage({
+          to: queue.lineUserId,
+          messages: [{
+            type: 'text',
+            text: `受付が承認されました。受付番号は『${queue.dailyNumber}番（${formatDateJp(queue.targetDate)}）』です。順番が近づくまでもうしばらくお待ちください。`
+          }]
+        });
+      } catch (err) {
+        console.error("Failed to send LINE message for approve:", err);
+      }
+    }
+
+    res.json(queueItem);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Admin: Reject a pending queue
+router.post('/admin/queue/:id/reject', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const queue = await prisma.queue.findUnique({ where: { id: parseInt(id) } });
+    if (!queue) return res.status(404).json({ error: 'Not found' });
+
+    const queueItem = await prisma.queue.update({
+      where: { id: parseInt(id) },
+      data: { status: 'CANCELED' }
+    });
+
+    res.json(queueItem);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server error' });

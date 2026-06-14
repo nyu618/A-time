@@ -86,7 +86,8 @@ export default function UserView() {
         {queueStatus ? (
           <div className="status-section">
             <h2 className={`status-badge ${queueStatus.status.toLowerCase()}`}>
-              {queueStatus.status === 'CALLED' ? 'お呼び出し中' : 
+              {queueStatus.status === 'PENDING' ? '承認待ち' : 
+               queueStatus.status === 'CALLED' ? 'お呼び出し中' : 
                queueStatus.status === 'IN_STORE' ? '店内待機中' : 
                queueStatus.status === 'ASSESSING' ? '査定中' : 
                queueStatus.status === 'ASSESSMENT_DONE' ? '査定完了' : 
@@ -96,6 +97,11 @@ export default function UserView() {
               <span className="label">お客様の受付番号</span>
               <span className="number">{queueStatus.dailyNumber}</span>
             </div>
+            {queueStatus.status === 'PENDING' && (
+              <div className="pending-alert" style={{backgroundColor: '#fef08a', padding: '15px', borderRadius: '12px', marginTop: '20px', color: '#854d0e', fontWeight: 'bold', border: '1px solid #fde047'}}>
+                <p style={{margin: 0}}>ただいま承認待ちです。店頭のスタッフにお名前をお伝えいただき、承認を受けてください。</p>
+              </div>
+            )}
             {queueStatus.status === 'WAITING' && (
               <div className="wait-info">
                 <div className="info-box">
