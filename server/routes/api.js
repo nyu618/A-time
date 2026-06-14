@@ -375,4 +375,67 @@ router.post('/admin/queue/:id/cancel', async (req, res) => {
   }
 });
 
+// Admin: Rollback (切り戻し)
+router.post('/admin/queue/:id/rollback', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const queue = await prisma.queue.findUnique({ where: { id: parseInt(id) } });
+    if (!queue) return res.status(404).json({ error: 'Not found' });
+
+    let newStatus = queue.status;
+    let dataUpdate = {};
+
+    switch (queue.status) {
+      case 'WAITING':
+        newStatus = 'PENDING';
+        break;
+      case 'CALLED':
+        newStatus = 'WAITING';
+        dataUpdate = { calledAt: null }; // clear timer
+        break;
+      case 'IN_STORE':
+        newStatus = 'CALLED';
+        dataUpdate = { calledAt: new Date() }; // restart 15min timer
+        break;
+      case 'ASSESSING':
+        newStatus = 'IN_STORE';
+        break;
+      case 'ASSESSMENT_DONE':
+        newStatus = 'ASSESSING';
+        break;
+      case 'COMPLETED':
+        newStatus = 'ASSESSMENT_DONE';
+        break;
+      case 'CANCELED':
+        newStatus = 'CALLED';
+        dataUpdate = { calledAt: new Date() }; // restart 15min timer
+        
+        // Delete auto-generated follow-up queue if exists (from cron)
+        await prisma.queue.deleteMany({
+          where: {
+            lineUserId: queue.lineUserId,
+            targetDate: queue.targetDate,
+            cancelCount: queue.cancelCount + 1,
+            status: { in: ['PENDING', 'WAITING', 'CALLED'] }
+          }
+        });
+        break;
+    }
+
+    if (newStatus !== queue.status) {
+      dataUpdate.status = newStatus;
+      const updatedItem = await prisma.queue.update({
+        where: { id: parseInt(id) },
+        data: dataUpdate
+      });
+      return res.json(updatedItem);
+    }
+    
+    res.json(queue);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 module.exports = router;

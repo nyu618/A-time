@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { UserCheck, PhoneCall, XCircle } from 'lucide-react';
+import { UserCheck, PhoneCall, XCircle, Undo2 } from 'lucide-react';
 
 export default function AdminView() {
   const [queues, setQueues] = useState([]);
@@ -29,6 +29,7 @@ export default function AdminView() {
   }, [selectedDate]);
 
   const handleAction = async (id, action) => {
+    if (!window.confirm("本当にこの処理を実行しますか？")) return;
     try {
       await fetch(`/api/admin/queue/${id}/${action}`, { method: 'POST' });
       fetchQueues(selectedDate);
@@ -170,6 +171,10 @@ export default function AdminView() {
                           <span>対応完了</span>
                         </button>
                       )}
+                      <button className="action-btn" onClick={() => handleAction(q.id, 'rollback')} title="戻る" style={{backgroundColor: '#9ca3af', color: 'white'}}>
+                        <Undo2 size={18} />
+                        <span>戻る</span>
+                      </button>
                     </div>
                   </div>
                 ))
@@ -196,6 +201,12 @@ export default function AdminView() {
                         {q.status === 'COMPLETED' ? '案内済' : 'キャンセル'}
                       </span>
                       <span className="q-time">{new Date(q.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
+                    <div className="queue-actions">
+                      <button className="action-btn" onClick={() => handleAction(q.id, 'rollback')} title="戻る" style={{backgroundColor: '#9ca3af', color: 'white'}}>
+                        <Undo2 size={18} />
+                        <span>戻る</span>
+                      </button>
                     </div>
                   </div>
                 ))
