@@ -217,7 +217,7 @@ router.post('/admin/queue/:id/complete', async (req, res) => {
           to: queue.lineUserId,
           messages: [{
             type: 'text',
-            text: `査定が完了いたしました。お手数ですが、レジカウンターまでお越しください。`
+            text: `査定が完了いたしました。お手数ですが、レジカウンターまでお越しください。\n（受付番号: ${queue.dailyNumber}番（${formatDateJp(queue.targetDate)}））`
           }]
         });
       } catch (err) {
