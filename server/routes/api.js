@@ -141,11 +141,19 @@ router.post('/admin/queue/:id/call', async (req, res) => {
     // Send LINE message
     if (lineClient && queueItem.lineUserId) {
       try {
+        const now = new Date();
+        const deadline = new Date(now.getTime() + 15 * 60000);
+        const deadlineStr = new Intl.DateTimeFormat('ja-JP', { 
+          timeZone: 'Asia/Tokyo', 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        }).format(deadline);
+
         await lineClient.pushMessage({
           to: queueItem.lineUserId,
           messages: [{
             type: 'text',
-            text: `順番が近づきました。ご来店をお願いいたします。\n（受付番号: ${queueItem.dailyNumber}番（${formatDateJp(queueItem.targetDate)}））`
+            text: `順番が近づきました。ご来店をお願いいたします。\n${deadlineStr} までに店にお戻りいただき、スタッフへ「受付番号」と「お名前」をお伝えください。\n（受付番号: ${queueItem.dailyNumber}番（${formatDateJp(queueItem.targetDate)}））`
           }]
         });
       } catch (err) {

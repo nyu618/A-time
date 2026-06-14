@@ -30,11 +30,19 @@ async function callNextWaitingUser(prisma, lineClient, targetDate, excludeQueueI
 
       if (lineClient && nextQueue.lineUserId) {
         try {
+          const now = new Date();
+          const deadline = new Date(now.getTime() + 15 * 60000);
+          const deadlineStr = new Intl.DateTimeFormat('ja-JP', { 
+            timeZone: 'Asia/Tokyo', 
+            hour: '2-digit', 
+            minute: '2-digit' 
+          }).format(deadline);
+
           await lineClient.pushMessage({
             to: nextQueue.lineUserId,
             messages: [{
               type: 'text',
-              text: `順番が来ましたので店舗へお越しください。\n（受付番号: ${nextQueue.dailyNumber}番（${formatDateJp(nextQueue.targetDate)}））`
+              text: `順番が来ましたので店舗へお越しください。\n${deadlineStr} までに店にお戻りいただき、スタッフへ「受付番号」と「お名前」をお伝えください。\n（受付番号: ${nextQueue.dailyNumber}番（${formatDateJp(nextQueue.targetDate)}））`
             }]
           });
         } catch (err) {
