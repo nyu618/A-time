@@ -54,7 +54,7 @@ export default function AdminView() {
           />
         </div>
         <div className="stats" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-          <span className="stat-badge">待機中: {activeQueues.filter(q => q.status === 'WAITING').length}</span>
+          <span className="stat-badge">受付済: {activeQueues.filter(q => q.status === 'WAITING').length}</span>
           <span className="stat-badge called">呼出中: {activeQueues.filter(q => q.status === 'CALLED').length}</span>
           <span className="stat-badge" style={{backgroundColor: '#bae6fd', color: '#0369a1'}}>店内待機: {activeQueues.filter(q => q.status === 'IN_STORE').length}</span>
           <span className="stat-badge" style={{backgroundColor: '#fed7aa', color: '#c2410c'}}>査定中: {activeQueues.filter(q => q.status === 'ASSESSING').length}</span>
@@ -80,7 +80,7 @@ export default function AdminView() {
                       {q.user && <span className="q-visit-count" style={{fontSize: '0.8rem', backgroundColor: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.3)', padding: '2px 8px', borderRadius: '12px', marginLeft: '10px', fontWeight: '500', letterSpacing: '0.5px'}}>来店: {q.user.visitCount}回目</span>}
                       {q.cancelCount > 0 && <span className="q-cancel-count" style={{fontSize: '0.8rem', backgroundColor: 'rgba(249, 115, 22, 0.15)', color: '#f97316', border: '1px solid rgba(249, 115, 22, 0.3)', padding: '2px 8px', borderRadius: '12px', marginLeft: '10px', fontWeight: '500'}}>再受付 (キャンセル{q.cancelCount}回)</span>}
                       <span className={`q-status ${q.status.toLowerCase()}`}>
-                        {q.status === 'WAITING' ? '待機中' : 
+                        {q.status === 'WAITING' ? '受付済' : 
                          q.status === 'CALLED' ? '呼出中' : 
                          q.status === 'IN_STORE' ? '店内待機中' : 
                          q.status === 'ASSESSING' ? '査定中' : 
@@ -124,7 +124,7 @@ export default function AdminView() {
                         </button>
                       )}
                       {q.status === 'ASSESSING' && (
-                        <button className="action-btn arrive" onClick={() => handleAction(q.id, 'assess-done')} title="査定完了" style={{backgroundColor: '#10b981'}}>
+                        <button className="action-btn arrive" onClick={() => handleAction(q.id, 'assess-done')} title="査定完了" style={{backgroundColor: '#10b981', color: 'white'}}>
                           <UserCheck size={18} />
                           <span>査定完了</span>
                         </button>
