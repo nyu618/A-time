@@ -77,6 +77,9 @@ export default function UserView() {
   return (
     <div className="user-view-container">
       <div className="glass-card">
+        <div className="logo-container" style={{ textAlign: 'center', marginBottom: '20px' }}>
+          <img src="/logo.jpg" alt="A-time CARD SHOP" style={{ maxWidth: '150px', borderRadius: '12px' }} />
+        </div>
         <h1 className="title">順番待ち受付</h1>
         {liffError && <p className="error-text">{liffError}</p>}
         
