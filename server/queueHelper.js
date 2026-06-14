@@ -1,3 +1,12 @@
+function formatDateJp(dateStr) {
+  if (!dateStr) return '';
+  const parts = dateStr.split('-');
+  if (parts.length === 3) {
+    return `${parts[0]}年${parseInt(parts[1], 10)}月${parseInt(parts[2], 10)}日`;
+  }
+  return dateStr;
+}
+
 async function callNextWaitingUser(prisma, lineClient, targetDate, excludeQueueId = null) {
   try {
     const whereClause = {
@@ -25,7 +34,7 @@ async function callNextWaitingUser(prisma, lineClient, targetDate, excludeQueueI
             to: nextQueue.lineUserId,
             messages: [{
               type: 'text',
-              text: `順番が来ましたので店舗へお越しください。\n（受付番号: ${nextQueue.dailyNumber}）`
+              text: `順番が来ましたので店舗へお越しください。\n（受付番号: ${nextQueue.dailyNumber}番（${formatDateJp(nextQueue.targetDate)}））`
             }]
           });
         } catch (err) {
@@ -91,7 +100,7 @@ async function handleCancelAndRequeue(prisma, lineClient, queueId) {
   // Notify user about re-queue
   if (lineClient && queue.lineUserId) {
     try {
-      let messageText = `お呼び出しから一定時間経過したため、最後尾にて再受付いたしました。\n新たな受付番号は『${newQueue.dailyNumber}番』です。`;
+      let messageText = `お呼び出しから一定時間経過したため、最後尾にて再受付いたしました。\n新たな受付番号は『${newQueue.dailyNumber}番（${formatDateJp(newQueue.targetDate)}）』です。`;
       
       if (queue.status === 'IN_STORE') {
         messageText = `申し訳ございません。査定のご案内のためお呼び出しいたしましたが、いらっしゃらなかったようなので一度キャンセルとさせていただきました。\n再度査定希望の場合は、お手数ですが店内スタッフにお声がけください。`;
@@ -115,4 +124,4 @@ async function handleCancelAndRequeue(prisma, lineClient, queueId) {
   return newQueue;
 }
 
-module.exports = { callNextWaitingUser, handleCancelAndRequeue };
+module.exports = { callNextWaitingUser, handleCancelAndRequeue, formatDateJp };

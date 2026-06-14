@@ -4,7 +4,7 @@ const { Pool } = require('pg');
 const { PrismaPg } = require('@prisma/adapter-pg');
 const line = require('@line/bot-sdk');
 const dotenv = require('dotenv');
-const { callNextWaitingUser, handleCancelAndRequeue } = require('../queueHelper');
+const { callNextWaitingUser, handleCancelAndRequeue, formatDateJp } = require('../queueHelper');
 
 dotenv.config();
 
@@ -145,7 +145,7 @@ router.post('/admin/queue/:id/call', async (req, res) => {
           to: queueItem.lineUserId,
           messages: [{
             type: 'text',
-            text: `順番が近づきました。ご来店をお願いいたします。\n（受付番号: ${queueItem.id}）`
+            text: `順番が近づきました。ご来店をお願いいたします。\n（受付番号: ${queueItem.dailyNumber}番（${formatDateJp(queueItem.targetDate)}））`
           }]
         });
       } catch (err) {
