@@ -89,6 +89,7 @@ export default function UserView() {
               {queueStatus.status === 'CALLED' ? 'お呼び出し中' : 
                queueStatus.status === 'IN_STORE' ? '店内待機中' : 
                queueStatus.status === 'ASSESSING' ? '査定中' : 
+               queueStatus.status === 'ASSESSMENT_DONE' ? '査定完了' : 
                '受付完了'}
             </h2>
             <div className="queue-number">

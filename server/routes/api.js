@@ -57,7 +57,7 @@ router.post('/queue', async (req, res) => {
       where: {
         lineUserId,
         targetDate: dateStr,
-        status: { in: ['WAITING', 'CALLED', 'IN_STORE', 'ASSESSING'] }
+        status: { in: ['WAITING', 'CALLED', 'IN_STORE', 'ASSESSING', 'ASSESSMENT_DONE'] }
       }
     });
     if (existing) {
@@ -88,7 +88,7 @@ router.get('/queue/status/:lineUserId', async (req, res) => {
     const queueItem = await prisma.queue.findFirst({
       where: {
         lineUserId,
-        status: { in: ['WAITING', 'CALLED', 'IN_STORE', 'ASSESSING'] }
+        status: { in: ['WAITING', 'CALLED', 'IN_STORE', 'ASSESSING', 'ASSESSMENT_DONE'] }
       }
     });
 
@@ -164,10 +164,29 @@ router.post('/admin/queue/:id/call', async (req, res) => {
 router.post('/admin/queue/:id/instore', async (req, res) => {
   try {
     const { id } = req.params;
+    
+    const queue = await prisma.queue.findUnique({ where: { id: parseInt(id) } });
+    if (!queue) return res.status(404).json({ error: 'Not found' });
+
     const queueItem = await prisma.queue.update({
       where: { id: parseInt(id) },
       data: { status: 'IN_STORE' }
     });
+
+    if (lineClient && queue.lineUserId) {
+      try {
+        await lineClient.pushMessage({
+          to: queue.lineUserId,
+          messages: [{
+            type: 'text',
+            text: `受付番号『${queue.dailyNumber}番（${formatDateJp(queue.targetDate)}）』のお客様、ご来店ありがとうございます。お呼び出し通知があるまで、もうしばらく店内で待機をお願いいたします。`
+          }]
+        });
+      } catch (err) {
+        console.error("Failed to send LINE message for instore:", err);
+      }
+    }
+
     res.json(queueItem);
   } catch (error) {
     console.error(error);
@@ -179,10 +198,29 @@ router.post('/admin/queue/:id/instore', async (req, res) => {
 router.post('/admin/queue/:id/assess', async (req, res) => {
   try {
     const { id } = req.params;
+    
+    const queue = await prisma.queue.findUnique({ where: { id: parseInt(id) } });
+    if (!queue) return res.status(404).json({ error: 'Not found' });
+
     const queueItem = await prisma.queue.update({
       where: { id: parseInt(id) },
       data: { status: 'ASSESSING' }
     });
+
+    if (lineClient && queue.lineUserId) {
+      try {
+        await lineClient.pushMessage({
+          to: queue.lineUserId,
+          messages: [{
+            type: 'text',
+            text: `受付番号『${queue.dailyNumber}番（${formatDateJp(queue.targetDate)}）』のお客様、ただいまより査定を開始いたします。完了次第お知らせいたします。`
+          }]
+        });
+      } catch (err) {
+        console.error("Failed to send LINE message for assess:", err);
+      }
+    }
+
     res.json(queueItem);
   } catch (error) {
     console.error(error);
@@ -190,7 +228,41 @@ router.post('/admin/queue/:id/assess', async (req, res) => {
   }
 });
 
-// Admin: Mark as COMPLETED (査定完了)
+// Admin: Mark as ASSESSMENT_DONE (査定完了)
+router.post('/admin/queue/:id/assess-done', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const queue = await prisma.queue.findUnique({ where: { id: parseInt(id) } });
+    if (!queue) return res.status(404).json({ error: 'Not found' });
+
+    const queueItem = await prisma.queue.update({
+      where: { id: parseInt(id) },
+      data: { status: 'ASSESSMENT_DONE' }
+    });
+
+    if (lineClient && queue.lineUserId) {
+      try {
+        await lineClient.pushMessage({
+          to: queue.lineUserId,
+          messages: [{
+            type: 'text',
+            text: `受付番号『${queue.dailyNumber}番（${formatDateJp(queue.targetDate)}）』のお客様、お待たせいたしました。査定が完了いたしましたので、スタッフのいるカウンターまでお越しください。`
+          }]
+        });
+      } catch (err) {
+        console.error("Failed to send LINE message for assess-done:", err);
+      }
+    }
+
+    res.json(queueItem);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Admin: Mark as COMPLETED (対応完了)
 router.post('/admin/queue/:id/complete', async (req, res) => {
   try {
     const { id } = req.params;
@@ -210,21 +282,6 @@ router.post('/admin/queue/:id/complete', async (req, res) => {
       data: { visitCount: { increment: 1 } }
     });
 
-    // Send LINE message for completion
-    if (lineClient && queue.lineUserId) {
-      try {
-        await lineClient.pushMessage({
-          to: queue.lineUserId,
-          messages: [{
-            type: 'text',
-            text: `査定が完了いたしました。お手数ですが、レジカウンターまでお越しください。\n（受付番号: ${queue.dailyNumber}番（${formatDateJp(queue.targetDate)}））`
-          }]
-        });
-      } catch (err) {
-        console.error("Failed to send LINE message for completion:", err);
-      }
-    }
-
     // Auto-call next waiting user
     await callNextWaitingUser(prisma, lineClient, queue.targetDate);
 
@@ -235,15 +292,22 @@ router.post('/admin/queue/:id/complete', async (req, res) => {
   }
 });
 
-// Admin: Cancel
+// Admin: Cancel (手動キャンセル: 完全キャンセル)
 router.post('/admin/queue/:id/cancel', async (req, res) => {
   try {
     const { id } = req.params;
-    const newQueue = await handleCancelAndRequeue(prisma, lineClient, id);
-    if (!newQueue) {
-      return res.status(404).json({ error: 'Not found' });
-    }
-    res.json(newQueue);
+    const queue = await prisma.queue.findUnique({ where: { id: parseInt(id) } });
+    if (!queue) return res.status(404).json({ error: 'Not found' });
+
+    const queueItem = await prisma.queue.update({
+      where: { id: parseInt(id) },
+      data: { status: 'CANCELED' }
+    });
+
+    // Auto-call next waiting user since slot freed up
+    await callNextWaitingUser(prisma, lineClient, queue.targetDate);
+
+    res.json(queueItem);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server error' });

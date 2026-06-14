@@ -102,10 +102,6 @@ async function handleCancelAndRequeue(prisma, lineClient, queueId) {
     try {
       let messageText = `お呼び出しから一定時間経過したため、最後尾にて再受付いたしました。\n新たな受付番号は『${newQueue.dailyNumber}番（${formatDateJp(newQueue.targetDate)}）』です。`;
       
-      if (queue.status === 'IN_STORE') {
-        messageText = `申し訳ございません。査定のご案内のためお呼び出しいたしましたが、いらっしゃらなかったようなので一度キャンセルとさせていただきました。\n再度査定希望の場合は、お手数ですが店内スタッフにお声がけください。\n（受付番号: ${newQueue.dailyNumber}番（${formatDateJp(newQueue.targetDate)}））`;
-      }
-
       await lineClient.pushMessage({
         to: queue.lineUserId,
         messages: [{
