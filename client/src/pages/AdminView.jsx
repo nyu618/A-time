@@ -28,8 +28,21 @@ export default function AdminView() {
     return () => clearInterval(interval);
   }, [selectedDate]);
 
+  const actionMessages = {
+    approve: '本当に承認しますか？',
+    reject: '本当に拒否しますか？',
+    call: '本当に呼出しますか？',
+    instore: '本当にステータスを「店内待機」に変更しますか？',
+    assess: '本当に査定を開始しますか？',
+    'assess-done': '本当に査定完了にしますか？',
+    complete: '本当に対応完了にしますか？',
+    cancel: '本当にキャンセルしますか？',
+    rollback: '本当に一つ前の状態に戻しますか？'
+  };
+
   const handleAction = async (id, action) => {
-    if (!window.confirm("本当にこの処理を実行しますか？")) return;
+    const message = actionMessages[action] || "本当にこの処理を実行しますか？";
+    if (!window.confirm(message)) return;
     try {
       await fetch(`/api/admin/queue/${id}/${action}`, { method: 'POST' });
       fetchQueues(selectedDate);
