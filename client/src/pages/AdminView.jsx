@@ -90,10 +90,20 @@ export default function AdminView() {
                     </div>
                     <div className="queue-actions">
                       {q.status === 'WAITING' && (
-                        <button className="action-btn call" onClick={() => handleAction(q.id, 'call')} title="呼出">
-                          <PhoneCall size={18} />
-                          <span>呼出</span>
-                        </button>
+                        <>
+                          <button className="action-btn call" onClick={() => handleAction(q.id, 'call')} title="呼出">
+                            <PhoneCall size={18} />
+                            <span>呼出</span>
+                          </button>
+                          <button className="action-btn arrive" onClick={() => handleAction(q.id, 'instore')} title="店内待機" style={{backgroundColor: '#0284c7'}}>
+                            <UserCheck size={18} />
+                            <span>店内待機</span>
+                          </button>
+                          <button className="action-btn cancel" onClick={() => handleAction(q.id, 'cancel')} title="キャンセル">
+                            <XCircle size={18} />
+                            <span>キャンセル</span>
+                          </button>
+                        </>
                       )}
                       {q.status === 'CALLED' && (
                         <>
