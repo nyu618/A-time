@@ -92,7 +92,7 @@ export default function UserView() {
                queueStatus.status === 'IN_STORE' ? '呼出後店内待機' : 
                queueStatus.status === 'ASSESSING' ? '査定受付開始' : 
                queueStatus.status === 'POST_ASSESS_CALL' ? '査定完了後呼出中' : 
-               queueStatus.status === 'POST_ASSESS_WAIT' ? '査定後店内待機' : 
+               queueStatus.status === 'POST_ASSESS_WAIT' ? '査定結果案内完了' : 
                '受付完了'}
             </h2>
             <div className="queue-number">
@@ -138,7 +138,7 @@ export default function UserView() {
             )}
             {queueStatus.status === 'POST_ASSESS_WAIT' && (
               <div className="called-alert" style={{backgroundColor: '#faf5ff', color: '#7e22ce', borderColor: '#e9d5ff'}}>
-                <p>査定が完了しました。ご案内まで店内でお待ちください。</p>
+                <p>査定結果のご案内が完了しました。精算までしばらくお待ちください。</p>
               </div>
             )}
             <button className="refresh-btn" onClick={() => fetchQueueStatus(profile.userId)}>
