@@ -91,7 +91,7 @@ export default function UserView() {
                queueStatus.status === 'CALLED' ? '受付後呼出中' : 
                queueStatus.status === 'IN_STORE' ? '呼出後店内待機' : 
                queueStatus.status === 'ASSESSING' ? '査定受付開始' : 
-               queueStatus.status === 'POST_ASSESS_CALL' ? '査定後呼出中' : 
+               queueStatus.status === 'POST_ASSESS_CALL' ? '査定完了後呼出中' : 
                queueStatus.status === 'POST_ASSESS_WAIT' ? '査定後店内待機' : 
                '受付完了'}
             </h2>
