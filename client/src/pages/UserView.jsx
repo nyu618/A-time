@@ -80,7 +80,7 @@ export default function UserView() {
         <div className="logo-container" style={{ textAlign: 'center', marginBottom: '20px' }}>
           <img src="/logo.jpg" alt="A-time CARD SHOP" style={{ maxWidth: '150px', borderRadius: '12px' }} />
         </div>
-        <h1 className="title">順番待ち受付</h1>
+        <h1 className="title">順番待ち整理券受付</h1>
         {liffError && <p className="error-text">{liffError}</p>}
         
         {queueStatus ? (
@@ -147,9 +147,9 @@ export default function UserView() {
           </div>
         ) : (
           <div className="register-section">
-            <p className="welcome-text">ご来店ありがとうございます。<br/>下のボタンから順番待ち受付を行ってください。</p>
+            <p className="welcome-text">ご来店ありがとうございます。<br/>下のボタンから順番待ち整理券を発行してください。</p>
             <button className="primary-btn" onClick={handleRegister}>
-              順番待ちを受付する
+              順番待ち整理券を発行する
             </button>
           </div>
         )}
