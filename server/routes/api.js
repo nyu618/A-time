@@ -394,6 +394,20 @@ router.post('/admin/queue/:id/complete', async (req, res) => {
       data: { visitCount: { increment: 1 } }
     });
 
+    if (lineClient && queue.lineUserId) {
+      try {
+        await lineClient.pushMessage({
+          to: queue.lineUserId,
+          messages: [{
+            type: 'text',
+            text: `ご利用ありがとうございました！またのお越しをお待ちしております！`
+          }]
+        });
+      } catch (err) {
+        console.error("Failed to send LINE message for complete:", err);
+      }
+    }
+
     // Auto-call next waiting user
     await callNextWaitingUser(prisma, lineClient, queue.targetDate);
 
