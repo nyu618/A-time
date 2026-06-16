@@ -90,10 +90,9 @@ export default function UserView() {
                queueStatus.status === 'WAITING' ? '受付済' : 
                queueStatus.status === 'CALLED' ? '受付後呼出中' : 
                queueStatus.status === 'IN_STORE' ? '呼出後店内待機' : 
-               queueStatus.status === 'ASSESSING' ? '査定中' : 
+               queueStatus.status === 'ASSESSING' ? '査定受付開始' : 
                queueStatus.status === 'POST_ASSESS_CALL' ? '査定後呼出中' : 
                queueStatus.status === 'POST_ASSESS_WAIT' ? '査定後店内待機' : 
-               queueStatus.status === 'ASSESSMENT_DONE' ? '査定完了' : 
                '受付完了'}
             </h2>
             <div className="queue-number">
@@ -129,7 +128,7 @@ export default function UserView() {
             )}
             {queueStatus.status === 'ASSESSING' && (
               <div className="called-alert" style={{backgroundColor: '#ffedd5', color: '#c2410c', borderColor: '#fed7aa'}}>
-                <p>現在査定中です。しばらくお待ちください。</p>
+                <p>査定の受付を開始しました。しばらくお待ちください。</p>
               </div>
             )}
             {queueStatus.status === 'POST_ASSESS_CALL' && (

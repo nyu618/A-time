@@ -57,7 +57,7 @@ router.post('/queue', async (req, res) => {
       where: {
         lineUserId,
         targetDate: dateStr,
-        status: { in: ['PENDING', 'WAITING', 'CALLED', 'IN_STORE', 'ASSESSING', 'POST_ASSESS_CALL', 'POST_ASSESS_WAIT', 'ASSESSMENT_DONE'] }
+        status: { in: ['PENDING', 'WAITING', 'CALLED', 'IN_STORE', 'ASSESSING', 'POST_ASSESS_CALL', 'POST_ASSESS_WAIT'] }
       }
     });
     if (existing) {
@@ -88,7 +88,7 @@ router.get('/queue/status/:lineUserId', async (req, res) => {
     const queueItem = await prisma.queue.findFirst({
       where: {
         lineUserId,
-        status: { in: ['PENDING', 'WAITING', 'CALLED', 'IN_STORE', 'ASSESSING', 'POST_ASSESS_CALL', 'POST_ASSESS_WAIT', 'ASSESSMENT_DONE'] }
+        status: { in: ['PENDING', 'WAITING', 'CALLED', 'IN_STORE', 'ASSESSING', 'POST_ASSESS_CALL', 'POST_ASSESS_WAIT'] }
       }
     });
 
@@ -471,11 +471,8 @@ router.post('/admin/queue/:id/rollback', async (req, res) => {
       case 'POST_ASSESS_WAIT':
         newStatus = 'POST_ASSESS_CALL';
         break;
-      case 'ASSESSMENT_DONE':
-        newStatus = 'POST_ASSESS_WAIT';
-        break;
       case 'COMPLETED':
-        newStatus = 'ASSESSMENT_DONE';
+        newStatus = 'POST_ASSESS_WAIT';
         break;
       case 'CANCELED':
         newStatus = 'CALLED';
