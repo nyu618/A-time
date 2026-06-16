@@ -308,7 +308,7 @@ router.post('/admin/queue/:id/post-assess-call', async (req, res) => {
 
     if (lineClient && queue.lineUserId) {
       try {
-        const deadline = new Date(now.getTime() + 30 * 60000);
+        const deadline = new Date(now.getTime() + 60 * 60000); // 1 hour
         const deadlineStr = new Intl.DateTimeFormat('ja-JP', { 
           timeZone: 'Asia/Tokyo', 
           hour: '2-digit', 
@@ -456,7 +456,6 @@ router.post('/admin/queue/:id/rollback', async (req, res) => {
         break;
       case 'POST_ASSESS_WAIT':
         newStatus = 'POST_ASSESS_CALL';
-        dataUpdate = { calledAt: new Date() }; // restart 30min timer
         break;
       case 'ASSESSMENT_DONE':
         newStatus = 'POST_ASSESS_WAIT';
