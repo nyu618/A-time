@@ -57,7 +57,7 @@ router.post('/queue', async (req, res) => {
       where: {
         lineUserId,
         targetDate: dateStr,
-        status: { in: ['PENDING', 'WAITING', 'CALLED', 'IN_STORE', 'ASSESSING', 'ASSESSMENT_DONE'] }
+        status: { in: ['PENDING', 'WAITING', 'CALLED', 'IN_STORE', 'ASSESSING', 'POST_ASSESS_WAIT', 'ASSESSMENT_DONE'] }
       }
     });
     if (existing) {
@@ -88,7 +88,7 @@ router.get('/queue/status/:lineUserId', async (req, res) => {
     const queueItem = await prisma.queue.findFirst({
       where: {
         lineUserId,
-        status: { in: ['PENDING', 'WAITING', 'CALLED', 'IN_STORE', 'ASSESSING', 'ASSESSMENT_DONE'] }
+        status: { in: ['PENDING', 'WAITING', 'CALLED', 'IN_STORE', 'ASSESSING', 'POST_ASSESS_WAIT', 'ASSESSMENT_DONE'] }
       }
     });
 
@@ -289,6 +289,26 @@ router.post('/admin/queue/:id/assess', async (req, res) => {
   }
 });
 
+// Admin: Mark as POST_ASSESS_WAIT
+router.post('/admin/queue/:id/post-assess-wait', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const queue = await prisma.queue.findUnique({ where: { id: parseInt(id) } });
+    if (!queue) return res.status(404).json({ error: 'Not found' });
+
+    const queueItem = await prisma.queue.update({
+      where: { id: parseInt(id) },
+      data: { status: 'POST_ASSESS_WAIT' }
+    });
+
+    res.json(queueItem);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // Admin: Mark as ASSESSMENT_DONE (査定完了)
 router.post('/admin/queue/:id/assess-done', async (req, res) => {
   try {
@@ -400,8 +420,11 @@ router.post('/admin/queue/:id/rollback', async (req, res) => {
       case 'ASSESSING':
         newStatus = 'IN_STORE';
         break;
-      case 'ASSESSMENT_DONE':
+      case 'POST_ASSESS_WAIT':
         newStatus = 'ASSESSING';
+        break;
+      case 'ASSESSMENT_DONE':
+        newStatus = 'POST_ASSESS_WAIT';
         break;
       case 'COMPLETED':
         newStatus = 'ASSESSMENT_DONE';
