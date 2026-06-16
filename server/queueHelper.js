@@ -31,7 +31,7 @@ async function callNextWaitingUser(prisma, lineClient, targetDate, excludeQueueI
       if (lineClient && nextQueue.lineUserId) {
         try {
           const now = new Date();
-          const deadline = new Date(now.getTime() + 15 * 60000);
+          const deadline = new Date(now.getTime() + 30 * 60000);
           const deadlineStr = new Intl.DateTimeFormat('ja-JP', { 
             timeZone: 'Asia/Tokyo', 
             hour: '2-digit', 

@@ -32,12 +32,12 @@ function startCron() {
   // Run every minute
   cron.schedule('* * * * *', async () => {
     try {
-      const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
+      const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
       
       const expiredQueues = await prisma.queue.findMany({
         where: {
           status: 'CALLED',
-          calledAt: { lte: fifteenMinutesAgo }
+          calledAt: { lte: thirtyMinutesAgo }
         }
       });
 

@@ -195,7 +195,7 @@ router.post('/admin/queue/:id/call', async (req, res) => {
     if (lineClient && queueItem.lineUserId) {
       try {
         const now = new Date();
-        const deadline = new Date(now.getTime() + 15 * 60000);
+        const deadline = new Date(now.getTime() + 30 * 60000);
         const deadlineStr = new Intl.DateTimeFormat('ja-JP', { 
           timeZone: 'Asia/Tokyo', 
           hour: '2-digit', 
@@ -415,7 +415,7 @@ router.post('/admin/queue/:id/rollback', async (req, res) => {
         break;
       case 'IN_STORE':
         newStatus = 'CALLED';
-        dataUpdate = { calledAt: new Date() }; // restart 15min timer
+        dataUpdate = { calledAt: new Date() }; // restart 30min timer
         break;
       case 'ASSESSING':
         newStatus = 'IN_STORE';
@@ -431,7 +431,7 @@ router.post('/admin/queue/:id/rollback', async (req, res) => {
         break;
       case 'CANCELED':
         newStatus = 'CALLED';
-        dataUpdate = { calledAt: new Date() }; // restart 15min timer
+        dataUpdate = { calledAt: new Date() }; // restart 30min timer
         
         // Delete auto-generated follow-up queue if exists (from cron)
         await prisma.queue.deleteMany({
