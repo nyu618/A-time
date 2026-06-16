@@ -36,7 +36,7 @@ function startCron() {
       
       const expiredQueues = await prisma.queue.findMany({
         where: {
-          status: 'CALLED',
+          status: { in: ['CALLED', 'POST_ASSESS_CALL'] },
           calledAt: { lte: thirtyMinutesAgo }
         }
       });

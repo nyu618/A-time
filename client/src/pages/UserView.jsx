@@ -88,9 +88,10 @@ export default function UserView() {
             <h2 className={`status-badge ${queueStatus.status.toLowerCase()}`}>
               {queueStatus.status === 'PENDING' ? '承認待ち' : 
                queueStatus.status === 'WAITING' ? '受付済' : 
-               queueStatus.status === 'CALLED' ? '呼出中' : 
+               queueStatus.status === 'CALLED' ? '受付後呼出中' : 
                queueStatus.status === 'IN_STORE' ? '呼出後店内待機' : 
                queueStatus.status === 'ASSESSING' ? '査定中' : 
+               queueStatus.status === 'POST_ASSESS_CALL' ? '査定後呼出中' : 
                queueStatus.status === 'POST_ASSESS_WAIT' ? '査定後店内待機' : 
                queueStatus.status === 'ASSESSMENT_DONE' ? '査定完了' : 
                '受付完了'}
@@ -129,6 +130,11 @@ export default function UserView() {
             {queueStatus.status === 'ASSESSING' && (
               <div className="called-alert" style={{backgroundColor: '#ffedd5', color: '#c2410c', borderColor: '#fed7aa'}}>
                 <p>現在査定中です。しばらくお待ちください。</p>
+              </div>
+            )}
+            {queueStatus.status === 'POST_ASSESS_CALL' && (
+              <div className="called-alert" style={{backgroundColor: '#fce7f3', color: '#be185d', borderColor: '#fbcfe8'}}>
+                <p>査定が完了しました。ご案内まで店舗へお戻りください。</p>
               </div>
             )}
             {queueStatus.status === 'POST_ASSESS_WAIT' && (

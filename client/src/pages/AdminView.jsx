@@ -38,7 +38,8 @@ export default function AdminView() {
     complete: '本当に対応完了にしますか？',
     cancel: '本当にキャンセルしますか？',
     rollback: '本当に一つ前の状態に戻しますか？',
-    'post-assess-wait': '本当にステータスを「査定後店内待機」に変更しますか？'
+    'post-assess-wait': '本当にステータスを「査定後店内待機」に変更しますか？',
+    'post-assess-call': '本当に査定後呼出をしますか？'
   };
 
   const handleAction = async (id, action) => {
@@ -53,7 +54,7 @@ export default function AdminView() {
   };
 
   const pendingQueues = queues.filter(q => q.status === 'PENDING');
-  const activeQueues = queues.filter(q => q.status === 'WAITING' || q.status === 'CALLED' || q.status === 'IN_STORE' || q.status === 'ASSESSING' || q.status === 'POST_ASSESS_WAIT' || q.status === 'ASSESSMENT_DONE');
+  const activeQueues = queues.filter(q => q.status === 'WAITING' || q.status === 'CALLED' || q.status === 'IN_STORE' || q.status === 'ASSESSING' || q.status === 'POST_ASSESS_CALL' || q.status === 'POST_ASSESS_WAIT' || q.status === 'ASSESSMENT_DONE');
   const historyQueues = queues.filter(q => q.status === 'COMPLETED' || q.status === 'CANCELED');
 
   return (
@@ -72,9 +73,10 @@ export default function AdminView() {
         <div className="stats" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
           <span className="stat-badge" style={{backgroundColor: '#fef08a', color: '#854d0e'}}>承認待: {pendingQueues.length}</span>
           <span className="stat-badge">受付済: {activeQueues.filter(q => q.status === 'WAITING').length}</span>
-          <span className="stat-badge called">呼出中: {activeQueues.filter(q => q.status === 'CALLED').length}</span>
+          <span className="stat-badge called">受付後呼出中: {activeQueues.filter(q => q.status === 'CALLED').length}</span>
           <span className="stat-badge" style={{backgroundColor: '#bae6fd', color: '#0369a1'}}>呼出後店内待機: {activeQueues.filter(q => q.status === 'IN_STORE').length}</span>
           <span className="stat-badge" style={{backgroundColor: '#fed7aa', color: '#c2410c'}}>査定中: {activeQueues.filter(q => q.status === 'ASSESSING').length}</span>
+          <span className="stat-badge" style={{backgroundColor: '#fbcfe8', color: '#be185d'}}>査定後呼出中: {activeQueues.filter(q => q.status === 'POST_ASSESS_CALL').length}</span>
           <span className="stat-badge" style={{backgroundColor: '#e9d5ff', color: '#7e22ce'}}>査定後店内待機: {activeQueues.filter(q => q.status === 'POST_ASSESS_WAIT').length}</span>
           <span className="stat-badge" style={{backgroundColor: '#bbf7d0', color: '#166534'}}>査定完了: {activeQueues.filter(q => q.status === 'ASSESSMENT_DONE').length}</span>
         </div>
@@ -132,9 +134,10 @@ export default function AdminView() {
                       {q.cancelCount > 0 && <span className="q-cancel-count" style={{fontSize: '0.8rem', backgroundColor: 'rgba(249, 115, 22, 0.15)', color: '#f97316', border: '1px solid rgba(249, 115, 22, 0.3)', padding: '2px 8px', borderRadius: '12px', marginLeft: '10px', fontWeight: '500'}}>再受付 (キャンセル{q.cancelCount}回)</span>}
                       <span className={`q-status ${q.status.toLowerCase()}`}>
                         {q.status === 'WAITING' ? '受付済' : 
-                         q.status === 'CALLED' ? '呼出中' : 
+                         q.status === 'CALLED' ? '受付後呼出中' : 
                          q.status === 'IN_STORE' ? '呼出後店内待機' : 
                          q.status === 'ASSESSING' ? '査定中' : 
+                         q.status === 'POST_ASSESS_CALL' ? '査定後呼出中' : 
                          q.status === 'POST_ASSESS_WAIT' ? '査定後店内待機' : 
                          q.status === 'ASSESSMENT_DONE' ? '査定完了' : ''}
                       </span>
@@ -176,10 +179,22 @@ export default function AdminView() {
                         </button>
                       )}
                       {q.status === 'ASSESSING' && (
-                        <button className="action-btn arrive" onClick={() => handleAction(q.id, 'post-assess-wait')} title="査定後店内待機" style={{backgroundColor: '#a855f7', color: 'white'}}>
-                          <UserCheck size={18} />
-                          <span>査定後店内待機</span>
+                        <button className="action-btn call" onClick={() => handleAction(q.id, 'post-assess-call')} title="査定後呼出" style={{backgroundColor: '#db2777', color: 'white'}}>
+                          <PhoneCall size={18} />
+                          <span>査定後呼出</span>
                         </button>
+                      )}
+                      {q.status === 'POST_ASSESS_CALL' && (
+                        <>
+                          <button className="action-btn arrive" onClick={() => handleAction(q.id, 'post-assess-wait')} title="査定後店内待機" style={{backgroundColor: '#a855f7', color: 'white'}}>
+                            <UserCheck size={18} />
+                            <span>査定後店内待機</span>
+                          </button>
+                          <button className="action-btn cancel" onClick={() => handleAction(q.id, 'cancel')} title="キャンセル">
+                            <XCircle size={18} />
+                            <span>キャンセル</span>
+                          </button>
+                        </>
                       )}
                       {q.status === 'POST_ASSESS_WAIT' && (
                         <button className="action-btn arrive" onClick={() => handleAction(q.id, 'assess-done')} title="査定完了" style={{backgroundColor: '#10b981', color: 'white'}}>

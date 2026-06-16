@@ -57,7 +57,7 @@ router.post('/queue', async (req, res) => {
       where: {
         lineUserId,
         targetDate: dateStr,
-        status: { in: ['PENDING', 'WAITING', 'CALLED', 'IN_STORE', 'ASSESSING', 'POST_ASSESS_WAIT', 'ASSESSMENT_DONE'] }
+        status: { in: ['PENDING', 'WAITING', 'CALLED', 'IN_STORE', 'ASSESSING', 'POST_ASSESS_CALL', 'POST_ASSESS_WAIT', 'ASSESSMENT_DONE'] }
       }
     });
     if (existing) {
@@ -88,7 +88,7 @@ router.get('/queue/status/:lineUserId', async (req, res) => {
     const queueItem = await prisma.queue.findFirst({
       where: {
         lineUserId,
-        status: { in: ['PENDING', 'WAITING', 'CALLED', 'IN_STORE', 'ASSESSING', 'POST_ASSESS_WAIT', 'ASSESSMENT_DONE'] }
+        status: { in: ['PENDING', 'WAITING', 'CALLED', 'IN_STORE', 'ASSESSING', 'POST_ASSESS_CALL', 'POST_ASSESS_WAIT', 'ASSESSMENT_DONE'] }
       }
     });
 
@@ -289,6 +289,51 @@ router.post('/admin/queue/:id/assess', async (req, res) => {
   }
 });
 
+// Admin: Mark as POST_ASSESS_CALL
+router.post('/admin/queue/:id/post-assess-call', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const queue = await prisma.queue.findUnique({ where: { id: parseInt(id) } });
+    if (!queue) return res.status(404).json({ error: 'Not found' });
+
+    const now = new Date();
+    const queueItem = await prisma.queue.update({
+      where: { id: parseInt(id) },
+      data: { 
+        status: 'POST_ASSESS_CALL',
+        calledAt: now 
+      }
+    });
+
+    if (lineClient && queue.lineUserId) {
+      try {
+        const deadline = new Date(now.getTime() + 30 * 60000);
+        const deadlineStr = new Intl.DateTimeFormat('ja-JP', { 
+          timeZone: 'Asia/Tokyo', 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        }).format(deadline);
+
+        await lineClient.pushMessage({
+          to: queue.lineUserId,
+          messages: [{
+            type: 'text',
+            text: `受付番号『${queue.dailyNumber}番（${formatDateJp(queue.targetDate)}）』のお客様、お待たせいたしました。査定が完了いたしましたので、ご来店をお願いいたします。${deadlineStr}までに店にお戻りいただき、スタッフへお声がけください。`
+          }]
+        });
+      } catch (err) {
+        console.error("Failed to send LINE message for post-assess-call:", err);
+      }
+    }
+
+    res.json(queueItem);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // Admin: Mark as POST_ASSESS_WAIT
 router.post('/admin/queue/:id/post-assess-wait', async (req, res) => {
   try {
@@ -321,20 +366,6 @@ router.post('/admin/queue/:id/assess-done', async (req, res) => {
       where: { id: parseInt(id) },
       data: { status: 'ASSESSMENT_DONE' }
     });
-
-    if (lineClient && queue.lineUserId) {
-      try {
-        await lineClient.pushMessage({
-          to: queue.lineUserId,
-          messages: [{
-            type: 'text',
-            text: `受付番号『${queue.dailyNumber}番（${formatDateJp(queue.targetDate)}）』のお客様、お待たせいたしました。査定が完了いたしましたので、スタッフのいるカウンターまでお越しください。`
-          }]
-        });
-      } catch (err) {
-        console.error("Failed to send LINE message for assess-done:", err);
-      }
-    }
 
     res.json(queueItem);
   } catch (error) {
@@ -420,8 +451,12 @@ router.post('/admin/queue/:id/rollback', async (req, res) => {
       case 'ASSESSING':
         newStatus = 'IN_STORE';
         break;
-      case 'POST_ASSESS_WAIT':
+      case 'POST_ASSESS_CALL':
         newStatus = 'ASSESSING';
+        break;
+      case 'POST_ASSESS_WAIT':
+        newStatus = 'POST_ASSESS_CALL';
+        dataUpdate = { calledAt: new Date() }; // restart 30min timer
         break;
       case 'ASSESSMENT_DONE':
         newStatus = 'POST_ASSESS_WAIT';
