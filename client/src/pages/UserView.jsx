@@ -96,7 +96,7 @@ export default function UserView() {
                '受付完了'}
             </h2>
             <div className="queue-number">
-              <span className="label">お客様の受付番号</span>
+              <span className="label">お客様の受付番号(整理券番号)</span>
               <span className="number">{queueStatus.dailyNumber}</span>
             </div>
             {queueStatus.status === 'PENDING' && (
