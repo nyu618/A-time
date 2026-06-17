@@ -141,7 +141,7 @@ export default function UserView() {
 
             {queueStatus.status === 'ASSESSING' && (
               <div className="called-alert" style={{backgroundColor: '#ffedd5', color: '#c2410c', borderColor: '#fed7aa'}}>
-                <p>査定の受付を開始しました。しばらくお待ちください。</p>
+                <p>査定受付をいたしますので、スタッフのいるカウンターまでお越しいただき「受付番号(整理券番号)」と「お名前」をお伝えください。</p>
               </div>
             )}
             {queueStatus.status === 'POST_ASSESS_CALL' && (
