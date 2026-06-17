@@ -260,7 +260,7 @@ router.post('/admin/queue/:id/assess', async (req, res) => {
           to: queue.lineUserId,
           messages: [{
             type: 'text',
-            text: `受付番号(整理券番号)『${queue.dailyNumber}番（${formatDateJp(queue.targetDate)}）』のお客様、ただいまより査定を開始いたします。完了次第お知らせいたします。`
+            text: `受付番号(整理券番号)『${queue.dailyNumber}番（${formatDateJp(queue.targetDate)}）』のお客様、大変お待たせいたしました。ただいまより査定受付をいたしますので、スタッフのいるカウンターまでお越しいただき「受付番号(整理券番号)」と「お名前」をお伝えください。`
           }]
         });
       } catch (err) {
