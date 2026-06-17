@@ -148,7 +148,7 @@ router.post('/admin/queue/:id/approve', async (req, res) => {
           to: queue.lineUserId,
           messages: [{
             type: 'text',
-            text: `整理券が発行されました。受付番号は${queue.dailyNumber}番です。順番が近づいたらお呼び出しいたしますのでもうしばらくお待ちください。`
+            text: `整理券が発行されました。受付番号(整理券番号)は『${queue.dailyNumber}番（${formatDateJp(queue.targetDate)}）』です。順番が近づいたらお呼び出しいたしますのでもうしばらくお待ちください。`
           }]
         });
       } catch (err) {
@@ -206,7 +206,7 @@ router.post('/admin/queue/:id/call', async (req, res) => {
           to: queueItem.lineUserId,
           messages: [{
             type: 'text',
-            text: `順番が近づきました。ご来店をお願いいたします。\n${deadlineStr} までに店にお戻りいただき、スタッフへ「受付番号(整理券番号)」と「お名前」をお伝えください。\n（受付番号(整理券番号): ${queueItem.dailyNumber}番（${formatDateJp(queueItem.targetDate)}））`
+            text: `受付番号(整理券番号)『${queueItem.dailyNumber}番（${formatDateJp(queueItem.targetDate)}）』のお客様、順番が近づきました。ご来店をお願いいたします。\n${deadlineStr} までに店にお戻りいただき、スタッフへ「受付番号(整理券番号)」と「お名前」をお伝えください。`
           }]
         });
       } catch (err) {
