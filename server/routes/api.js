@@ -305,7 +305,7 @@ router.post('/admin/queue/:id/post-assess-call', async (req, res) => {
           to: queue.lineUserId,
           messages: [{
             type: 'text',
-            text: `受付番号(整理券番号)『${queue.dailyNumber}番（${formatDateJp(queue.targetDate)}）』のお客様、お待たせいたしました。査定が完了いたしましたので、ご来店をお願いいたします。${deadlineStr}までに店にお戻りいただき、スタッフへお声がけください。`
+            text: `受付番号(整理券番号)『${queue.dailyNumber}番（${formatDateJp(queue.targetDate)}）』のお客様、お待たせいたしました。査定が完了いたしましたので、ご来店をお願いいたします。${deadlineStr}までに店にお戻りいただき、スタッフへお声がけいただき「受付番号(整理券番号)」と「お名前」をお伝えください。`
           }]
         });
       } catch (err) {
