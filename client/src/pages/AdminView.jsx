@@ -54,7 +54,7 @@ export default function AdminView() {
   };
 
   const pendingQueues = queues.filter(q => q.status === 'PENDING');
-  const activeQueues = queues.filter(q => q.status === 'WAITING' || q.status === 'CALLED' || q.status === 'IN_STORE' || q.status === 'ASSESSING' || q.status === 'POST_ASSESS_CALL' || q.status === 'POST_ASSESS_WAIT');
+  const activeQueues = queues.filter(q => q.status === 'WAITING' || q.status === 'CALLED' || q.status === 'ASSESSING' || q.status === 'POST_ASSESS_CALL' || q.status === 'POST_ASSESS_WAIT');
   const historyQueues = queues.filter(q => q.status === 'COMPLETED' || q.status === 'CANCELED');
 
   return (
@@ -74,7 +74,7 @@ export default function AdminView() {
           <span className="stat-badge" style={{backgroundColor: '#fef08a', color: '#854d0e'}}>承認待: {pendingQueues.length}</span>
           <span className="stat-badge">受付済: {activeQueues.filter(q => q.status === 'WAITING').length}</span>
           <span className="stat-badge called">受付後呼出中: {activeQueues.filter(q => q.status === 'CALLED').length}</span>
-          <span className="stat-badge" style={{backgroundColor: '#bae6fd', color: '#0369a1'}}>呼出後店内待機: {activeQueues.filter(q => q.status === 'IN_STORE').length}</span>
+
           <span className="stat-badge" style={{backgroundColor: '#fed7aa', color: '#c2410c'}}>査定受付呼出: {activeQueues.filter(q => q.status === 'ASSESSING').length}</span>
           <span className="stat-badge" style={{backgroundColor: '#fbcfe8', color: '#be185d'}}>査定完了後呼出中: {activeQueues.filter(q => q.status === 'POST_ASSESS_CALL').length}</span>
           <span className="stat-badge" style={{backgroundColor: '#e9d5ff', color: '#7e22ce'}}>査定結果案内完了: {activeQueues.filter(q => q.status === 'POST_ASSESS_WAIT').length}</span>
@@ -134,7 +134,7 @@ export default function AdminView() {
                       <span className={`q-status ${q.status.toLowerCase()}`}>
                         {q.status === 'WAITING' ? '受付済' : 
                          q.status === 'CALLED' ? '受付後呼出中' : 
-                         q.status === 'IN_STORE' ? '呼出後店内待機' : 
+
                          q.status === 'ASSESSING' ? '査定受付呼出' : 
                          q.status === 'POST_ASSESS_CALL' ? '査定完了後呼出中' : 
                          q.status === 'POST_ASSESS_WAIT' ? '査定結果案内完了' : ''}
@@ -148,9 +148,9 @@ export default function AdminView() {
                             <PhoneCall size={18} />
                             <span>呼出</span>
                           </button>
-                          <button className="action-btn arrive" onClick={() => handleAction(q.id, 'instore')} title="店内待機" style={{backgroundColor: '#0284c7'}}>
+                          <button className="action-btn" onClick={() => handleAction(q.id, 'assess')} title="査定受付呼出" style={{backgroundColor: '#ea580c', color: 'white'}}>
                             <UserCheck size={18} />
-                            <span>店内待機</span>
+                            <span>査定受付呼出</span>
                           </button>
                           <button className="action-btn cancel" onClick={() => handleAction(q.id, 'cancel')} title="キャンセル">
                             <XCircle size={18} />
@@ -160,21 +160,15 @@ export default function AdminView() {
                       )}
                       {q.status === 'CALLED' && (
                         <>
-                          <button className="action-btn arrive" onClick={() => handleAction(q.id, 'instore')} title="店内待機" style={{backgroundColor: '#0284c7'}}>
+                          <button className="action-btn" onClick={() => handleAction(q.id, 'assess')} title="査定受付呼出" style={{backgroundColor: '#ea580c', color: 'white'}}>
                             <UserCheck size={18} />
-                            <span>店内待機</span>
+                            <span>査定受付呼出</span>
                           </button>
                           <button className="action-btn cancel" onClick={() => handleAction(q.id, 'cancel')} title="キャンセル">
                             <XCircle size={18} />
                             <span>キャンセル</span>
                           </button>
                         </>
-                      )}
-                      {q.status === 'IN_STORE' && (
-                        <button className="action-btn" onClick={() => handleAction(q.id, 'assess')} title="査定受付呼出" style={{backgroundColor: '#ea580c', color: 'white'}}>
-                          <UserCheck size={18} />
-                          <span>査定受付呼出</span>
-                        </button>
                       )}
                       {q.status === 'ASSESSING' && (
                         <button className="action-btn call" onClick={() => handleAction(q.id, 'post-assess-call')} title="査定完了" style={{backgroundColor: '#db2777', color: 'white'}}>
