@@ -31,7 +31,7 @@ export default function AdminView() {
   const actionMessages = {
     approve: '本当に整理券発行承認しますか？',
     reject: '本当に拒否しますか？',
-    call: '本当に呼出しますか？',
+    call: '本当に来店呼出しますか？',
     instore: '本当にステータスを「店内待機」に変更しますか？',
     assess: '本当に査定受付呼出をしますか？',
     'assess-done': '本当に査定完了にしますか？',
@@ -39,7 +39,7 @@ export default function AdminView() {
     cancel: '本当にキャンセルしますか？',
     rollback: '本当に一つ前の状態に戻しますか？',
     'post-assess-wait': '本当にステータスを「査定結果案内完了」に変更しますか？',
-    'post-assess-call': '本当に査定完了にしますか？'
+    'post-assess-call': '本当に査定完了呼出にしますか？'
   };
 
   const handleAction = async (id, action) => {
@@ -72,7 +72,7 @@ export default function AdminView() {
         </div>
         <div className="stats" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
           <span className="stat-badge" style={{backgroundColor: '#fef08a', color: '#854d0e'}}>承認待: {pendingQueues.length}</span>
-          <span className="stat-badge">受付済: {activeQueues.filter(q => q.status === 'WAITING').length}</span>
+          <span className="stat-badge">整理券発行済: {activeQueues.filter(q => q.status === 'WAITING').length}</span>
           <span className="stat-badge called">受付後呼出中: {activeQueues.filter(q => q.status === 'CALLED').length}</span>
           <span className="stat-badge" style={{backgroundColor: '#bae6fd', color: '#0369a1'}}>呼出後店内待機: {activeQueues.filter(q => q.status === 'IN_STORE').length}</span>
           <span className="stat-badge" style={{backgroundColor: '#fed7aa', color: '#c2410c'}}>査定受付呼出: {activeQueues.filter(q => q.status === 'ASSESSING').length}</span>
@@ -132,7 +132,7 @@ export default function AdminView() {
                       {q.user && <span className="q-visit-count" style={{fontSize: '0.8rem', backgroundColor: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.3)', padding: '2px 8px', borderRadius: '12px', marginLeft: '10px', fontWeight: '500', letterSpacing: '0.5px'}}>来店: {q.user.visitCount}回目</span>}
                       {q.cancelCount > 0 && <span className="q-cancel-count" style={{fontSize: '0.8rem', backgroundColor: 'rgba(249, 115, 22, 0.15)', color: '#f97316', border: '1px solid rgba(249, 115, 22, 0.3)', padding: '2px 8px', borderRadius: '12px', marginLeft: '10px', fontWeight: '500'}}>再受付 (キャンセル{q.cancelCount}回)</span>}
                       <span className={`q-status ${q.status.toLowerCase()}`}>
-                        {q.status === 'WAITING' ? '受付済' : 
+                        {q.status === 'WAITING' ? '整理券発行済' : 
                          q.status === 'CALLED' ? '受付後呼出中' : 
                          q.status === 'IN_STORE' ? '呼出後店内待機' : 
                          q.status === 'ASSESSING' ? '査定受付呼出' : 
@@ -144,9 +144,9 @@ export default function AdminView() {
                     <div className="queue-actions">
                       {q.status === 'WAITING' && (
                         <>
-                          <button className="action-btn call" onClick={() => handleAction(q.id, 'call')} title="呼出">
+                          <button className="action-btn call" onClick={() => handleAction(q.id, 'call')} title="来店呼出">
                             <PhoneCall size={18} />
-                            <span>呼出</span>
+                            <span>来店呼出</span>
                           </button>
                           <button className="action-btn arrive" onClick={() => handleAction(q.id, 'instore')} title="店内待機" style={{backgroundColor: '#0284c7'}}>
                             <UserCheck size={18} />
@@ -177,9 +177,9 @@ export default function AdminView() {
                         </button>
                       )}
                       {q.status === 'ASSESSING' && (
-                        <button className="action-btn call" onClick={() => handleAction(q.id, 'post-assess-call')} title="査定完了" style={{backgroundColor: '#db2777', color: 'white'}}>
-                          <PhoneCall size={18} />
-                          <span>査定完了</span>
+                        <button className="action-btn call" onClick={() => handleAction(q.id, 'post-assess-call')} title="査定完了呼出" style={{backgroundColor: '#db2777', color: 'white'}}>
+                          <BellRing size={18} />
+                          <span>査定完了呼出</span>
                         </button>
                       )}
                       {q.status === 'POST_ASSESS_CALL' && (
