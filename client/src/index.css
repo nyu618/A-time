@@ -294,10 +294,9 @@ body {
   border-radius: 16px;
   padding: 1rem 1.5rem;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  align-items: stretch;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  flex-wrap: wrap;
   gap: 1rem;
 }
 
@@ -312,8 +311,7 @@ body {
   display: flex;
   align-items: center;
   gap: 1.5rem;
-  flex: 1;
-  min-width: 300px;
+  width: 100%;
 }
 
 .q-number {
@@ -353,6 +351,7 @@ body {
 
 .queue-actions {
   display: flex;
+  justify-content: flex-end;
   gap: 0.5rem;
 }
 
