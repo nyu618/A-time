@@ -427,8 +427,8 @@ router.post('/admin/queue/:id/rollback', async (req, res) => {
         dataUpdate = { calledAt: null }; // clear timer
         break;
       case 'IN_STORE':
-        newStatus = 'CALLED';
-        dataUpdate = { calledAt: new Date() }; // restart 30min timer
+        newStatus = 'WAITING';
+        dataUpdate = { calledAt: null }; // clear timer
         break;
       case 'ASSESSING':
         newStatus = 'IN_STORE';
