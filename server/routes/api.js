@@ -445,8 +445,33 @@ router.post('/admin/queue/:id/rollback', async (req, res) => {
         newStatus = 'POST_ASSESS_CALL';
         break;
       case 'CANCELED':
-        newStatus = 'CALLED';
-        dataUpdate = { calledAt: new Date() }; // restart 30min timer
+        // Check if there is an active duplicate for this user
+        const activeDup = await prisma.queue.findFirst({
+          where: {
+            lineUserId: queue.lineUserId,
+            targetDate: queue.targetDate,
+            status: { in: ['PENDING', 'WAITING', 'CALLED', 'IN_STORE', 'ASSESSING', 'POST_ASSESS_CALL'] },
+            id: { not: queue.id }
+          }
+        });
+
+        if (activeDup) {
+          // Merge: adopt the active duplicate's status, but keep the younger ticket number
+          await prisma.queue.delete({ where: { id: activeDup.id } });
+          newStatus = activeDup.status;
+          dataUpdate = {
+            calledAt: activeDup.calledAt,
+            dailyNumber: Math.min(queue.dailyNumber, activeDup.dailyNumber)
+          };
+        } else {
+          if (queue.calledAt) {
+            newStatus = 'CALLED';
+            dataUpdate = { calledAt: new Date() }; // restart 30min timer
+          } else {
+            // If they never reached CALLED before cancel, safely return them to PENDING
+            newStatus = 'PENDING';
+          }
+        }
         
         // Delete auto-generated follow-up queue if exists (from cron)
         await prisma.queue.deleteMany({
