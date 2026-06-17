@@ -74,11 +74,11 @@ export default function AdminView() {
       <div className="queue-actions">
         {q.status === 'WAITING' && (
           <>
-            <button className="action-btn call" onClick={() => handleAction(q.id, 'call')} title="来店呼出">
+            <button className="action-btn" onClick={() => handleAction(q.id, 'call')} title="来店呼出" style={{backgroundColor: '#f59e0b', color: 'white'}}>
               <PhoneCall size={18} />
               <span>来店呼出</span>
             </button>
-            <button className="action-btn arrive" onClick={() => handleAction(q.id, 'instore')} title="店内待機" style={{backgroundColor: '#0284c7'}}>
+            <button className="action-btn" onClick={() => handleAction(q.id, 'instore')} title="店内待機" style={{backgroundColor: '#0284c7', color: 'white'}}>
               <UserCheck size={18} />
               <span>店内待機</span>
             </button>
@@ -90,7 +90,7 @@ export default function AdminView() {
         )}
         {q.status === 'CALLED' && (
           <>
-            <button className="action-btn arrive" onClick={() => handleAction(q.id, 'instore')} title="店内待機" style={{backgroundColor: '#0284c7'}}>
+            <button className="action-btn" onClick={() => handleAction(q.id, 'instore')} title="店内待機" style={{backgroundColor: '#0284c7', color: 'white'}}>
               <UserCheck size={18} />
               <span>店内待機</span>
             </button>
@@ -153,11 +153,11 @@ export default function AdminView() {
         </div>
         <div className="stats" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
           <span className="stat-badge" style={{backgroundColor: '#fef08a', color: '#854d0e'}}>承認待: {pendingQueues.length}</span>
-          <span className="stat-badge">整理券発行済: {activeQueues.filter(q => q.status === 'WAITING').length}</span>
-          <span className="stat-badge called">受付後呼出中: {activeQueues.filter(q => q.status === 'CALLED').length}</span>
+          <span className="stat-badge" style={{backgroundColor: '#d1fae5', color: '#047857'}}>整理券発行済: {activeQueues.filter(q => q.status === 'WAITING').length}</span>
+          <span className="stat-badge" style={{backgroundColor: '#fef3c7', color: '#b45309'}}>受付後呼出中: {activeQueues.filter(q => q.status === 'CALLED').length}</span>
           <span className="stat-badge" style={{backgroundColor: '#bae6fd', color: '#0369a1'}}>呼出後店内待機: {activeQueues.filter(q => q.status === 'IN_STORE').length}</span>
-          <span className="stat-badge" style={{backgroundColor: '#fed7aa', color: '#c2410c'}}>査定受付呼出: {activeQueues.filter(q => q.status === 'ASSESSING').length}</span>
-          <span className="stat-badge" style={{backgroundColor: '#fbcfe8', color: '#be185d'}}>査定完了後呼出中: {activeQueues.filter(q => q.status === 'POST_ASSESS_CALL').length}</span>
+          <span className="stat-badge" style={{backgroundColor: '#ffedd5', color: '#c2410c'}}>査定受付呼出: {activeQueues.filter(q => q.status === 'ASSESSING').length}</span>
+          <span className="stat-badge" style={{backgroundColor: '#fce7f3', color: '#be185d'}}>査定完了後呼出中: {activeQueues.filter(q => q.status === 'POST_ASSESS_CALL').length}</span>
         </div>
       </header>
 
