@@ -148,7 +148,7 @@ router.post('/admin/queue/:id/approve', async (req, res) => {
           to: queue.lineUserId,
           messages: [{
             type: 'text',
-            text: `受付が承認されました。受付番号は『${queue.dailyNumber}番（${formatDateJp(queue.targetDate)}）』です。順番が近づくまでもうしばらくお待ちください。`
+            text: `受付が承認されました。受付番号(整理券番号)は『${queue.dailyNumber}番（${formatDateJp(queue.targetDate)}）』です。順番が近づくまでもうしばらくお待ちください。`
           }]
         });
       } catch (err) {
@@ -206,7 +206,7 @@ router.post('/admin/queue/:id/call', async (req, res) => {
           to: queueItem.lineUserId,
           messages: [{
             type: 'text',
-            text: `順番が近づきました。ご来店をお願いいたします。\n${deadlineStr} までに店にお戻りいただき、スタッフへ「受付番号」と「お名前」をお伝えください。\n（受付番号: ${queueItem.dailyNumber}番（${formatDateJp(queueItem.targetDate)}））`
+            text: `順番が近づきました。ご来店をお願いいたします。\n${deadlineStr} までに店にお戻りいただき、スタッフへ「受付番号(整理券番号)」と「お名前」をお伝えください。\n（受付番号(整理券番号): ${queueItem.dailyNumber}番（${formatDateJp(queueItem.targetDate)}））`
           }]
         });
       } catch (err) {
@@ -234,20 +234,6 @@ router.post('/admin/queue/:id/instore', async (req, res) => {
       data: { status: 'IN_STORE' }
     });
 
-    if (lineClient && queue.lineUserId) {
-      try {
-        await lineClient.pushMessage({
-          to: queue.lineUserId,
-          messages: [{
-            type: 'text',
-            text: `受付番号『${queue.dailyNumber}番（${formatDateJp(queue.targetDate)}）』のお客様、ご来店ありがとうございます。お呼び出し通知があるまで、もうしばらく店内で待機をお願いいたします。`
-          }]
-        });
-      } catch (err) {
-        console.error("Failed to send LINE message for instore:", err);
-      }
-    }
-
     res.json(queueItem);
   } catch (error) {
     console.error(error);
@@ -274,7 +260,7 @@ router.post('/admin/queue/:id/assess', async (req, res) => {
           to: queue.lineUserId,
           messages: [{
             type: 'text',
-            text: `受付番号『${queue.dailyNumber}番（${formatDateJp(queue.targetDate)}）』のお客様、ただいまより査定を開始いたします。完了次第お知らせいたします。`
+            text: `受付番号(整理券番号)『${queue.dailyNumber}番（${formatDateJp(queue.targetDate)}）』のお客様、ただいまより査定を開始いたします。完了次第お知らせいたします。`
           }]
         });
       } catch (err) {
@@ -319,7 +305,7 @@ router.post('/admin/queue/:id/post-assess-call', async (req, res) => {
           to: queue.lineUserId,
           messages: [{
             type: 'text',
-            text: `受付番号『${queue.dailyNumber}番（${formatDateJp(queue.targetDate)}）』のお客様、お待たせいたしました。査定が完了いたしましたので、ご来店をお願いいたします。${deadlineStr}までに店にお戻りいただき、スタッフへお声がけください。`
+            text: `受付番号(整理券番号)『${queue.dailyNumber}番（${formatDateJp(queue.targetDate)}）』のお客様、お待たせいたしました。査定が完了いたしましたので、ご来店をお願いいたします。${deadlineStr}までに店にお戻りいただき、スタッフへお声がけください。`
           }]
         });
       } catch (err) {
