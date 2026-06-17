@@ -101,10 +101,16 @@ export default function AdminView() {
           </>
         )}
         {q.status === 'IN_STORE' && (
-          <button className="action-btn" onClick={() => handleAction(q.id, 'assess')} title="査定受付呼出" style={{backgroundColor: '#ea580c', color: 'white'}}>
-            <UserCheck size={18} />
-            <span>査定受付呼出</span>
-          </button>
+          <>
+            <button className="action-btn" onClick={() => handleAction(q.id, 'assess')} title="査定受付呼出" style={{backgroundColor: '#ea580c', color: 'white'}}>
+              <UserCheck size={18} />
+              <span>査定受付呼出</span>
+            </button>
+            <button className="action-btn cancel" onClick={() => handleAction(q.id, 'cancel')} title="キャンセル">
+              <XCircle size={18} />
+              <span>キャンセル</span>
+            </button>
+          </>
         )}
         {q.status === 'ASSESSING' && (
           <button className="action-btn call" onClick={() => handleAction(q.id, 'post-assess-call')} title="査定完了呼出" style={{backgroundColor: '#db2777', color: 'white'}}>
