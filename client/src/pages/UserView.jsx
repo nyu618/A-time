@@ -36,6 +36,18 @@ export default function UserView() {
     initLiff();
   }, []);
 
+  useEffect(() => {
+    let intervalId;
+    if (profile && profile.userId) {
+      intervalId = setInterval(() => {
+        fetchQueueStatus(profile.userId);
+      }, 10000); // Poll every 10 seconds
+    }
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [profile]);
+
   const fetchQueueStatus = async (lineUserId) => {
     try {
       const res = await fetch(`/api/queue/status/${lineUserId}`);
