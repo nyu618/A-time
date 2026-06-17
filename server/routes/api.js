@@ -148,7 +148,7 @@ router.post('/admin/queue/:id/approve', async (req, res) => {
           to: queue.lineUserId,
           messages: [{
             type: 'text',
-            text: `受付が承認されました。受付番号(整理券番号)は『${queue.dailyNumber}番（${formatDateJp(queue.targetDate)}）』です。順番が近づくまでもうしばらくお待ちください。`
+            text: `整理券が発行されました。受付番号は${queue.dailyNumber}番です。順番が近づいたらお呼び出しいたしますのでもうしばらくお待ちください。`
           }]
         });
       } catch (err) {
