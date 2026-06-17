@@ -56,6 +56,82 @@ export default function AdminView() {
   const activeQueues = queues.filter(q => q.status === 'WAITING' || q.status === 'CALLED' || q.status === 'IN_STORE' || q.status === 'ASSESSING' || q.status === 'POST_ASSESS_CALL');
   const historyQueues = queues.filter(q => q.status === 'COMPLETED' || q.status === 'CANCELED');
 
+  const queuesWaiting = queues.filter(q => q.status === 'WAITING');
+  const queuesCalled = queues.filter(q => q.status === 'CALLED');
+  const queuesInStore = queues.filter(q => q.status === 'IN_STORE');
+  const queuesAssessing = queues.filter(q => q.status === 'ASSESSING');
+  const queuesPostAssessCall = queues.filter(q => q.status === 'POST_ASSESS_CALL');
+
+  const renderQueueItem = (q) => (
+    <div key={q.id} className={`queue-item ${q.status.toLowerCase()}`}>
+      <div className="queue-info">
+        <span className="q-number">#{q.dailyNumber}</span>
+        <span className="q-name">{q.displayName || '名無しゲスト'}</span>
+        {q.user && <span className="q-visit-count" style={{fontSize: '0.8rem', backgroundColor: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.3)', padding: '2px 8px', borderRadius: '12px', marginLeft: '10px', fontWeight: '500', letterSpacing: '0.5px'}}>来店: {q.user.visitCount}回目</span>}
+        {q.cancelCount > 0 && <span className="q-cancel-count" style={{fontSize: '0.8rem', backgroundColor: 'rgba(249, 115, 22, 0.15)', color: '#f97316', border: '1px solid rgba(249, 115, 22, 0.3)', padding: '2px 8px', borderRadius: '12px', marginLeft: '10px', fontWeight: '500'}}>再受付 (キャンセル{q.cancelCount}回)</span>}
+        <span className="q-time">{new Date(q.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+      </div>
+      <div className="queue-actions">
+        {q.status === 'WAITING' && (
+          <>
+            <button className="action-btn call" onClick={() => handleAction(q.id, 'call')} title="来店呼出">
+              <PhoneCall size={18} />
+              <span>来店呼出</span>
+            </button>
+            <button className="action-btn arrive" onClick={() => handleAction(q.id, 'instore')} title="店内待機" style={{backgroundColor: '#0284c7'}}>
+              <UserCheck size={18} />
+              <span>店内待機</span>
+            </button>
+            <button className="action-btn cancel" onClick={() => handleAction(q.id, 'cancel')} title="キャンセル">
+              <XCircle size={18} />
+              <span>キャンセル</span>
+            </button>
+          </>
+        )}
+        {q.status === 'CALLED' && (
+          <>
+            <button className="action-btn arrive" onClick={() => handleAction(q.id, 'instore')} title="店内待機" style={{backgroundColor: '#0284c7'}}>
+              <UserCheck size={18} />
+              <span>店内待機</span>
+            </button>
+            <button className="action-btn cancel" onClick={() => handleAction(q.id, 'cancel')} title="キャンセル">
+              <XCircle size={18} />
+              <span>キャンセル</span>
+            </button>
+          </>
+        )}
+        {q.status === 'IN_STORE' && (
+          <button className="action-btn" onClick={() => handleAction(q.id, 'assess')} title="査定受付呼出" style={{backgroundColor: '#ea580c', color: 'white'}}>
+            <UserCheck size={18} />
+            <span>査定受付呼出</span>
+          </button>
+        )}
+        {q.status === 'ASSESSING' && (
+          <button className="action-btn call" onClick={() => handleAction(q.id, 'post-assess-call')} title="査定完了呼出" style={{backgroundColor: '#db2777', color: 'white'}}>
+            <BellRing size={18} />
+            <span>査定完了呼出</span>
+          </button>
+        )}
+        {q.status === 'POST_ASSESS_CALL' && (
+          <>
+            <button className="action-btn arrive" onClick={() => handleAction(q.id, 'complete')} title="査定結果案内完了" style={{backgroundColor: '#a855f7', color: 'white'}}>
+              <UserCheck size={18} />
+              <span>査定結果案内完了</span>
+            </button>
+            <button className="action-btn cancel" onClick={() => handleAction(q.id, 'cancel')} title="キャンセル">
+              <XCircle size={18} />
+              <span>キャンセル</span>
+            </button>
+          </>
+        )}
+        <button className="action-btn" onClick={() => handleAction(q.id, 'rollback')} title="戻る" style={{backgroundColor: '#9ca3af', color: 'white'}}>
+          <Undo2 size={18} />
+          <span>戻る</span>
+        </button>
+      </div>
+    </div>
+  );
+
   return (
     <div className="admin-container">
       <header className="admin-header">
@@ -115,91 +191,45 @@ export default function AdminView() {
               )}
             </div>
           </section>
+          
+          <section className="queue-section" style={{ marginTop: '40px' }}>
+            <h2>進行中のお客様</h2>
 
-          <section className="queue-section">
-            <h2>待機中・呼出中リスト</h2>
-            <div className="queue-list">
-              {activeQueues.length === 0 ? (
-                <p className="empty-state">現在お待ちのお客様はいません。</p>
-              ) : (
-                activeQueues.map((q) => (
-                  <div key={q.id} className={`queue-item ${q.status.toLowerCase()}`}>
-                    <div className="queue-info">
-                      <span className="q-number">#{q.dailyNumber}</span>
-                      <span className="q-name">{q.displayName || '名無しゲスト'}</span>
-                      {q.user && <span className="q-visit-count" style={{fontSize: '0.8rem', backgroundColor: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.3)', padding: '2px 8px', borderRadius: '12px', marginLeft: '10px', fontWeight: '500', letterSpacing: '0.5px'}}>来店: {q.user.visitCount}回目</span>}
-                      {q.cancelCount > 0 && <span className="q-cancel-count" style={{fontSize: '0.8rem', backgroundColor: 'rgba(249, 115, 22, 0.15)', color: '#f97316', border: '1px solid rgba(249, 115, 22, 0.3)', padding: '2px 8px', borderRadius: '12px', marginLeft: '10px', fontWeight: '500'}}>再受付 (キャンセル{q.cancelCount}回)</span>}
-                      <span className={`q-status ${q.status.toLowerCase()}`}>
-                        {q.status === 'WAITING' ? '整理券発行済' : 
-                         q.status === 'CALLED' ? '受付後呼出中' : 
-                         q.status === 'IN_STORE' ? '呼出後店内待機' : 
-                         q.status === 'ASSESSING' ? '査定受付呼出' : 
-                         q.status === 'POST_ASSESS_CALL' ? '査定完了後呼出中' : ''}
-                      </span>
-                      <span className="q-time">{new Date(q.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                    </div>
-                    <div className="queue-actions">
-                      {q.status === 'WAITING' && (
-                        <>
-                          <button className="action-btn call" onClick={() => handleAction(q.id, 'call')} title="来店呼出">
-                            <PhoneCall size={18} />
-                            <span>来店呼出</span>
-                          </button>
-                          <button className="action-btn arrive" onClick={() => handleAction(q.id, 'instore')} title="店内待機" style={{backgroundColor: '#0284c7'}}>
-                            <UserCheck size={18} />
-                            <span>店内待機</span>
-                          </button>
-                          <button className="action-btn cancel" onClick={() => handleAction(q.id, 'cancel')} title="キャンセル">
-                            <XCircle size={18} />
-                            <span>キャンセル</span>
-                          </button>
-                        </>
-                      )}
-                      {q.status === 'CALLED' && (
-                        <>
-                          <button className="action-btn arrive" onClick={() => handleAction(q.id, 'instore')} title="店内待機" style={{backgroundColor: '#0284c7'}}>
-                            <UserCheck size={18} />
-                            <span>店内待機</span>
-                          </button>
-                          <button className="action-btn cancel" onClick={() => handleAction(q.id, 'cancel')} title="キャンセル">
-                            <XCircle size={18} />
-                            <span>キャンセル</span>
-                          </button>
-                        </>
-                      )}
-                      {q.status === 'IN_STORE' && (
-                        <button className="action-btn" onClick={() => handleAction(q.id, 'assess')} title="査定受付呼出" style={{backgroundColor: '#ea580c', color: 'white'}}>
-                          <UserCheck size={18} />
-                          <span>査定受付呼出</span>
-                        </button>
-                      )}
-                      {q.status === 'ASSESSING' && (
-                        <button className="action-btn call" onClick={() => handleAction(q.id, 'post-assess-call')} title="査定完了呼出" style={{backgroundColor: '#db2777', color: 'white'}}>
-                          <BellRing size={18} />
-                          <span>査定完了呼出</span>
-                        </button>
-                      )}
-                      {q.status === 'POST_ASSESS_CALL' && (
-                        <>
-                          <button className="action-btn arrive" onClick={() => handleAction(q.id, 'complete')} title="査定結果案内完了" style={{backgroundColor: '#a855f7', color: 'white'}}>
-                            <UserCheck size={18} />
-                            <span>査定結果案内完了</span>
-                          </button>
-                          <button className="action-btn cancel" onClick={() => handleAction(q.id, 'cancel')} title="キャンセル">
-                            <XCircle size={18} />
-                            <span>キャンセル</span>
-                          </button>
-                        </>
-                      )}
-                      <button className="action-btn" onClick={() => handleAction(q.id, 'rollback')} title="戻る" style={{backgroundColor: '#9ca3af', color: 'white'}}>
-                        <Undo2 size={18} />
-                        <span>戻る</span>
-                      </button>
-                    </div>
-                  </div>
-                ))
-              )}
+            <div className="status-block" style={{ borderLeft: '4px solid #10b981', paddingLeft: '10px', marginBottom: '20px', backgroundColor: '#f0fdf4', padding: '15px', borderRadius: '8px' }}>
+              <h3 style={{ marginTop: 0, color: '#047857', borderBottom: '1px solid #a7f3d0', paddingBottom: '8px' }}>整理券発行済 ({queuesWaiting.length}名)</h3>
+              <div className="queue-list" style={{ marginTop: '10px' }}>
+                {queuesWaiting.length === 0 ? <p className="empty-state" style={{margin:0, padding:'10px'}}>現在このステータスのお客様はいません。</p> : queuesWaiting.map(renderQueueItem)}
+              </div>
             </div>
+
+            <div className="status-block" style={{ borderLeft: '4px solid #f59e0b', paddingLeft: '10px', marginBottom: '20px', backgroundColor: '#fffbeb', padding: '15px', borderRadius: '8px' }}>
+              <h3 style={{ marginTop: 0, color: '#b45309', borderBottom: '1px solid #fde68a', paddingBottom: '8px' }}>受付後呼出中 ({queuesCalled.length}名)</h3>
+              <div className="queue-list" style={{ marginTop: '10px' }}>
+                {queuesCalled.length === 0 ? <p className="empty-state" style={{margin:0, padding:'10px'}}>現在このステータスのお客様はいません。</p> : queuesCalled.map(renderQueueItem)}
+              </div>
+            </div>
+
+            <div className="status-block" style={{ borderLeft: '4px solid #0284c7', paddingLeft: '10px', marginBottom: '20px', backgroundColor: '#f0f9ff', padding: '15px', borderRadius: '8px' }}>
+              <h3 style={{ marginTop: 0, color: '#0369a1', borderBottom: '1px solid #bae6fd', paddingBottom: '8px' }}>呼出後店内待機 ({queuesInStore.length}名)</h3>
+              <div className="queue-list" style={{ marginTop: '10px' }}>
+                {queuesInStore.length === 0 ? <p className="empty-state" style={{margin:0, padding:'10px'}}>現在このステータスのお客様はいません。</p> : queuesInStore.map(renderQueueItem)}
+              </div>
+            </div>
+
+            <div className="status-block" style={{ borderLeft: '4px solid #ea580c', paddingLeft: '10px', marginBottom: '20px', backgroundColor: '#fff7ed', padding: '15px', borderRadius: '8px' }}>
+              <h3 style={{ marginTop: 0, color: '#c2410c', borderBottom: '1px solid #fed7aa', paddingBottom: '8px' }}>査定受付呼出 ({queuesAssessing.length}名)</h3>
+              <div className="queue-list" style={{ marginTop: '10px' }}>
+                {queuesAssessing.length === 0 ? <p className="empty-state" style={{margin:0, padding:'10px'}}>現在このステータスのお客様はいません。</p> : queuesAssessing.map(renderQueueItem)}
+              </div>
+            </div>
+
+            <div className="status-block" style={{ borderLeft: '4px solid #db2777', paddingLeft: '10px', marginBottom: '20px', backgroundColor: '#fdf2f8', padding: '15px', borderRadius: '8px' }}>
+              <h3 style={{ marginTop: 0, color: '#be185d', borderBottom: '1px solid #fbcfe8', paddingBottom: '8px' }}>査定完了後呼出中 ({queuesPostAssessCall.length}名)</h3>
+              <div className="queue-list" style={{ marginTop: '10px' }}>
+                {queuesPostAssessCall.length === 0 ? <p className="empty-state" style={{margin:0, padding:'10px'}}>現在このステータスのお客様はいません。</p> : queuesPostAssessCall.map(renderQueueItem)}
+              </div>
+            </div>
+
           </section>
 
           <section className="queue-section" style={{ marginTop: '40px' }}>
