@@ -7,21 +7,48 @@ generator client {
 }
 
 model User {
-  lineUid     String   @id
-  displayName String?
-  visitCount  Int      @default(0)
-  queues      Queue[]
+  lineUid       String      @id
+  displayName   String?
+  visitCount    Int         @default(0)
+  queues        Queue[]
+  agreements    Agreement[]
+  fullName      String?
+  fullNameKana  String?
+  birthDate     String?
+  phoneNumber   String?
+  postalCode    String?
+  address       String?
+  occupation    String?
+  bankName      String?
+  branchName    String?
+  accountType   String?
+  accountNumber String?
+  accountName   String?
 }
 
 model Queue {
-  id          Int      @id @default(autoincrement())
+  id          Int        @id @default(autoincrement())
   lineUserId  String
-  user        User?    @relation(fields: [lineUserId], references: [lineUid])
+  user        User?      @relation(fields: [lineUserId], references: [lineUid])
   displayName String?
-  status      String   @default("WAITING") // WAITING, CALLED, IN_STORE, ASSESSING, COMPLETED, CANCELED
-  targetDate  String   @default("") // e.g. "2023-10-01"
-  dailyNumber Int      @default(0)
-  cancelCount Int      @default(0)
-  createdAt   DateTime @default(now())
+  status      String     @default("WAITING") // WAITING, CALLED, IN_STORE, ASSESSING, COMPLETED, CANCELED
+  targetDate  String     @default("") // e.g. "2023-10-01"
+  dailyNumber Int        @default(0)
+  cancelCount Int        @default(0)
+  createdAt   DateTime   @default(now())
   calledAt    DateTime?
+  agreement   Agreement?
+}
+
+model Agreement {
+  id                  Int      @id @default(autoincrement())
+  queueId             Int      @unique
+  queue               Queue    @relation(fields: [queueId], references: [id])
+  userId              String
+  user                User     @relation(fields: [userId], references: [lineUid])
+  idCardImageUrl      String?
+  signatureData       String?  @db.Text
+  agreedAt            DateTime @default(now())
+  isInvoiceRegistered Boolean  @default(false)
+  isAgreedToTerms     Boolean  @default(false)
 }
