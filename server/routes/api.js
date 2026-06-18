@@ -501,4 +501,71 @@ router.post('/admin/queue/:id/rollback', async (req, res) => {
   }
 });
 
+// Get User Profile for Agreement Auto-fill
+router.get('/user/:uid', async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { lineUid: req.params.uid }
+    });
+    res.json(user);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Submit Agreement
+router.post('/agreement', async (req, res) => {
+  try {
+    const { queueId, userId, userInfo, idCardImageUrl, signatureData, isAgreedToTerms, isInvoiceRegistered } = req.body;
+
+    if (!queueId || !userId) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    // 1. Update User with new info
+    await prisma.user.update({
+      where: { lineUid: userId },
+      data: {
+        fullName: userInfo.fullName,
+        fullNameKana: userInfo.fullNameKana,
+        birthDate: userInfo.birthDate,
+        phoneNumber: userInfo.phoneNumber,
+        postalCode: userInfo.postalCode,
+        address: userInfo.address,
+        occupation: userInfo.occupation,
+        bankName: userInfo.bankName,
+        branchName: userInfo.branchName,
+        accountType: userInfo.accountType,
+        accountNumber: userInfo.accountNumber,
+        accountName: userInfo.accountName,
+      }
+    });
+
+    // 2. Create or Update Agreement
+    const agreement = await prisma.agreement.upsert({
+      where: { queueId: queueId },
+      update: {
+        idCardImageUrl,
+        signatureData,
+        isAgreedToTerms,
+        isInvoiceRegistered
+      },
+      create: {
+        queueId,
+        userId,
+        idCardImageUrl,
+        signatureData,
+        isAgreedToTerms,
+        isInvoiceRegistered
+      }
+    });
+
+    res.json(agreement);
+  } catch (error) {
+    console.error("Failed to save agreement:", error);
+    res.status(500).json({ error: 'Server error while saving agreement' });
+  }
+});
+
 module.exports = router;

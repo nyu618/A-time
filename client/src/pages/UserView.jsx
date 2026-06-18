@@ -141,11 +141,17 @@ export default function UserView() {
             {queueStatus.status === 'ASSESSING' && (
               <div className="called-alert" style={{backgroundColor: '#ffedd5', color: '#c2410c', borderColor: '#fed7aa'}}>
                 <p>査定受付をいたしますので、スタッフのいるカウンターまでお越しいただき「受付番号(整理券番号)」と「お名前」をお伝えください。</p>
+                <div style={{marginTop: '15px'}}>
+                  <button onClick={() => window.location.href = `/agreement/${queueStatus.id}`} style={{width: '100%', padding: '12px', backgroundColor: '#ea580c', color: 'white', borderRadius: '8px', fontWeight: 'bold', border: 'none'}}>買取承諾フォームへ進む</button>
+                </div>
               </div>
             )}
             {queueStatus.status === 'POST_ASSESS_CALL' && (
               <div className="called-alert" style={{backgroundColor: '#fce7f3', color: '#be185d', borderColor: '#fbcfe8'}}>
                 <p>査定が完了しました。ご案内まで店舗へお戻りください。</p>
+                <div style={{marginTop: '15px'}}>
+                  <button onClick={() => window.location.href = `/agreement/${queueStatus.id}`} style={{width: '100%', padding: '12px', backgroundColor: '#db2777', color: 'white', borderRadius: '8px', fontWeight: 'bold', border: 'none'}}>買取承諾フォームへ進む</button>
+                </div>
               </div>
             )}
 
