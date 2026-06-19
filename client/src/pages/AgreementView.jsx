@@ -285,7 +285,6 @@ export default function AgreementView() {
             <input 
               type="file" 
               accept="image/*" 
-              capture="environment" 
               onChange={handleImageChange}
               className="file-input"
             />
