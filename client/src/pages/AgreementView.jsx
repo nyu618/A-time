@@ -13,6 +13,7 @@ export default function AgreementView() {
   const [submitting, setSubmitting] = useState(false);
   const [profile, setProfile] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
+  const [isEditingProfile, setIsEditingProfile] = useState(true);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -83,6 +84,9 @@ export default function AgreementView() {
             accountNumber: data.accountNumber || '',
             accountName: data.accountName || '',
           });
+          if (data.fullName && data.address && data.bankName) {
+            setIsEditingProfile(false);
+          }
         }
       }
     } catch (err) {
@@ -166,10 +170,13 @@ export default function AgreementView() {
     );
   }
 
+  const today = new Date();
+  const dateString = `${today.getFullYear()}年${today.getMonth() + 1}月${today.getDate()}日`;
+
   return (
     <div className="agreement-container">
       <div className="agreement-header">
-        <h1>買取承諾フォーム</h1>
+        <h1>買取承諾フォーム ({dateString})</h1>
         <button onClick={() => navigate('/')} className="back-button">戻る</button>
       </div>
 
@@ -178,78 +185,98 @@ export default function AgreementView() {
 
         <form onSubmit={handleSubmit}>
           
-          {/* 1. お客様情報 */}
-          <section className="form-section">
-            <h2 className="section-title"><span className="section-badge">1</span>お客様情報</h2>
-            
-            <div className="form-group">
-              <label>お名前（本名） <span className="required-mark">*</span></label>
-              <input required type="text" name="fullName" value={formData.fullName} onChange={handleChange} className="form-control" placeholder="山田 太郎" />
-            </div>
-            <div className="form-group">
-              <label>フリガナ <span className="required-mark">*</span></label>
-              <input required type="text" name="fullNameKana" value={formData.fullNameKana} onChange={handleChange} className="form-control" placeholder="ヤマダ タロウ" />
-            </div>
-            <div className="form-group">
-              <label>生年月日 <span className="required-mark">*</span></label>
-              <input required type="date" name="birthDate" value={formData.birthDate} onChange={handleChange} className="form-control" />
-            </div>
-            <div className="form-group">
-              <label>電話番号 <span className="required-mark">*</span></label>
-              <input required type="tel" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} className="form-control" placeholder="090-1234-5678" />
-            </div>
-            <div className="form-group">
-              <label>郵便番号 <span className="required-mark">*</span></label>
-              <input required type="text" name="postalCode" value={formData.postalCode} onChange={handleChange} className="form-control" placeholder="123-4567" />
-            </div>
-            <div className="form-group">
-              <label>ご住所 <span className="required-mark">*</span></label>
-              <input required type="text" name="address" value={formData.address} onChange={handleChange} className="form-control" placeholder="東京都渋谷区..." />
-            </div>
-            <div className="form-group">
-              <label>ご職業 <span className="required-mark">*</span></label>
-              <select required name="occupation" value={formData.occupation} onChange={handleChange} className="form-control">
-                <option value="">選択してください</option>
-                <option value="会社員">会社員</option>
-                <option value="公務員">公務員</option>
-                <option value="自営業">自営業</option>
-                <option value="学生">学生</option>
-                <option value="主婦・主夫">主婦・主夫</option>
-                <option value="その他">その他</option>
-              </select>
-            </div>
-          </section>
+          {!isEditingProfile ? (
+            <section className="form-section">
+              <h2 className="section-title">ご登録済みのお客様情報</h2>
+              <p className="section-desc" style={{ marginBottom: '1rem', color: '#4b5563', lineHeight: '1.5' }}>
+                前回ご登録いただいた情報（<strong>{formData.fullName}</strong> 様）を使用します。<br/>
+                住所や口座情報などに変更がある場合のみ、以下のボタンから情報を編集してください。
+              </p>
+              <button 
+                type="button" 
+                onClick={() => setIsEditingProfile(true)} 
+                className="submit-btn" 
+                style={{ backgroundColor: '#f3f4f6', color: '#374151', padding: '0.75rem', fontSize: '0.875rem', boxShadow: 'none', border: '1px solid #d1d5db' }}
+              >
+                情報を編集する
+              </button>
+            </section>
+          ) : (
+            <>
+              {/* 1. お客様情報 */}
+              <section className="form-section">
+                <h2 className="section-title"><span className="section-badge">1</span>お客様情報</h2>
+                
+                <div className="form-group">
+                  <label>お名前（本名） <span className="required-mark">*</span></label>
+                  <input required type="text" name="fullName" value={formData.fullName} onChange={handleChange} className="form-control" placeholder="山田 太郎" />
+                </div>
+                <div className="form-group">
+                  <label>フリガナ <span className="required-mark">*</span></label>
+                  <input required type="text" name="fullNameKana" value={formData.fullNameKana} onChange={handleChange} className="form-control" placeholder="ヤマダ タロウ" />
+                </div>
+                <div className="form-group">
+                  <label>生年月日 <span className="required-mark">*</span></label>
+                  <input required type="date" name="birthDate" value={formData.birthDate} onChange={handleChange} className="form-control" />
+                </div>
+                <div className="form-group">
+                  <label>電話番号 <span className="required-mark">*</span></label>
+                  <input required type="tel" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} className="form-control" placeholder="090-1234-5678" />
+                </div>
+                <div className="form-group">
+                  <label>郵便番号 <span className="required-mark">*</span></label>
+                  <input required type="text" name="postalCode" value={formData.postalCode} onChange={handleChange} className="form-control" placeholder="123-4567" />
+                </div>
+                <div className="form-group">
+                  <label>ご住所 <span className="required-mark">*</span></label>
+                  <input required type="text" name="address" value={formData.address} onChange={handleChange} className="form-control" placeholder="東京都渋谷区..." />
+                </div>
+                <div className="form-group">
+                  <label>ご職業 <span className="required-mark">*</span></label>
+                  <select required name="occupation" value={formData.occupation} onChange={handleChange} className="form-control">
+                    <option value="">選択してください</option>
+                    <option value="会社員">会社員</option>
+                    <option value="公務員">公務員</option>
+                    <option value="自営業">自営業</option>
+                    <option value="学生">学生</option>
+                    <option value="主婦・主夫">主婦・主夫</option>
+                    <option value="その他">その他</option>
+                  </select>
+                </div>
+              </section>
 
-          {/* 2. 口座情報 */}
-          <section className="form-section">
-            <h2 className="section-title"><span className="section-badge">2</span>お振込先口座情報</h2>
-            <p className="section-desc">買取金額のお振込先をご入力ください。</p>
-            
-            <div className="form-group">
-              <label>銀行名 <span className="required-mark">*</span></label>
-              <input required type="text" name="bankName" value={formData.bankName} onChange={handleChange} className="form-control" placeholder="〇〇銀行" />
-            </div>
-            <div className="form-group">
-              <label>支店名 <span className="required-mark">*</span></label>
-              <input required type="text" name="branchName" value={formData.branchName} onChange={handleChange} className="form-control" placeholder="〇〇支店" />
-            </div>
-            <div className="form-group">
-              <label>口座種類 <span className="required-mark">*</span></label>
-              <select required name="accountType" value={formData.accountType} onChange={handleChange} className="form-control">
-                <option value="普通">普通</option>
-                <option value="当座">当座</option>
-                <option value="貯蓄">貯蓄</option>
-              </select>
-            </div>
-            <div className="form-group">
-              <label>口座番号 <span className="required-mark">*</span></label>
-              <input required type="text" name="accountNumber" value={formData.accountNumber} onChange={handleChange} className="form-control" placeholder="1234567" />
-            </div>
-            <div className="form-group">
-              <label>口座名義（カタカナ） <span className="required-mark">*</span></label>
-              <input required type="text" name="accountName" value={formData.accountName} onChange={handleChange} className="form-control" placeholder="ヤマダ タロウ" />
-            </div>
-          </section>
+              {/* 2. 口座情報 */}
+              <section className="form-section">
+                <h2 className="section-title"><span className="section-badge">2</span>お振込先口座情報</h2>
+                <p className="section-desc">買取金額のお振込先をご入力ください。</p>
+                
+                <div className="form-group">
+                  <label>銀行名 <span className="required-mark">*</span></label>
+                  <input required type="text" name="bankName" value={formData.bankName} onChange={handleChange} className="form-control" placeholder="〇〇銀行" />
+                </div>
+                <div className="form-group">
+                  <label>支店名 <span className="required-mark">*</span></label>
+                  <input required type="text" name="branchName" value={formData.branchName} onChange={handleChange} className="form-control" placeholder="〇〇支店" />
+                </div>
+                <div className="form-group">
+                  <label>口座種類 <span className="required-mark">*</span></label>
+                  <select required name="accountType" value={formData.accountType} onChange={handleChange} className="form-control">
+                    <option value="普通">普通</option>
+                    <option value="当座">当座</option>
+                    <option value="貯蓄">貯蓄</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>口座番号 <span className="required-mark">*</span></label>
+                  <input required type="text" name="accountNumber" value={formData.accountNumber} onChange={handleChange} className="form-control" placeholder="1234567" />
+                </div>
+                <div className="form-group">
+                  <label>口座名義（カタカナ） <span className="required-mark">*</span></label>
+                  <input required type="text" name="accountName" value={formData.accountName} onChange={handleChange} className="form-control" placeholder="ヤマダ タロウ" />
+                </div>
+              </section>
+            </>
+          )}
 
           {/* 3. 身分証明書 */}
           <section className="form-section">
