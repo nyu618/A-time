@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import liff from '@line/liff';
+import { useNavigate } from 'react-router-dom';
 
 export default function UserView() {
+  const navigate = useNavigate();
   const [liffError, setLiffError] = useState(null);
   const [profile, setProfile] = useState(null);
   const [queueStatus, setQueueStatus] = useState(null);
@@ -150,7 +152,7 @@ export default function UserView() {
             )}
 
             <div style={{marginTop: '20px', marginBottom: '10px'}}>
-              <button onClick={() => window.location.href = `/agreement/${queueStatus.id}`} style={{width: '100%', padding: '15px', backgroundColor: '#3b82f6', color: 'white', borderRadius: '12px', fontWeight: 'bold', border: 'none', boxShadow: '0 4px 6px rgba(59, 130, 246, 0.2)'}}>
+              <button onClick={() => navigate(`/agreement/${queueStatus.id}`)} style={{width: '100%', padding: '15px', backgroundColor: '#3b82f6', color: 'white', borderRadius: '12px', fontWeight: 'bold', border: 'none', boxShadow: '0 4px 6px rgba(59, 130, 246, 0.2)'}}>
                 📄 買取承諾フォームへ進む
               </button>
             </div>
