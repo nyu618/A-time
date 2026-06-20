@@ -154,7 +154,7 @@ export default function UserView() {
             {queueStatus.status !== 'PENDING' && (
               <div style={{marginTop: '20px', marginBottom: '10px'}}>
                 <button onClick={() => navigate(`/agreement/${queueStatus.id}`)} style={{width: '100%', padding: '15px', backgroundColor: '#facc15', color: '#422006', borderRadius: '12px', fontWeight: 'bold', border: 'none', boxShadow: '0 4px 6px rgba(250, 204, 21, 0.3)', fontSize: '1.05rem'}}>
-                  📄 買取承諾フォームへ進む
+                  📄 買取申込フォームへ進む
                 </button>
               </div>
             )}

@@ -152,7 +152,7 @@ export default function AgreementView() {
         throw new Error(errorData.error || 'Submit failed');
       }
 
-      alert("買取承諾を受け付けました！ありがとうございました。");
+      alert("買取申込を受け付けました！ありがとうございました。");
       navigate('/');
     } catch (err) {
       console.error(err);
@@ -176,7 +176,7 @@ export default function AgreementView() {
   return (
     <div className="agreement-container">
       <div className="agreement-header">
-        <h1>買取承諾フォーム ({dateString})</h1>
+        <h1>買取申込フォーム ({dateString})</h1>
         <button onClick={() => navigate('/')} className="back-button">戻る</button>
       </div>
 
@@ -354,7 +354,7 @@ export default function AgreementView() {
               disabled={submitting || !isAgreedToTerms || !isNotTaxFree}
               className="submit-btn"
             >
-              {submitting ? '送信中...' : '買取を承諾して送信する'}
+              {submitting ? '送信中...' : '買取申込を送信する'}
             </button>
             <p className="submit-hint">送信ボタンを押すと受付完了となります。</p>
           </div>
