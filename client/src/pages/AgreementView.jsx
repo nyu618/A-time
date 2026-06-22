@@ -45,6 +45,7 @@ export default function AgreementView() {
   const [idCardImageUrl, setIdCardImageUrl] = useState(draft?.idCardImageUrl || null); // Base64
   const [isAgreedToTerms, setIsAgreedToTerms] = useState(draft?.isAgreedToTerms || false);
   const [isNotTaxFree, setIsNotTaxFree] = useState(draft?.isNotTaxFree || false);
+  const [isSignatureActive, setIsSignatureActive] = useState(draft?.signatureData ? true : false);
 
   // Save to draft on change
   useEffect(() => {
@@ -151,6 +152,14 @@ export default function AgreementView() {
 
   const clearSignature = () => {
     sigCanvas.current.clear();
+    sessionStorage.setItem(draftKey, JSON.stringify({
+      formData,
+      idCardImageUrl,
+      isAgreedToTerms,
+      isNotTaxFree,
+      isEditingProfile,
+      signatureData: null
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -374,6 +383,14 @@ export default function AgreementView() {
             <h2 className="section-title"><span className="section-badge">5</span>ご署名</h2>
             <p className="section-desc">下記枠内に指でサインをお願いいたします。</p>
             <div className="signature-container">
+              {!isSignatureActive && (
+                <div 
+                  className="signature-overlay" 
+                  onClick={() => setIsSignatureActive(true)}
+                >
+                  <span className="signature-overlay-text">タップしてサインを入力</span>
+                </div>
+              )}
               <SignatureCanvas 
                 ref={sigCanvas} 
                 penColor="black"
