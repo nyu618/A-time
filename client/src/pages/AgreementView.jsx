@@ -259,11 +259,11 @@ export default function AgreementView() {
                 </div>
                 <div className="form-group">
                   <label>電話番号 <span className="required-mark">*</span></label>
-                  <input required type="tel" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} className="form-control" placeholder="090-1234-5678" />
+                  <input required type="tel" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} className="form-control" placeholder="09012345678" />
                 </div>
                 <div className="form-group">
                   <label>郵便番号 <span className="required-mark">*</span></label>
-                  <input required type="text" name="postalCode" value={formData.postalCode} onChange={handleChange} className="form-control" placeholder="123-4567" />
+                  <input required type="text" name="postalCode" value={formData.postalCode} onChange={handleChange} className="form-control" placeholder="1234567" />
                 </div>
                 <div className="form-group">
                   <label>ご住所 <span className="required-mark">*</span></label>
