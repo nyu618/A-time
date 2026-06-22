@@ -9,14 +9,25 @@ export default function AgreementView() {
   const navigate = useNavigate();
   const sigCanvas = useRef({});
 
+  const draftKey = `agreementDraft_${queueId}`;
+  const getDraft = () => {
+    try {
+      const stored = sessionStorage.getItem(draftKey);
+      return stored ? JSON.parse(stored) : null;
+    } catch (e) {
+      return null;
+    }
+  };
+  const draft = getDraft();
+
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [profile, setProfile] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
-  const [isEditingProfile, setIsEditingProfile] = useState(true);
+  const [isEditingProfile, setIsEditingProfile] = useState(draft ? draft.isEditingProfile : true);
 
   // Form State
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState(draft?.formData || {
     fullName: '',
     fullNameKana: '',
     birthDate: '',
@@ -31,9 +42,34 @@ export default function AgreementView() {
     accountName: '',
   });
 
-  const [idCardImageUrl, setIdCardImageUrl] = useState(null); // Base64
-  const [isAgreedToTerms, setIsAgreedToTerms] = useState(false);
-  const [isNotTaxFree, setIsNotTaxFree] = useState(false);
+  const [idCardImageUrl, setIdCardImageUrl] = useState(draft?.idCardImageUrl || null); // Base64
+  const [isAgreedToTerms, setIsAgreedToTerms] = useState(draft?.isAgreedToTerms || false);
+  const [isNotTaxFree, setIsNotTaxFree] = useState(draft?.isNotTaxFree || false);
+
+  // Save to draft on change
+  useEffect(() => {
+    if (!loading) {
+      const signatureData = sigCanvas.current && !sigCanvas.current.isEmpty() 
+        ? sigCanvas.current.getTrimmedCanvas().toDataURL('image/png') 
+        : (draft?.signatureData || null);
+        
+      sessionStorage.setItem(draftKey, JSON.stringify({
+        formData,
+        idCardImageUrl,
+        isAgreedToTerms,
+        isNotTaxFree,
+        isEditingProfile,
+        signatureData
+      }));
+    }
+  }, [formData, idCardImageUrl, isAgreedToTerms, isNotTaxFree, isEditingProfile, loading, queueId, draftKey]);
+
+  // Load signature from draft
+  useEffect(() => {
+    if (draft?.signatureData && sigCanvas.current) {
+      sigCanvas.current.fromDataURL(draft.signatureData);
+    }
+  }, [draft?.signatureData, loading]);
 
   useEffect(() => {
     const initLiff = async () => {
@@ -152,6 +188,7 @@ export default function AgreementView() {
         throw new Error(errorData.error || 'Submit failed');
       }
 
+      sessionStorage.removeItem(draftKey);
       alert("買取申込を受け付けました！ありがとうございました。");
       navigate('/');
     } catch (err) {
@@ -340,6 +377,12 @@ export default function AgreementView() {
                 ref={sigCanvas} 
                 penColor="black"
                 canvasProps={{ className: 'signature-canvas' }} 
+                onEnd={() => {
+                  const signatureData = sigCanvas.current.getTrimmedCanvas().toDataURL('image/png');
+                  sessionStorage.setItem(draftKey, JSON.stringify({
+                    formData, idCardImageUrl, isAgreedToTerms, isNotTaxFree, isEditingProfile, signatureData
+                  }));
+                }}
               />
             </div>
             <div className="clear-btn-container">
