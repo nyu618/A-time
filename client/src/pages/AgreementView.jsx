@@ -144,11 +144,16 @@ export default function AgreementView() {
   };
 
   const handleCompleteSignature = () => {
-    if (sigCanvas.current && !sigCanvas.current.isEmpty()) {
-      setSignatureData(sigCanvas.current.getTrimmedCanvas().toDataURL('image/png'));
-      setIsSignatureModalOpen(false);
-    } else {
-      alert("サインが入力されていません。");
+    try {
+      if (sigCanvas.current && !sigCanvas.current.isEmpty()) {
+        setSignatureData(sigCanvas.current.toDataURL('image/png'));
+        setIsSignatureModalOpen(false);
+      } else {
+        alert("サインが入力されていません。");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("サインの保存に失敗しました。もう一度お試しください。");
     }
   };
 
