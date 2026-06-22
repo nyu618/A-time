@@ -104,8 +104,9 @@ export default function AgreementView() {
       const res = await fetch(`/api/user/${lineUserId}`);
       if (res.ok) {
         const data = await res.json();
-        if (data) {
-          // Auto fill form with existing data
+        const currentDraft = getDraft();
+        if (data && !currentDraft) {
+          // Auto fill form with existing data ONLY IF no draft exists
           setFormData({
             fullName: data.fullName || '',
             fullNameKana: data.fullNameKana || '',
