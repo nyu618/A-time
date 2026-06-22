@@ -45,15 +45,12 @@ export default function AgreementView() {
   const [idCardImageUrl, setIdCardImageUrl] = useState(draft?.idCardImageUrl || null); // Base64
   const [isAgreedToTerms, setIsAgreedToTerms] = useState(draft?.isAgreedToTerms || false);
   const [isNotTaxFree, setIsNotTaxFree] = useState(draft?.isNotTaxFree || false);
-  const [isSignatureActive, setIsSignatureActive] = useState(draft?.signatureData ? true : false);
+  const [signatureData, setSignatureData] = useState(draft?.signatureData || null);
+  const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
 
   // Save to draft on change
   useEffect(() => {
     if (!loading) {
-      const signatureData = sigCanvas.current && !sigCanvas.current.isEmpty() 
-        ? sigCanvas.current.getTrimmedCanvas().toDataURL('image/png') 
-        : (draft?.signatureData || null);
-        
       sessionStorage.setItem(draftKey, JSON.stringify({
         formData,
         idCardImageUrl,
@@ -63,14 +60,10 @@ export default function AgreementView() {
         signatureData
       }));
     }
-  }, [formData, idCardImageUrl, isAgreedToTerms, isNotTaxFree, isEditingProfile, loading, queueId, draftKey]);
+  }, [formData, idCardImageUrl, isAgreedToTerms, isNotTaxFree, isEditingProfile, signatureData, loading, queueId, draftKey]);
 
-  // Load signature from draft
-  useEffect(() => {
-    if (draft?.signatureData && sigCanvas.current) {
-      sigCanvas.current.fromDataURL(draft.signatureData);
-    }
-  }, [draft?.signatureData, loading]);
+  // Remove the useEffect that loads from draft to sigCanvas on mount
+  // because sigCanvas is now only rendered inside the modal when open.
 
   useEffect(() => {
     const initLiff = async () => {
@@ -150,16 +143,13 @@ export default function AgreementView() {
     }
   };
 
-  const clearSignature = () => {
-    sigCanvas.current.clear();
-    sessionStorage.setItem(draftKey, JSON.stringify({
-      formData,
-      idCardImageUrl,
-      isAgreedToTerms,
-      isNotTaxFree,
-      isEditingProfile,
-      signatureData: null
-    }));
+  const handleCompleteSignature = () => {
+    if (sigCanvas.current && !sigCanvas.current.isEmpty()) {
+      setSignatureData(sigCanvas.current.getTrimmedCanvas().toDataURL('image/png'));
+      setIsSignatureModalOpen(false);
+    } else {
+      alert("サインが入力されていません。");
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -168,13 +158,12 @@ export default function AgreementView() {
       alert("すべての同意項目にチェックを入れてください。");
       return;
     }
-    if (sigCanvas.current.isEmpty()) {
+    if (!signatureData) {
       alert("ご署名をお願いいたします。");
       return;
     }
 
     setSubmitting(true);
-    const signatureData = sigCanvas.current.getTrimmedCanvas().toDataURL('image/png');
 
     const payload = {
       queueId: parseInt(queueId),
@@ -381,38 +370,37 @@ export default function AgreementView() {
           {/* 5. ご署名 */}
           <section className="form-section">
             <h2 className="section-title"><span className="section-badge">5</span>ご署名</h2>
-            <p className="section-desc">下記枠内に指でサインをお願いいたします。</p>
-            <div className="signature-container">
-              {!isSignatureActive && (
-                <div 
-                  className="signature-overlay" 
-                  onClick={() => setIsSignatureActive(true)}
-                >
-                  <span className="signature-overlay-text">タップしてサインを入力</span>
+            <p className="section-desc">下記ボタンよりサインを入力してください。</p>
+            
+            {signatureData ? (
+              <div>
+                <div className="signed-image-container">
+                  <img src={signatureData} alt="ご署名" className="signed-image" />
                 </div>
-              )}
-              <SignatureCanvas 
-                ref={sigCanvas} 
-                penColor="black"
-                canvasProps={{ className: 'signature-canvas' }} 
-                onEnd={() => {
-                  const signatureData = sigCanvas.current.getTrimmedCanvas().toDataURL('image/png');
-                  sessionStorage.setItem(draftKey, JSON.stringify({
-                    formData, idCardImageUrl, isAgreedToTerms, isNotTaxFree, isEditingProfile, signatureData
-                  }));
-                }}
-              />
-            </div>
-            <div className="clear-btn-container">
-              <button type="button" onClick={clearSignature} className="clear-btn">書き直す</button>
-            </div>
+                <button 
+                  type="button" 
+                  onClick={() => setIsSignatureModalOpen(true)}
+                  className="open-signature-btn"
+                >
+                  🖊️ サインを書き直す
+                </button>
+              </div>
+            ) : (
+              <button 
+                type="button" 
+                onClick={() => setIsSignatureModalOpen(true)}
+                className="open-signature-btn"
+              >
+                🖊️ タップしてサインを入力
+              </button>
+            )}
           </section>
 
           {/* Submit */}
           <div className="submit-container">
             <button 
               type="submit" 
-              disabled={submitting || !isAgreedToTerms || !isNotTaxFree}
+              disabled={submitting || !isAgreedToTerms || !isNotTaxFree || !signatureData}
               className="submit-btn"
             >
               {submitting ? '送信中...' : '買取申込を送信する'}
@@ -422,6 +410,35 @@ export default function AgreementView() {
 
         </form>
       </div>
+
+      {/* Signature Modal */}
+      {isSignatureModalOpen && (
+        <div className="signature-modal-backdrop" onClick={() => setIsSignatureModalOpen(false)}>
+          <div className="signature-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="signature-modal-header">
+              <span>ご署名を入力</span>
+              <button type="button" onClick={() => setIsSignatureModalOpen(false)} style={{background:'none', border:'none', fontSize:'1.25rem', color:'#9ca3af', cursor:'pointer'}}>&times;</button>
+            </div>
+            <div className="signature-modal-body">
+              <div className="signature-container">
+                <SignatureCanvas 
+                  ref={sigCanvas} 
+                  penColor="black"
+                  canvasProps={{ className: 'signature-canvas' }} 
+                />
+              </div>
+              <div className="clear-btn-container">
+                <button type="button" onClick={() => sigCanvas.current && sigCanvas.current.clear()} className="clear-btn">書き直す</button>
+              </div>
+            </div>
+            <div className="signature-modal-actions">
+              <button type="button" className="btn-secondary" onClick={() => setIsSignatureModalOpen(false)}>キャンセル</button>
+              <button type="button" className="btn-primary" onClick={handleCompleteSignature}>完了</button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
