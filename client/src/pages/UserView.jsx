@@ -100,12 +100,12 @@ export default function UserView() {
         {queueStatus ? (
           <div className="status-section">
             <h2 className={`status-badge ${queueStatus.status.toLowerCase()}`}>
-              {queueStatus.status === 'PENDING' ? '承認待ち' : 
-               queueStatus.status === 'WAITING' ? '整理券発行済' : 
-               queueStatus.status === 'CALLED' ? '受付後呼出中' : 
-               queueStatus.status === 'IN_STORE' ? '呼出後店内待機' : 
-               queueStatus.status === 'ASSESSING' ? '査定受付呼出' : 
-               queueStatus.status === 'POST_ASSESS_CALL' ? '査定完了後呼出中' : 
+              {queueStatus.status === 'PENDING' ? '1.承認待ちリスト' : 
+               queueStatus.status === 'WAITING' ? '2.整理券発行済' : 
+               queueStatus.status === 'CALLED' ? '3.受付後呼出中' : 
+               queueStatus.status === 'IN_STORE' ? '4.呼出後店内待機' : 
+               queueStatus.status === 'ASSESSING' ? '5.査定受付呼出' : 
+               queueStatus.status === 'POST_ASSESS_CALL' ? '6.査定完了呼出中' : 
                '受付完了'}
             </h2>
             <div className="queue-number">

@@ -152,12 +152,12 @@ export default function AdminView() {
           />
         </div>
         <div className="stats" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-          <span className="stat-badge" style={{backgroundColor: '#fef08a', color: '#854d0e'}}>承認待: {pendingQueues.length}</span>
-          <span className="stat-badge" style={{backgroundColor: '#d1fae5', color: '#047857'}}>整理券発行済: {activeQueues.filter(q => q.status === 'WAITING').length}</span>
-          <span className="stat-badge" style={{backgroundColor: '#fef3c7', color: '#b45309'}}>受付後呼出中: {activeQueues.filter(q => q.status === 'CALLED').length}</span>
-          <span className="stat-badge" style={{backgroundColor: '#bae6fd', color: '#0369a1'}}>呼出後店内待機: {activeQueues.filter(q => q.status === 'IN_STORE').length}</span>
-          <span className="stat-badge" style={{backgroundColor: '#ffedd5', color: '#c2410c'}}>査定受付呼出: {activeQueues.filter(q => q.status === 'ASSESSING').length}</span>
-          <span className="stat-badge" style={{backgroundColor: '#fce7f3', color: '#be185d'}}>査定完了後呼出中: {activeQueues.filter(q => q.status === 'POST_ASSESS_CALL').length}</span>
+          <span className="stat-badge" style={{backgroundColor: '#fef08a', color: '#854d0e'}}>1.承認待ちリスト: {pendingQueues.length}</span>
+          <span className="stat-badge" style={{backgroundColor: '#d1fae5', color: '#047857'}}>2.整理券発行済: {activeQueues.filter(q => q.status === 'WAITING').length}</span>
+          <span className="stat-badge" style={{backgroundColor: '#fef3c7', color: '#b45309'}}>3.受付後呼出中: {activeQueues.filter(q => q.status === 'CALLED').length}</span>
+          <span className="stat-badge" style={{backgroundColor: '#bae6fd', color: '#0369a1'}}>4.呼出後店内待機: {activeQueues.filter(q => q.status === 'IN_STORE').length}</span>
+          <span className="stat-badge" style={{backgroundColor: '#ffedd5', color: '#c2410c'}}>5.査定受付呼出: {activeQueues.filter(q => q.status === 'ASSESSING').length}</span>
+          <span className="stat-badge" style={{backgroundColor: '#fce7f3', color: '#be185d'}}>6.査定完了呼出中: {activeQueues.filter(q => q.status === 'POST_ASSESS_CALL').length}</span>
         </div>
       </header>
 
@@ -166,7 +166,7 @@ export default function AdminView() {
       ) : (
         <div className="admin-content">
           <section className="queue-section" style={{ marginBottom: '40px' }}>
-            <h2>承認待ちリスト</h2>
+            <h2>1.承認待ちリスト</h2>
             <div className="queue-list">
               {pendingQueues.length === 0 ? (
                 <p className="empty-state">現在承認待ちのお客様はいません。</p>
@@ -178,7 +178,7 @@ export default function AdminView() {
                       <span className="q-name">{q.displayName || '名無しゲスト'}</span>
                       {q.user && <span className="q-visit-count" style={{fontSize: '0.8rem', backgroundColor: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.3)', padding: '2px 8px', borderRadius: '12px', marginLeft: '10px', fontWeight: '500', letterSpacing: '0.5px'}}>来店: {q.user.visitCount}回目</span>}
                       <span className="q-status pending" style={{color: '#ca8a04', fontWeight: 'bold'}}>
-                        承認待ち
+                        1.承認待ちリスト
                       </span>
                       <span className="q-time">{new Date(q.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
@@ -202,35 +202,35 @@ export default function AdminView() {
             <h2>進行中のお客様</h2>
 
             <div className="status-block" style={{ borderLeft: '4px solid #10b981', paddingLeft: '10px', marginBottom: '20px', backgroundColor: '#f0fdf4', padding: '15px', borderRadius: '8px' }}>
-              <h3 style={{ marginTop: 0, color: '#047857', borderBottom: '1px solid #a7f3d0', paddingBottom: '8px' }}>整理券発行済 ({queuesWaiting.length}名)</h3>
+              <h3 style={{ marginTop: 0, color: '#047857', borderBottom: '1px solid #a7f3d0', paddingBottom: '8px' }}>2.整理券発行済 ({queuesWaiting.length}名)</h3>
               <div className="queue-list" style={{ marginTop: '10px' }}>
                 {queuesWaiting.length === 0 ? <p className="empty-state" style={{margin:0, padding:'10px'}}>現在このステータスのお客様はいません。</p> : queuesWaiting.map(renderQueueItem)}
               </div>
             </div>
 
             <div className="status-block" style={{ borderLeft: '4px solid #f59e0b', paddingLeft: '10px', marginBottom: '20px', backgroundColor: '#fffbeb', padding: '15px', borderRadius: '8px' }}>
-              <h3 style={{ marginTop: 0, color: '#b45309', borderBottom: '1px solid #fde68a', paddingBottom: '8px' }}>受付後呼出中 ({queuesCalled.length}名)</h3>
+              <h3 style={{ marginTop: 0, color: '#b45309', borderBottom: '1px solid #fde68a', paddingBottom: '8px' }}>3.受付後呼出中 ({queuesCalled.length}名)</h3>
               <div className="queue-list" style={{ marginTop: '10px' }}>
                 {queuesCalled.length === 0 ? <p className="empty-state" style={{margin:0, padding:'10px'}}>現在このステータスのお客様はいません。</p> : queuesCalled.map(renderQueueItem)}
               </div>
             </div>
 
             <div className="status-block" style={{ borderLeft: '4px solid #0284c7', paddingLeft: '10px', marginBottom: '20px', backgroundColor: '#f0f9ff', padding: '15px', borderRadius: '8px' }}>
-              <h3 style={{ marginTop: 0, color: '#0369a1', borderBottom: '1px solid #bae6fd', paddingBottom: '8px' }}>呼出後店内待機 ({queuesInStore.length}名)</h3>
+              <h3 style={{ marginTop: 0, color: '#0369a1', borderBottom: '1px solid #bae6fd', paddingBottom: '8px' }}>4.呼出後店内待機 ({queuesInStore.length}名)</h3>
               <div className="queue-list" style={{ marginTop: '10px' }}>
                 {queuesInStore.length === 0 ? <p className="empty-state" style={{margin:0, padding:'10px'}}>現在このステータスのお客様はいません。</p> : queuesInStore.map(renderQueueItem)}
               </div>
             </div>
 
             <div className="status-block" style={{ borderLeft: '4px solid #ea580c', paddingLeft: '10px', marginBottom: '20px', backgroundColor: '#fff7ed', padding: '15px', borderRadius: '8px' }}>
-              <h3 style={{ marginTop: 0, color: '#c2410c', borderBottom: '1px solid #fed7aa', paddingBottom: '8px' }}>査定受付呼出 ({queuesAssessing.length}名)</h3>
+              <h3 style={{ marginTop: 0, color: '#c2410c', borderBottom: '1px solid #fed7aa', paddingBottom: '8px' }}>5.査定受付呼出 ({queuesAssessing.length}名)</h3>
               <div className="queue-list" style={{ marginTop: '10px' }}>
                 {queuesAssessing.length === 0 ? <p className="empty-state" style={{margin:0, padding:'10px'}}>現在このステータスのお客様はいません。</p> : queuesAssessing.map(renderQueueItem)}
               </div>
             </div>
 
             <div className="status-block" style={{ borderLeft: '4px solid #db2777', paddingLeft: '10px', marginBottom: '20px', backgroundColor: '#fdf2f8', padding: '15px', borderRadius: '8px' }}>
-              <h3 style={{ marginTop: 0, color: '#be185d', borderBottom: '1px solid #fbcfe8', paddingBottom: '8px' }}>査定完了後呼出中 ({queuesPostAssessCall.length}名)</h3>
+              <h3 style={{ marginTop: 0, color: '#be185d', borderBottom: '1px solid #fbcfe8', paddingBottom: '8px' }}>6.査定完了呼出中 ({queuesPostAssessCall.length}名)</h3>
               <div className="queue-list" style={{ marginTop: '10px' }}>
                 {queuesPostAssessCall.length === 0 ? <p className="empty-state" style={{margin:0, padding:'10px'}}>現在このステータスのお客様はいません。</p> : queuesPostAssessCall.map(renderQueueItem)}
               </div>
