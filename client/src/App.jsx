@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom'
 import UserView from './pages/UserView'
 import AdminView from './pages/AdminView'
 import AgreementView from './pages/AgreementView'
+import QrScan from './pages/QrScan'
 
 function App() {
   return (
@@ -11,6 +12,7 @@ function App() {
       <Route path="/liff" element={<UserView />} />
       <Route path="/agreement/:queueId" element={<AgreementView />} />
       <Route path="/admin" element={<AdminView />} />
+      <Route path="/qr-scan" element={<QrScan />} />
       <Route path="*" element={<UserView />} />
     </Routes>
   )
