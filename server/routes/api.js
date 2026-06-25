@@ -568,4 +568,28 @@ router.post('/agreement', async (req, res) => {
   }
 });
 
+// User: Scan QR code and send entry message
+router.post('/send-entry-message', async (req, res) => {
+  try {
+    const { lineUserId } = req.body;
+    if (!lineUserId) return res.status(400).json({ error: 'lineUserId is required' });
+
+    if (lineClient) {
+      const liffId = process.env.VITE_LIFF_ID || process.env.LIFF_ID || '2010494802-asj2kOFe';
+      await lineClient.pushMessage({
+        to: lineUserId,
+        messages: [{
+          type: 'text',
+          text: `ご来店ありがとうございます！\n本日の受付・状況確認は以下のURLからお願いいたします👇\nhttps://liff.line.me/${liffId}`
+        }]
+      });
+    }
+
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error('Failed to send entry message:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 module.exports = router;

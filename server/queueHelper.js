@@ -42,7 +42,7 @@ async function callNextWaitingUser(prisma, lineClient, targetDate, excludeQueueI
             to: nextQueue.lineUserId,
             messages: [{
               type: 'text',
-              text: `順番が来ましたので店舗へお越しください。\n${deadlineStr} までに店にお戻りいただき、スタッフへ「受付番号(整理券番号)」と「お名前」をお伝えください。\n（受付番号(整理券番号): ${nextQueue.dailyNumber}番（${formatDateJp(nextQueue.targetDate)}））`
+              text: `【2.ご来店依頼】\n順番が来ましたので店舗へお越しください。\n${deadlineStr} までに店にお戻りいただき、スタッフへ「受付番号(整理券番号)」をお伝えください。\n\n[${formatDateJp(nextQueue.targetDate)}]`
             }]
           });
         } catch (err) {
@@ -73,7 +73,7 @@ async function handleCancelAndRequeue(prisma, lineClient, queueId) {
           to: queue.lineUserId,
           messages: [{
             type: 'text',
-            text: `誠に恐れ入りますが、再度お呼び出ししてもいらっしゃらなかったため、本日の受付を完全にキャンセルとさせていただきました。\n再度査定をご希望の場合は、お手数ですが最初から受付をお願いいたします。\n（受付番号(整理券番号): ${queue.dailyNumber}番（${formatDateJp(queue.targetDate)}））`
+            text: `誠に恐れ入りますが、再度お呼び出ししてもいらっしゃらなかったため、本日の受付を完全にキャンセルとさせていただきました。\n再度査定をご希望の場合は、お手数ですが最初から受付をお願いいたします。\n\n[${formatDateJp(queue.targetDate)}]`
           }]
         });
       } catch (err) {
@@ -108,7 +108,7 @@ async function handleCancelAndRequeue(prisma, lineClient, queueId) {
   // Notify user about re-queue
   if (lineClient && queue.lineUserId) {
     try {
-      let messageText = `お呼び出しから一定時間経過したため、最後尾にて再受付いたしました。\n新たな受付番号(整理券番号)は『${newQueue.dailyNumber}番（${formatDateJp(newQueue.targetDate)}）』です。`;
+      let messageText = `お呼び出しから一定時間経過したため、最後尾にて再受付いたしました。\n新たな受付番号(整理券番号)は『${newQueue.dailyNumber}番』です。\n\n[${formatDateJp(newQueue.targetDate)}]`;
       
       await lineClient.pushMessage({
         to: queue.lineUserId,
