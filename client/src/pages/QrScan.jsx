@@ -3,7 +3,8 @@ import liff from '@line/liff';
 import './QrScan.css';
 
 function QrScan() {
-  const [error, setError] = useState(null);
+  const [errorDetails, setErrorDetails] = useState(null);
+  const [successMsg, setSuccessMsg] = useState(null);
 
   useEffect(() => {
     const initLiff = async () => {
@@ -32,18 +33,19 @@ function QrScan() {
         });
 
         if (!res.ok) {
-          throw new Error("Failed to send message via API");
+          const errText = await res.text().catch(() => 'No response text');
+          throw new Error(`API Error: ${res.status} ${res.statusText} - ${errText}`);
         }
 
         // Close the LIFF window upon success
         liff.closeWindow();
         
         // In case closeWindow doesn't work (e.g. testing in external browser)
-        setError("画面左上の「×」で閉じて、LINEのトーク画面をご確認ください。");
+        setSuccessMsg("画面左上の「×」で閉じて、LINEのトーク画面をご確認ください。");
 
       } catch (err) {
         console.error("LIFF Init / API Error:", err);
-        setError("エラーが発生しました。画面左上の「×」で閉じて、再度お試しください。");
+        setErrorDetails(`[${err.name || 'Error'}] ${err.message}\n${err.stack || ''}`);
       }
     };
 
@@ -53,13 +55,21 @@ function QrScan() {
   return (
     <div className="qr-scan-container">
       <div className="qr-scan-content">
-        {!error ? (
+        {!errorDetails && !successMsg ? (
           <>
             <div className="spinner" style={{ marginBottom: '20px' }}></div>
             <p style={{ fontWeight: 'bold', color: '#1f2937' }}>受付メッセージを送信しています...</p>
           </>
+        ) : successMsg ? (
+          <p className="qr-scan-success" style={{ fontWeight: 'bold', color: '#047857' }}>{successMsg}</p>
         ) : (
-          <p className="qr-scan-error">{error}</p>
+          <div className="qr-scan-error" style={{ textAlign: 'left', wordBreak: 'break-all' }}>
+            <p style={{ fontWeight: 'bold', marginBottom: '10px' }}>エラー詳細情報</p>
+            <pre style={{ whiteSpace: 'pre-wrap', fontSize: '11px', background: 'rgba(255,255,255,0.7)', padding: '10px', borderRadius: '4px' }}>
+              {errorDetails}
+            </pre>
+            <p style={{ fontSize: '12px', marginTop: '10px', fontWeight: 'bold' }}>画面左上の「×」で閉じて、再度お試しください。</p>
+          </div>
         )}
       </div>
     </div>
