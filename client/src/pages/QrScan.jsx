@@ -8,12 +8,14 @@ function QrScan() {
   useEffect(() => {
     const initLiff = async () => {
       try {
-        const liffId = import.meta.env.VITE_SCAN_LIFF_ID;
-        if (!liffId || liffId === "YOUR_SCAN_LIFF_ID") {
+        const envLiffId = import.meta.env.VITE_SCAN_LIFF_ID;
+        const finalLiffId = envLiffId && envLiffId !== "YOUR_SCAN_LIFF_ID" ? envLiffId : "2010494802-XUrGaS3R";
+        
+        if (!finalLiffId || finalLiffId === "YOUR_SCAN_LIFF_ID") {
           throw new Error("VITE_SCAN_LIFF_ID is not configured");
         }
 
-        await liff.init({ liffId });
+        await liff.init({ liffId: finalLiffId });
 
         if (!liff.isLoggedIn()) {
           liff.login();

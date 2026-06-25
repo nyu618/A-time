@@ -13,8 +13,12 @@ export default function UserView() {
   useEffect(() => {
     const initLiff = async () => {
       try {
-        const liffId = import.meta.env.VITE_LIFF_ID;
-        if (!liffId || liffId === "YOUR_LIFF_ID") {
+        // Use new LIFF ID directly or via env
+        const liffId = import.meta.env.VITE_LIFF_ID || "2010494802-asj2kOFe";
+        // Force override to new LIFF ID if old one is stuck
+        const finalLiffId = (liffId === "2010316224-EHzt5FIl" || liffId === "YOUR_LIFF_ID") ? "2010494802-asj2kOFe" : liffId;
+        
+        if (!finalLiffId || finalLiffId === "YOUR_LIFF_ID") {
           console.warn("LIFF ID is not configured. Using mock user.");
           // For testing without LIFF, set a mock profile
           setProfile({ userId: 'mock_user_123', displayName: 'Mock User' });
@@ -22,7 +26,7 @@ export default function UserView() {
           return;
         }
 
-        await liff.init({ liffId });
+        await liff.init({ liffId: finalLiffId });
         if (!liff.isLoggedIn()) {
           liff.login();
         } else {
