@@ -51,14 +51,31 @@ export default function AgreementView() {
   // Save to draft on change
   useEffect(() => {
     if (!loading) {
-      sessionStorage.setItem(draftKey, JSON.stringify({
-        formData,
-        idCardImageUrl,
-        isAgreedToTerms,
-        isNotTaxFree,
-        isEditingProfile,
-        signatureData
-      }));
+      try {
+        sessionStorage.setItem(draftKey, JSON.stringify({
+          formData,
+          idCardImageUrl,
+          isAgreedToTerms,
+          isNotTaxFree,
+          isEditingProfile,
+          signatureData
+        }));
+      } catch (err) {
+        console.warn("Draft save failed (likely due to large image size):", err);
+        // Fallback: save draft without images to preserve text data and avoid crash
+        try {
+          sessionStorage.setItem(draftKey, JSON.stringify({
+            formData,
+            idCardImageUrl: null,
+            isAgreedToTerms,
+            isNotTaxFree,
+            isEditingProfile,
+            signatureData: null
+          }));
+        } catch (e) {
+          console.error("Fallback draft save failed:", e);
+        }
+      }
     }
   }, [formData, idCardImageUrl, isAgreedToTerms, isNotTaxFree, isEditingProfile, signatureData, loading, queueId, draftKey]);
 
