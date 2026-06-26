@@ -40,6 +40,7 @@ async function callNextWaitingUser(prisma, lineClient, targetDate, excludeQueueI
 
           await lineClient.pushMessage({
             to: nextQueue.lineUserId,
+          notificationDisabled: false,
           messages: [{
               type: 'text',
               text: `【2.ご来店依頼】\n順番が来ましたので店舗へお越しください。\n${deadlineStr} までに店にお戻りいただき、スタッフへ「受付番号(整理券番号)」をお伝えください。\n\n[${formatDateJp(nextQueue.targetDate)}]`
@@ -71,6 +72,7 @@ async function handleCancelAndRequeue(prisma, lineClient, queueId) {
       try {
         await lineClient.pushMessage({
           to: queue.lineUserId,
+          notificationDisabled: false,
           messages: [{
             type: 'text',
             text: `誠に恐れ入りますが、再度お呼び出ししてもいらっしゃらなかったため、本日の受付を完全にキャンセルとさせていただきました。\n再度査定をご希望の場合は、お手数ですが最初から受付をお願いいたします。\n\n[${formatDateJp(queue.targetDate)}]`
@@ -112,6 +114,7 @@ async function handleCancelAndRequeue(prisma, lineClient, queueId) {
       
       await lineClient.pushMessage({
         to: queue.lineUserId,
+          notificationDisabled: false,
           messages: [{
           type: 'text',
           text: messageText

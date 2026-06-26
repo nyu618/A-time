@@ -146,6 +146,7 @@ router.post('/admin/queue/:id/approve', async (req, res) => {
       try {
         await lineClient.pushMessage({
           to: queue.lineUserId,
+          notificationDisabled: false,
           messages: [{
             type: 'text',
             text: `【1.整理券発行】\n整理券が発行されました。受付番号(整理券番号)は『${queue.dailyNumber}番』です。順番が近づいたらお呼び出しいたしますのでもうしばらくお待ちください。\n\n[${formatDateJp(queue.targetDate)}]`
@@ -204,6 +205,7 @@ router.post('/admin/queue/:id/call', async (req, res) => {
 
         await lineClient.pushMessage({
           to: queueItem.lineUserId,
+          notificationDisabled: false,
           messages: [{
             type: 'text',
             text: `【2.ご来店依頼】\n受付番号(整理券番号)『${queueItem.dailyNumber}番』のお客様、順番が近づきました。ご来店をお願いいたします。\n${deadlineStr} までに店にお戻りいただき、スタッフへ「受付番号(整理券番号)」をお伝えください。\n\n[${formatDateJp(queueItem.targetDate)}]`
@@ -258,6 +260,7 @@ router.post('/admin/queue/:id/assess', async (req, res) => {
       try {
         await lineClient.pushMessage({
           to: queue.lineUserId,
+          notificationDisabled: false,
           messages: [{
             type: 'text',
             text: `【4.査定受付呼出】\n受付番号(整理券番号)『${queue.dailyNumber}番』のお客様、大変お待たせいたしました。ただいまより査定受付をいたしますので、スタッフのいるカウンターまでお越しいただき「受付番号(整理券番号)」をお伝えください。\n\n[${formatDateJp(queue.targetDate)}]`
@@ -303,6 +306,7 @@ router.post('/admin/queue/:id/post-assess-call', async (req, res) => {
 
         await lineClient.pushMessage({
           to: queue.lineUserId,
+          notificationDisabled: false,
           messages: [{
             type: 'text',
             text: `【5.査定完了 ご来店依頼】\n受付番号(整理券番号)『${queue.dailyNumber}番』のお客様、お待たせいたしました。査定が完了いたしましたので、ご来店をお願いいたします。\n${deadlineStr} までに店にお戻りいただき、スタッフへお声がけいただき「受付番号(整理券番号)」をお伝えください。\n\n[${formatDateJp(queue.targetDate)}]`
@@ -366,6 +370,7 @@ router.post('/admin/queue/:id/complete', async (req, res) => {
       try {
         await lineClient.pushMessage({
           to: queue.lineUserId,
+          notificationDisabled: false,
           messages: [{
             type: 'text',
             text: `ご利用ありがとうございました！またのお越しをお待ちしております！`
@@ -578,6 +583,7 @@ router.post('/send-entry-message', async (req, res) => {
       const liffId = process.env.VITE_LIFF_ID || process.env.LIFF_ID || '2010494802-asj2kOFe';
       await lineClient.pushMessage({
         to: lineUserId,
+          notificationDisabled: false,
           messages: [{
           type: 'text',
           text: `ご来店ありがとうございます！\n本日の受付・状況確認は以下のURLからお願いいたします👇\nhttps://liff.line.me/${liffId}`
