@@ -587,7 +587,7 @@ router.post('/agreement', async (req, res) => {
 router.post('/send-entry-message', async (req, res) => {
   try {
     const { lineUserId } = req.body;
-    if (!lineUserId) return res.status(400).json({ error: 'lineUserId is required' });
+    if (!lineUserId) return res.status(400).json({ error: 'Missing userId' });
 
     if (lineClient) {
       const liffId = process.env.VITE_LIFF_ID || process.env.LIFF_ID || '2010494802-asj2kOFe';

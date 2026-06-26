@@ -23,8 +23,21 @@ function QrScan() {
           return;
         }
 
-        const profile = await liff.getProfile();
-        const lineUserId = profile.userId;
+        let lineUserId = null;
+        try {
+          const profile = await liff.getProfile();
+          lineUserId = profile.userId;
+        } catch (profileError) {
+          console.warn("getProfile failed, trying getContext", profileError);
+          const context = liff.getContext();
+          if (context && context.userId) {
+            lineUserId = context.userId;
+          }
+        }
+
+        if (!lineUserId) {
+          throw new Error("LINEのユーザーIDが取得できませんでした。時間をおいて再度お試しください。");
+        }
 
         const res = await fetch('/api/send-entry-message', {
           method: 'POST',
