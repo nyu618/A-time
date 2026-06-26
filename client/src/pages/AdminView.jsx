@@ -140,9 +140,9 @@ export default function AdminView() {
           <Undo2 size={18} />
           <span>戻る</span>
         </button>
-        <button className="action-btn" onClick={() => setSelectedQueueId(q.id)} title="承諾情報" style={{backgroundColor: '#4b5563', color: 'white'}}>
+        <button className="action-btn" onClick={() => setSelectedQueueId(q.id)} title="申込情報" style={{backgroundColor: q.agreement ? '#eab308' : '#4b5563', color: 'white'}}>
           <FileText size={18} />
-          <span>承諾情報</span>
+          <span>申込情報</span>
         </button>
       </div>
     </div>
@@ -155,9 +155,9 @@ export default function AdminView() {
           <h1>順番待ち管理パネル</h1>
           <button 
             onClick={handleDownloadCsv}
-            style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#10b981', color: 'white', padding: '10px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#6b7280', color: 'white', padding: '6px 12px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontSize: '0.85rem' }}
           >
-            <FileDown size={20} />
+            <FileDown size={16} />
             顧客データCSVダウンロード
           </button>
         </div>
@@ -210,9 +210,9 @@ export default function AdminView() {
                         <XCircle size={18} />
                         <span>拒否</span>
                       </button>
-                      <button className="action-btn" onClick={() => setSelectedQueueId(q.id)} title="承諾情報" style={{backgroundColor: '#4b5563', color: 'white'}}>
+                      <button className="action-btn" onClick={() => setSelectedQueueId(q.id)} title="申込情報" style={{backgroundColor: q.agreement ? '#eab308' : '#4b5563', color: 'white'}}>
                         <FileText size={18} />
-                        <span>承諾情報</span>
+                        <span>申込情報</span>
                       </button>
                     </div>
                   </div>
@@ -286,9 +286,9 @@ export default function AdminView() {
                         <Undo2 size={18} />
                         <span>戻る</span>
                       </button>
-                      <button className="action-btn" onClick={() => setSelectedQueueId(q.id)} title="承諾情報" style={{backgroundColor: '#4b5563', color: 'white'}}>
+                      <button className="action-btn" onClick={() => setSelectedQueueId(q.id)} title="申込情報" style={{backgroundColor: q.agreement ? '#eab308' : '#4b5563', color: 'white'}}>
                         <FileText size={18} />
-                        <span>承諾情報</span>
+                        <span>申込情報</span>
                       </button>
                     </div>
                   </div>

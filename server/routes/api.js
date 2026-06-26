@@ -119,7 +119,10 @@ router.get('/admin/queue', async (req, res) => {
       where: {
         targetDate: dateStr
       },
-      include: { user: true },
+      include: { 
+        user: true,
+        agreement: { select: { id: true } }
+      },
       orderBy: { createdAt: 'asc' }
     });
     res.json(queues);
