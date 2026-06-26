@@ -513,7 +513,14 @@ router.post('/admin/queue/:id/rollback', async (req, res) => {
 router.get('/user/:uid', async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
-      where: { lineUid: req.params.uid }
+      where: { lineUid: req.params.uid },
+      include: {
+        agreements: {
+          orderBy: { agreedAt: 'desc' },
+          take: 1,
+          select: { idCardImageUrl: true }
+        }
+      }
     });
     res.json(user);
   } catch (error) {

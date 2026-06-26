@@ -136,7 +136,11 @@ export default function AgreementView() {
             accountNumber: data.accountNumber || '',
             accountName: data.accountName || '',
           });
-          if (data.fullName && data.address && data.bankName) {
+          if (data.agreements && data.agreements.length > 0 && data.agreements[0].idCardImageUrl) {
+            setIdCardImageUrl(data.agreements[0].idCardImageUrl);
+          }
+
+          if (data.fullName && data.address && data.bankName && data.agreements && data.agreements.length > 0 && data.agreements[0].idCardImageUrl) {
             setIsEditingProfile(false);
           }
         }
@@ -251,8 +255,12 @@ export default function AgreementView() {
             <section className="form-section">
               <h2 className="section-title">ご登録済みのお客様情報</h2>
               <p className="section-desc" style={{ marginBottom: '1rem', color: '#4b5563', lineHeight: '1.5' }}>
-                前回ご登録いただいた情報（<strong>{formData.fullName}</strong> 様）を使用します。<br/>
-                住所や口座情報などに変更がある場合のみ、以下のボタンから情報を編集してください。
+                前回ご登録いただいた以下の情報を使用します。<br/>
+                ・<strong>お客様情報</strong>（{formData.fullName} 様）<br/>
+                ・<strong>お振込先口座情報</strong>（{formData.bankName}）<br/>
+                ・<strong>身分証明書</strong>（登録済み）<br/>
+                <br/>
+                住所や口座情報、身分証などに変更がある場合のみ、以下のボタンから情報を編集してください。
               </p>
               <button 
                 type="button" 
@@ -337,25 +345,25 @@ export default function AgreementView() {
                   <input required type="text" name="accountName" value={formData.accountName} onChange={handleChange} className="form-control" placeholder="ヤマダ タロウ" />
                 </div>
               </section>
+
+              {/* 3. 身分証明書 */}
+              <section className="form-section">
+                <h2 className="section-title"><span className="section-badge">3</span>身分証明書アップロード</h2>
+                <p className="section-desc">運転免許証やマイナンバーカード等、現住所が確認できる身分証明書を撮影してアップロードしてください。</p>
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  onChange={handleImageChange}
+                  className="file-input"
+                />
+                {idCardImageUrl && (
+                  <div className="preview-container">
+                    <img src={idCardImageUrl} alt="身分証プレビュー" className="preview-image" />
+                  </div>
+                )}
+              </section>
             </>
           )}
-
-          {/* 3. 身分証明書 */}
-          <section className="form-section">
-            <h2 className="section-title"><span className="section-badge">3</span>身分証明書アップロード</h2>
-            <p className="section-desc">運転免許証やマイナンバーカード等、現住所が確認できる身分証明書を撮影してアップロードしてください。</p>
-            <input 
-              type="file" 
-              accept="image/*" 
-              onChange={handleImageChange}
-              className="file-input"
-            />
-            {idCardImageUrl && (
-              <div className="preview-container">
-                <img src={idCardImageUrl} alt="身分証プレビュー" className="preview-image" />
-              </div>
-            )}
-          </section>
 
           {/* 4. 免責事項 */}
           <section className="form-section">
