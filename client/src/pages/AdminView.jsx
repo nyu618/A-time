@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { UserCheck, PhoneCall, XCircle, Undo2, BellRing } from 'lucide-react';
+import { UserCheck, PhoneCall, XCircle, Undo2, BellRing, FileDown, FileText } from 'lucide-react';
+import CustomerDetailsModal from '../components/CustomerDetailsModal';
 
 export default function AdminView() {
   const [queues, setQueues] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedQueueId, setSelectedQueueId] = useState(null);
   
   // Date picker state (default to today)
   const d = new Date();
@@ -50,6 +52,10 @@ export default function AdminView() {
     } catch (err) {
       console.error(err);
     }
+  };
+
+  const handleDownloadCsv = () => {
+    window.location.href = `/api/admin/agreements/csv?date=${selectedDate}`;
   };
 
   const pendingQueues = queues.filter(q => q.status === 'PENDING');
@@ -134,6 +140,10 @@ export default function AdminView() {
           <Undo2 size={18} />
           <span>戻る</span>
         </button>
+        <button className="action-btn" onClick={() => setSelectedQueueId(q.id)} title="承諾情報" style={{backgroundColor: '#4b5563', color: 'white'}}>
+          <FileText size={18} />
+          <span>承諾情報</span>
+        </button>
       </div>
     </div>
   );
@@ -141,7 +151,16 @@ export default function AdminView() {
   return (
     <div className="admin-container">
       <header className="admin-header">
-        <h1>順番待ち管理パネル</h1>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h1>順番待ち管理パネル</h1>
+          <button 
+            onClick={handleDownloadCsv}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#10b981', color: 'white', padding: '10px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}
+          >
+            <FileDown size={20} />
+            顧客データCSVダウンロード
+          </button>
+        </div>
         <div className="date-picker-container" style={{ margin: '10px 0' }}>
           <input 
             type="date" 
@@ -190,6 +209,10 @@ export default function AdminView() {
                       <button className="action-btn cancel" onClick={() => handleAction(q.id, 'reject')} title="拒否">
                         <XCircle size={18} />
                         <span>拒否</span>
+                      </button>
+                      <button className="action-btn" onClick={() => setSelectedQueueId(q.id)} title="承諾情報" style={{backgroundColor: '#4b5563', color: 'white'}}>
+                        <FileText size={18} />
+                        <span>承諾情報</span>
                       </button>
                     </div>
                   </div>
@@ -263,6 +286,10 @@ export default function AdminView() {
                         <Undo2 size={18} />
                         <span>戻る</span>
                       </button>
+                      <button className="action-btn" onClick={() => setSelectedQueueId(q.id)} title="承諾情報" style={{backgroundColor: '#4b5563', color: 'white'}}>
+                        <FileText size={18} />
+                        <span>承諾情報</span>
+                      </button>
                     </div>
                   </div>
                 ))
@@ -270,6 +297,9 @@ export default function AdminView() {
             </div>
           </section>
         </div>
+      )}
+      {selectedQueueId && (
+        <CustomerDetailsModal queueId={selectedQueueId} onClose={() => setSelectedQueueId(null)} />
       )}
     </div>
   );

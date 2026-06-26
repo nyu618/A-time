@@ -598,4 +598,94 @@ router.post('/send-entry-message', async (req, res) => {
   }
 });
 
+// Admin: Get specific agreement detail
+router.get('/admin/agreement/:queueId', async (req, res) => {
+  try {
+    const queueId = parseInt(req.params.queueId, 10);
+    const queue = await prisma.queue.findUnique({
+      where: { id: queueId },
+      include: {
+        user: true,
+        agreement: true
+      }
+    });
+
+    if (!queue) {
+      return res.status(404).json({ error: 'Queue not found' });
+    }
+
+    res.json(queue);
+  } catch (error) {
+    console.error('Failed to fetch agreement details:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Admin: Download CSV for specific date
+router.get('/admin/agreements/csv', async (req, res) => {
+  try {
+    const dateStr = req.query.date || new Date().toISOString().split('T')[0];
+    
+    // Find all queues with agreements for the specified date
+    const queues = await prisma.queue.findMany({
+      where: {
+        targetDate: dateStr,
+        agreement: { isNot: null }
+      },
+      include: {
+        user: true,
+        agreement: true
+      },
+      orderBy: { dailyNumber: 'asc' }
+    });
+
+    // CSV Header
+    const headers = [
+      '受付番号', 'ステータス', '本名', 'フリガナ', '生年月日', '電話番号', '郵便番号', '住所', '職業', 
+      '銀行名', '支店名', '口座種類', '口座番号', '口座名義', '同意フラグ', '同意日時'
+    ];
+    
+    // BOM for Excel
+    let csvContent = '\uFEFF' + headers.join(',') + '\n';
+
+    for (const q of queues) {
+      const u = q.user || {};
+      const a = q.agreement || {};
+      
+      const escapeCsv = (str) => {
+        if (str === null || str === undefined) return '""';
+        const s = String(str);
+        return '"' + s.replace(/"/g, '""') + '"';
+      };
+
+      const row = [
+        escapeCsv(q.dailyNumber),
+        escapeCsv(q.status),
+        escapeCsv(u.fullName),
+        escapeCsv(u.fullNameKana),
+        escapeCsv(u.birthDate),
+        escapeCsv(u.phoneNumber),
+        escapeCsv(u.postalCode),
+        escapeCsv(u.address),
+        escapeCsv(u.occupation),
+        escapeCsv(u.bankName),
+        escapeCsv(u.branchName),
+        escapeCsv(u.accountType),
+        escapeCsv(u.accountNumber),
+        escapeCsv(u.accountName),
+        escapeCsv(a.isAgreedToTerms ? '同意済' : '未同意'),
+        escapeCsv(a.agreedAt ? new Date(a.agreedAt).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }) : '')
+      ];
+      csvContent += row.join(',') + '\n';
+    }
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="customers_${dateStr}.csv"`);
+    res.send(csvContent);
+  } catch (error) {
+    console.error('Failed to generate CSV:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 module.exports = router;

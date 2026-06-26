@@ -1,0 +1,240 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: #fff;
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f9fafb;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #111827;
+}
+
+.close-icon-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #6b7280;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.close-icon-btn:hover {
+  color: #111827;
+}
+
+.modal-body {
+  padding: 20px;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+.info-section {
+  margin-bottom: 24px;
+}
+
+.info-section h3 {
+  font-size: 1.1rem;
+  color: #374151;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 8px;
+  margin-bottom: 16px;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-item.full-width {
+  grid-column: span 2;
+}
+
+.info-item .label {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+
+.info-item .value {
+  font-size: 1rem;
+  color: #111827;
+  font-weight: 500;
+}
+
+.info-item .value.success {
+  color: #047857;
+}
+
+.image-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.image-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #f3f4f6;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px dashed #d1d5db;
+}
+
+.image-box .label {
+  font-size: 0.9rem;
+  color: #4b5563;
+  margin-bottom: 12px;
+  font-weight: bold;
+}
+
+.image-box img {
+  max-width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  cursor: pointer;
+  transition: transform 0.2s;
+  border: 1px solid #e5e7eb;
+  background-color: #fff;
+}
+
+.image-box img:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.image-box .signature-img {
+  background-color: transparent;
+  border: none;
+}
+
+.no-image {
+  color: #9ca3af;
+  font-style: italic;
+  padding: 40px 0;
+}
+
+.image-hint {
+  text-align: center;
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin-top: 12px;
+}
+
+.modal-footer {
+  padding: 16px 20px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+  background-color: #f9fafb;
+}
+
+.close-btn {
+  background-color: #6b7280;
+  color: white;
+  border: none;
+  padding: 8px 24px;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.close-btn:hover {
+  background-color: #4b5563;
+}
+
+.no-agreement-banner {
+  background-color: #fef3c7;
+  color: #92400e;
+  padding: 16px;
+  border-radius: 6px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.fullscreen-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.9);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: zoom-out;
+}
+
+.fullscreen-overlay img {
+  max-width: 90%;
+  max-height: 90%;
+  object-fit: contain;
+}
+
+.close-fullscreen {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 3rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.modal-content.loading, .modal-content.error {
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  height: auto;
+}
+
+.error-text {
+  color: #dc2626;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
