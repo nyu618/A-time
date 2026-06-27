@@ -100,6 +100,7 @@ export default function AgreementView() {
         await liff.init({ liffId: finalLiffId });
         if (!liff.isLoggedIn()) {
           liff.login();
+          return;
         } else {
           const userProfile = await liff.getProfile();
           setProfile(userProfile);
