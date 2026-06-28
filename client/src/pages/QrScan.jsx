@@ -5,6 +5,8 @@ import './QrScan.css';
 function QrScan() {
   const [errorDetails, setErrorDetails] = useState(null);
   const [successMsg, setSuccessMsg] = useState(null);
+  const [needsFriendship, setNeedsFriendship] = useState(false);
+  const lineOaUrl = import.meta.env.VITE_LINE_OA_URL || "https://lin.ee/〇〇〇〇";
 
   useEffect(() => {
     const initLiff = async () => {
@@ -39,6 +41,20 @@ function QrScan() {
           throw new Error("LINEのユーザーIDが取得できませんでした。時間をおいて再度お試しください。");
         }
 
+        let isFriend = false;
+        try {
+          const friendship = await liff.getFriendship();
+          isFriend = friendship.friendFlag;
+        } catch (friendErr) {
+          console.warn("Failed to get friendship status", friendErr);
+          isFriend = false; // block if we can't verify
+        }
+
+        if (!isFriend) {
+          setNeedsFriendship(true);
+          return;
+        }
+
         const res = await fetch('/api/send-entry-message', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -68,11 +84,37 @@ function QrScan() {
   return (
     <div className="qr-scan-container">
       <div className="qr-scan-content">
-        {!errorDetails && !successMsg ? (
+        {!errorDetails && !successMsg && !needsFriendship ? (
           <>
             <div className="spinner" style={{ marginBottom: '20px' }}></div>
             <p style={{ fontWeight: 'bold', color: '#1f2937' }}>受付メッセージを送信しています...</p>
           </>
+        ) : needsFriendship ? (
+          <div className="qr-scan-warning" style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '3rem', marginBottom: '10px' }}>⚠️</div>
+            <p style={{ fontWeight: 'bold', marginBottom: '20px', color: '#b45309', lineHeight: '1.5' }}>
+              受付を完了するには、公式アカウントの友だち追加が必要です。
+            </p>
+            <a 
+              href={lineOaUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'inline-block',
+                backgroundColor: '#06c755',
+                color: 'white',
+                padding: '14px 24px',
+                borderRadius: '8px',
+                textDecoration: 'none',
+                fontWeight: 'bold',
+                width: '100%',
+                boxSizing: 'border-box',
+                boxShadow: '0 4px 6px rgba(6, 199, 85, 0.3)'
+              }}
+            >
+              公式アカウントを友だち追加する
+            </a>
+          </div>
         ) : successMsg ? (
           <p className="qr-scan-success" style={{ fontWeight: 'bold', color: '#047857' }}>{successMsg}</p>
         ) : (
