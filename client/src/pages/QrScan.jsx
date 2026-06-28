@@ -6,7 +6,7 @@ function QrScan() {
   const [errorDetails, setErrorDetails] = useState(null);
   const [successMsg, setSuccessMsg] = useState(null);
   const [needsFriendship, setNeedsFriendship] = useState(false);
-  const lineOaUrl = import.meta.env.VITE_LINE_OA_URL || "https://lin.ee/〇〇〇〇";
+  const lineOaUrl = import.meta.env.VITE_LINE_OA_URL || "https://lin.ee/SXnSHAj";
 
   useEffect(() => {
     const initLiff = async () => {
