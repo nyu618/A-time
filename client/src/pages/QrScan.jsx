@@ -21,7 +21,7 @@ function QrScan() {
         await liff.init({ liffId: finalLiffId });
 
         if (!liff.isLoggedIn()) {
-          liff.login();
+          liff.login({ redirectUri: window.location.href });
           return;
         }
 
@@ -70,7 +70,7 @@ function QrScan() {
         liff.closeWindow();
         
         // In case closeWindow doesn't work (e.g. testing in external browser)
-        setSuccessMsg("画面左上の「×」で閉じて、LINEのトーク画面をご確認ください。");
+        setSuccessMsg("LINEへ受付メッセージを送信しました。画面を閉じてLINEをご確認ください。");
 
       } catch (err) {
         console.error("LIFF Init / API Error:", err);
@@ -118,12 +118,9 @@ function QrScan() {
         ) : successMsg ? (
           <p className="qr-scan-success" style={{ fontWeight: 'bold', color: '#047857' }}>{successMsg}</p>
         ) : (
-          <div className="qr-scan-error" style={{ textAlign: 'left', wordBreak: 'break-all' }}>
-            <p style={{ fontWeight: 'bold', marginBottom: '10px' }}>エラー詳細情報</p>
-            <pre style={{ whiteSpace: 'pre-wrap', fontSize: '11px', background: 'rgba(255,255,255,0.7)', padding: '10px', borderRadius: '4px' }}>
-              {errorDetails}
-            </pre>
-            <p style={{ fontSize: '12px', marginTop: '10px', fontWeight: 'bold' }}>画面左上の「×」で閉じて、再度お試しください。</p>
+          <div className="qr-scan-error" style={{ textAlign: 'center', color: '#b45309' }}>
+            <div style={{ fontSize: '3rem', marginBottom: '10px' }}>⚠️</div>
+            <p style={{ fontWeight: 'bold' }}>エラーが発生しました。</p>
           </div>
         )}
       </div>

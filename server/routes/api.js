@@ -31,9 +31,33 @@ if (lineConfig.channelAccessToken && lineConfig.channelSecret && lineConfig.chan
 }
 
 // Webhook endpoint for LINE (Used for verification and receiving events)
-router.post('/webhook', (req, res) => {
+router.post('/webhook', async (req, res) => {
   // Return 200 OK to pass the LINE Developers verification.
   res.status(200).send('OK');
+
+  try {
+    const events = req.body.events;
+    if (events && events.length > 0) {
+      for (const event of events) {
+        if (event.type === 'follow') {
+          const liffUrl = `https://liff.line.me/${process.env.VITE_LIFF_ID || "2010494802-asj2kOFe"}`;
+          const msg = `受付予約はこちらからお願いします：\n${liffUrl}`;
+          
+          if (lineClient) {
+            await lineClient.replyMessage({
+              replyToken: event.replyToken,
+              messages: [{
+                type: 'text',
+                text: msg
+              }]
+            });
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.error("Webhook processing error:", err);
+  }
 });
 
 // User: Register for queue
