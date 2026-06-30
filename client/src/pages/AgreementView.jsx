@@ -44,7 +44,6 @@ export default function AgreementView() {
 
   const [idCardImageUrl, setIdCardImageUrl] = useState(draft?.idCardImageUrl || null); // Base64
   const [isAgreedToTerms, setIsAgreedToTerms] = useState(draft?.isAgreedToTerms || false);
-  const [isNotTaxFree, setIsNotTaxFree] = useState(draft?.isNotTaxFree || false);
   const [signatureData, setSignatureData] = useState(draft?.signatureData || null);
   const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
 
@@ -68,7 +67,6 @@ export default function AgreementView() {
             formData,
             idCardImageUrl: null,
             isAgreedToTerms,
-            isNotTaxFree,
             isEditingProfile,
             signatureData: null
           }));
@@ -77,7 +75,7 @@ export default function AgreementView() {
         }
       }
     }
-  }, [formData, idCardImageUrl, isAgreedToTerms, isNotTaxFree, isEditingProfile, signatureData, loading, queueId, draftKey]);
+  }, [formData, idCardImageUrl, isAgreedToTerms, isEditingProfile, signatureData, loading, queueId, draftKey]);
 
   // Remove the useEffect that loads from draft to sigCanvas on mount
   // because sigCanvas is now only rendered inside the modal when open.
@@ -392,17 +390,7 @@ export default function AgreementView() {
                   onChange={(e) => setIsAgreedToTerms(e.target.checked)}
                   className="checkbox-input" 
                 />
-                <span className="checkbox-text">免責事項・プライバシーポリシーをすべて確認し、同意します。</span>
-              </label>
-
-              <label className="checkbox-label">
-                <input 
-                  type="checkbox" 
-                  checked={isNotTaxFree}
-                  onChange={(e) => setIsNotTaxFree(e.target.checked)}
-                  className="checkbox-input" 
-                />
-                <span className="checkbox-text">査定に出す商品は、免税で購入した商品ではありません。</span>
+                <span className="checkbox-text">上記の免責事項をすべて確認し、同意します。</span>
               </label>
             </div>
           </section>
@@ -440,7 +428,7 @@ export default function AgreementView() {
           <div className="submit-container">
             <button 
               type="submit" 
-              disabled={submitting || !isAgreedToTerms || !isNotTaxFree || !signatureData}
+              disabled={submitting || !isAgreedToTerms || !signatureData}
               className="submit-btn"
             >
               {submitting ? '送信中...' : '買取申込を送信する'}
