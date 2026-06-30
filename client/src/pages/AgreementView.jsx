@@ -218,20 +218,20 @@ export default function AgreementView() {
         newErrors.fullNameKana = 'フリガナは全角カタカナで入力してください。';
         if (!firstErrorField) firstErrorField = 'fullNameKana';
       }
-      if (formData.phoneNumber && !/^[0-9-]+$/.test(formData.phoneNumber)) {
-        newErrors.phoneNumber = '電話番号は半角数字（ハイフン可）で入力してください。';
+      if (formData.phoneNumber && !/^[0-9]+$/.test(formData.phoneNumber)) {
+        newErrors.phoneNumber = '電話番号は半角数字で入力してください（ハイフンなし）。';
         if (!firstErrorField) firstErrorField = 'phoneNumber';
       }
-      if (formData.postalCode && !/^[0-9-]+$/.test(formData.postalCode)) {
-        newErrors.postalCode = '郵便番号は半角数字（ハイフン可）で入力してください。';
+      if (formData.postalCode && !/^[0-9]+$/.test(formData.postalCode)) {
+        newErrors.postalCode = '郵便番号は半角数字で入力してください（ハイフンなし）。';
         if (!firstErrorField) firstErrorField = 'postalCode';
       }
       if (formData.accountNumber && !/^[0-9]+$/.test(formData.accountNumber)) {
         newErrors.accountNumber = '口座番号は半角数字で入力してください。';
         if (!firstErrorField) firstErrorField = 'accountNumber';
       }
-      if (formData.accountName && !/^[ァ-ヶー\sA-Za-z0-9]+$/.test(formData.accountName)) {
-        newErrors.accountName = '口座名義は全角カタカナまたは英数字で入力してください。';
+      if (formData.accountName && !/^[ァ-ヶー\s]+$/.test(formData.accountName)) {
+        newErrors.accountName = '口座名義は全角カタカナで入力してください。';
         if (!firstErrorField) firstErrorField = 'accountName';
       }
 
@@ -339,7 +339,7 @@ export default function AgreementView() {
       <div className="agreement-content">
         {errorMsg && <div className="error-message">{errorMsg}</div>}
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} noValidate>
           
           {!isEditingProfile ? (
             <section className="form-section">
@@ -533,7 +533,7 @@ export default function AgreementView() {
           <div className="submit-container">
             <button 
               type="submit" 
-              disabled={submitting || !isAgreedToTerms || !signatureData}
+              disabled={submitting}
               className="submit-btn"
             >
               {submitting ? '送信中...' : '買取申込を送信する'}
