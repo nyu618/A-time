@@ -46,6 +46,7 @@ export default function AgreementView() {
   const [isAgreedToTerms, setIsAgreedToTerms] = useState(draft?.isAgreedToTerms || false);
   const [signatureData, setSignatureData] = useState(draft?.signatureData || null);
   const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
+  const [errors, setErrors] = useState({});
 
   // Save to draft on change
   useEffect(() => {
@@ -183,12 +184,102 @@ export default function AgreementView() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!isAgreedToTerms || !isNotTaxFree) {
-      alert("すべての同意項目にチェックを入れてください。");
+    if (!profile) {
+      alert("プロフィール情報が取得できません。もう一度お試しください。");
       return;
     }
+
+    const newErrors = {};
+    let firstErrorField = null;
+
+    if (isEditingProfile) {
+      const requiredFields = {
+        fullName: 'お名前（本名）',
+        fullNameKana: 'フリガナ',
+        birthDate: '生年月日',
+        phoneNumber: '電話番号',
+        postalCode: '郵便番号',
+        address: 'ご住所',
+        occupation: 'ご職業',
+        bankName: '銀行名',
+        branchName: '支店名',
+        accountNumber: '口座番号',
+        accountName: '口座名義',
+      };
+
+      for (const [key, label] of Object.entries(requiredFields)) {
+        if (!formData[key] || formData[key].trim() === '') {
+          newErrors[key] = `${label}を入力してください。`;
+          if (!firstErrorField) firstErrorField = key;
+        }
+      }
+
+      if (formData.fullNameKana && !/^[ァ-ヶー\s]+$/.test(formData.fullNameKana)) {
+        newErrors.fullNameKana = 'フリガナは全角カタカナで入力してください。';
+        if (!firstErrorField) firstErrorField = 'fullNameKana';
+      }
+      if (formData.phoneNumber && !/^[0-9-]+$/.test(formData.phoneNumber)) {
+        newErrors.phoneNumber = '電話番号は半角数字（ハイフン可）で入力してください。';
+        if (!firstErrorField) firstErrorField = 'phoneNumber';
+      }
+      if (formData.postalCode && !/^[0-9-]+$/.test(formData.postalCode)) {
+        newErrors.postalCode = '郵便番号は半角数字（ハイフン可）で入力してください。';
+        if (!firstErrorField) firstErrorField = 'postalCode';
+      }
+      if (formData.accountNumber && !/^[0-9]+$/.test(formData.accountNumber)) {
+        newErrors.accountNumber = '口座番号は半角数字で入力してください。';
+        if (!firstErrorField) firstErrorField = 'accountNumber';
+      }
+      if (formData.accountName && !/^[ァ-ヶー\sA-Za-z0-9]+$/.test(formData.accountName)) {
+        newErrors.accountName = '口座名義は全角カタカナまたは英数字で入力してください。';
+        if (!firstErrorField) firstErrorField = 'accountName';
+      }
+
+      if (formData.birthDate) {
+        const today = new Date();
+        const birthDate = new Date(formData.birthDate);
+        if (birthDate > today) {
+          newErrors.birthDate = '生年月日に未来の日付は指定できません。';
+          if (!firstErrorField) firstErrorField = 'birthDate';
+        } else {
+          let age = today.getFullYear() - birthDate.getFullYear();
+          const m = today.getMonth() - birthDate.getMonth();
+          if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+          }
+          if (age < 18) {
+            newErrors.birthDate = '18歳未満の方は保護者の同意が必要です。同意書を持参してください。';
+            if (!firstErrorField) firstErrorField = 'birthDate';
+          }
+        }
+      }
+
+      if (!idCardImageUrl) {
+        newErrors.idCardImageUrl = '身分証明書の画像をアップロードしてください。';
+        if (!firstErrorField) firstErrorField = 'idCardImageUrl';
+      }
+    }
+
     if (!signatureData) {
-      alert("ご署名をお願いいたします。");
+      newErrors.signatureData = 'ご署名をお願いいたします。';
+      if (!firstErrorField) firstErrorField = 'signatureData';
+    }
+
+    if (!isAgreedToTerms) {
+        newErrors.isAgreedToTerms = '免責事項に同意してください。';
+        if (!firstErrorField) firstErrorField = 'isAgreedToTerms';
+    }
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) {
+      alert("入力内容にエラーがあります。赤字の項目を修正してください。");
+      if (firstErrorField) {
+        const el = document.getElementById(`field-${firstErrorField}`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
       return;
     }
 
@@ -276,33 +367,39 @@ export default function AgreementView() {
               <section className="form-section">
                 <h2 className="section-title"><span className="section-badge">1</span>お客様情報</h2>
                 
-                <div className="form-group">
+                <div className="form-group" id="field-fullName">
                   <label>お名前（本名） <span className="required-mark">*</span></label>
-                  <input required type="text" name="fullName" value={formData.fullName} onChange={handleChange} className="form-control" placeholder="山田 太郎" />
+                  <input required type="text" name="fullName" value={formData.fullName} onChange={handleChange} className={`form-control ${errors.fullName ? 'input-error' : ''}`} placeholder="山田 太郎" />
+                  {errors.fullName && <span className="error-msg">{errors.fullName}</span>}
                 </div>
-                <div className="form-group">
+                <div className="form-group" id="field-fullNameKana">
                   <label>フリガナ <span className="required-mark">*</span></label>
-                  <input required type="text" name="fullNameKana" value={formData.fullNameKana} onChange={handleChange} className="form-control" placeholder="ヤマダ タロウ" />
+                  <input required type="text" name="fullNameKana" value={formData.fullNameKana} onChange={handleChange} className={`form-control ${errors.fullNameKana ? 'input-error' : ''}`} placeholder="ヤマダ タロウ" />
+                  {errors.fullNameKana && <span className="error-msg">{errors.fullNameKana}</span>}
                 </div>
-                <div className="form-group">
+                <div className="form-group" id="field-birthDate">
                   <label>生年月日 <span className="required-mark">*</span></label>
-                  <input required type="date" name="birthDate" value={formData.birthDate} onChange={handleChange} className="form-control" />
+                  <input required type="date" name="birthDate" value={formData.birthDate} onChange={handleChange} className={`form-control ${errors.birthDate ? 'input-error' : ''}`} />
+                  {errors.birthDate && <span className="error-msg">{errors.birthDate}</span>}
                 </div>
-                <div className="form-group">
+                <div className="form-group" id="field-phoneNumber">
                   <label>電話番号 <span className="required-mark">*</span></label>
-                  <input required type="tel" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} className="form-control" placeholder="09012345678" />
+                  <input required type="tel" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} className={`form-control ${errors.phoneNumber ? 'input-error' : ''}`} placeholder="09012345678" />
+                  {errors.phoneNumber && <span className="error-msg">{errors.phoneNumber}</span>}
                 </div>
-                <div className="form-group">
+                <div className="form-group" id="field-postalCode">
                   <label>郵便番号 <span className="required-mark">*</span></label>
-                  <input required type="text" name="postalCode" value={formData.postalCode} onChange={handleChange} className="form-control" placeholder="1234567" />
+                  <input required type="text" name="postalCode" value={formData.postalCode} onChange={handleChange} className={`form-control ${errors.postalCode ? 'input-error' : ''}`} placeholder="1234567" />
+                  {errors.postalCode && <span className="error-msg">{errors.postalCode}</span>}
                 </div>
-                <div className="form-group">
+                <div className="form-group" id="field-address">
                   <label>ご住所 <span className="required-mark">*</span></label>
-                  <input required type="text" name="address" value={formData.address} onChange={handleChange} className="form-control" placeholder="東京都渋谷区..." />
+                  <input required type="text" name="address" value={formData.address} onChange={handleChange} className={`form-control ${errors.address ? 'input-error' : ''}`} placeholder="東京都渋谷区..." />
+                  {errors.address && <span className="error-msg">{errors.address}</span>}
                 </div>
-                <div className="form-group">
+                <div className="form-group" id="field-occupation">
                   <label>ご職業 <span className="required-mark">*</span></label>
-                  <select required name="occupation" value={formData.occupation} onChange={handleChange} className="form-control">
+                  <select required name="occupation" value={formData.occupation} onChange={handleChange} className={`form-control ${errors.occupation ? 'input-error' : ''}`}>
                     <option value="">選択してください</option>
                     <option value="会社員">会社員</option>
                     <option value="公務員">公務員</option>
@@ -311,6 +408,7 @@ export default function AgreementView() {
                     <option value="主婦・主夫">主婦・主夫</option>
                     <option value="その他">その他</option>
                   </select>
+                  {errors.occupation && <span className="error-msg">{errors.occupation}</span>}
                 </div>
               </section>
 
@@ -319,42 +417,48 @@ export default function AgreementView() {
                 <h2 className="section-title"><span className="section-badge">2</span>お振込先口座情報</h2>
                 <p className="section-desc">買取金額のお振込先をご入力ください。</p>
                 
-                <div className="form-group">
+                <div className="form-group" id="field-bankName">
                   <label>銀行名 <span className="required-mark">*</span></label>
-                  <input required type="text" name="bankName" value={formData.bankName} onChange={handleChange} className="form-control" placeholder="〇〇銀行" />
+                  <input required type="text" name="bankName" value={formData.bankName} onChange={handleChange} className={`form-control ${errors.bankName ? 'input-error' : ''}`} placeholder="〇〇銀行" />
+                  {errors.bankName && <span className="error-msg">{errors.bankName}</span>}
                 </div>
-                <div className="form-group">
+                <div className="form-group" id="field-branchName">
                   <label>支店名 <span className="required-mark">*</span></label>
-                  <input required type="text" name="branchName" value={formData.branchName} onChange={handleChange} className="form-control" placeholder="〇〇支店" />
+                  <input required type="text" name="branchName" value={formData.branchName} onChange={handleChange} className={`form-control ${errors.branchName ? 'input-error' : ''}`} placeholder="〇〇支店" />
+                  {errors.branchName && <span className="error-msg">{errors.branchName}</span>}
                 </div>
-                <div className="form-group">
+                <div className="form-group" id="field-accountType">
                   <label>口座種類 <span className="required-mark">*</span></label>
-                  <select required name="accountType" value={formData.accountType} onChange={handleChange} className="form-control">
+                  <select required name="accountType" value={formData.accountType} onChange={handleChange} className={`form-control ${errors.accountType ? 'input-error' : ''}`}>
                     <option value="普通">普通</option>
                     <option value="当座">当座</option>
                     <option value="貯蓄">貯蓄</option>
                   </select>
+                  {errors.accountType && <span className="error-msg">{errors.accountType}</span>}
                 </div>
-                <div className="form-group">
+                <div className="form-group" id="field-accountNumber">
                   <label>口座番号 <span className="required-mark">*</span></label>
-                  <input required type="text" name="accountNumber" value={formData.accountNumber} onChange={handleChange} className="form-control" placeholder="1234567" />
+                  <input required type="text" name="accountNumber" value={formData.accountNumber} onChange={handleChange} className={`form-control ${errors.accountNumber ? 'input-error' : ''}`} placeholder="1234567" />
+                  {errors.accountNumber && <span className="error-msg">{errors.accountNumber}</span>}
                 </div>
-                <div className="form-group">
+                <div className="form-group" id="field-accountName">
                   <label>口座名義（カタカナ） <span className="required-mark">*</span></label>
-                  <input required type="text" name="accountName" value={formData.accountName} onChange={handleChange} className="form-control" placeholder="ヤマダ タロウ" />
+                  <input required type="text" name="accountName" value={formData.accountName} onChange={handleChange} className={`form-control ${errors.accountName ? 'input-error' : ''}`} placeholder="ヤマダ タロウ" />
+                  {errors.accountName && <span className="error-msg">{errors.accountName}</span>}
                 </div>
               </section>
 
               {/* 3. 身分証明書 */}
-              <section className="form-section">
+              <section className="form-section" id="field-idCardImageUrl">
                 <h2 className="section-title"><span className="section-badge">3</span>身分証明書アップロード</h2>
                 <p className="section-desc">運転免許証やマイナンバーカード等、現住所が確認できる身分証明書を撮影してアップロードしてください。</p>
                 <input 
                   type="file" 
                   accept="image/*" 
                   onChange={handleImageChange}
-                  className="file-input"
+                  className={`file-input ${errors.idCardImageUrl ? 'input-error' : ''}`}
                 />
+                {errors.idCardImageUrl && <span className="error-msg" style={{marginBottom: '10px'}}>{errors.idCardImageUrl}</span>}
                 {idCardImageUrl && (
                   <div className="preview-container">
                     <img src={idCardImageUrl} alt="身分証プレビュー" className="preview-image" />
@@ -396,9 +500,10 @@ export default function AgreementView() {
           </section>
 
           {/* 5. ご署名 */}
-          <section className="form-section">
+          <section className="form-section" id="field-signatureData">
             <h2 className="section-title"><span className="section-badge">5</span>ご署名</h2>
             <p className="section-desc">下記ボタンよりサインを入力してください。</p>
+            {errors.signatureData && <span className="error-msg" style={{marginBottom: '10px'}}>{errors.signatureData}</span>}
             
             {signatureData ? (
               <div>

@@ -1,3 +1,15 @@
+.error-msg {
+  color: #ef4444;
+  font-size: 0.8rem;
+  margin-top: 4px;
+  display: block;
+}
+
+.input-error {
+  border-color: #ef4444 !important;
+  background-color: #fef2f2 !important;
+}
+
 .agreement-container {
   min-height: 100vh;
   background-color: #ffffff;
