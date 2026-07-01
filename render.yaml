@@ -3,7 +3,7 @@ services:
     name: line-queue-system
     env: node
     plan: starter
-    buildCommand: npm install && npm run build && npx prisma db push
+    buildCommand: npm install && npm run build && (npx prisma migrate resolve --applied 0_init || true) && npx prisma migrate deploy
     startCommand: npm start
     envVars:
       - key: NODE_ENV
