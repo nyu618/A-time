@@ -37,14 +37,14 @@ Web Serviceの **「Environment」** タブを開き、以下の環境変数を�
 
 ## 4. データベースのセットアップ（マイグレーション）
 
-初回デプロイ時、データベースのテーブルがまだ作成されていないためエラーになることがあります。
-Web Serviceの **「Shell」** タブを開き、以下のコマンドを実行してデータベースを構築してください。
+初回デプロイ時および今後の更新時、データベースのテーブル作成・変更は `render.yaml` のビルドコマンド内に記述された以下の処理により**自動的に**行われます。
 
 ```bash
-npx prisma db push
+npx prisma migrate resolve --applied 0_init || true
+npx prisma migrate deploy
 ```
 
-成功すると、PostgreSQL上に `Queue` テーブルが作成されます。
+これにより、手動でコマンドを実行しなくても安全に最新のテーブル構造が反映され、過去のデータ履歴がリセットされることなく永続化されます。
 
 ## 5. LINE Developersの設定更新
 
