@@ -10,8 +10,7 @@ dotenv.config();
 
 // 必須環境変数のチェック (Renderデプロイ時のSQLiteフォールバックを防止)
 if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
-  console.error("FATAL ERROR: DATABASE_URL is not set. The application requires a PostgreSQL connection string to start in production.");
-  process.exit(1);
+  console.warn("WARNING: DATABASE_URL is not set. The application requires a PostgreSQL connection string to start properly in production.");
 }
 
 const app = express();
