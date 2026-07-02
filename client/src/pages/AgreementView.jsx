@@ -42,7 +42,9 @@ export default function AgreementView() {
     accountName: '',
   });
 
-  const [idCardImageUrl, setIdCardImageUrl] = useState(draft?.idCardImageUrl || null); // Base64
+  const [idCardImageFront, setIdCardImageFront] = useState(draft?.idCardImageFront || null); // Base64
+  const [idCardImageBack, setIdCardImageBack] = useState(draft?.idCardImageBack || null); // Base64
+  const [isImageLegible, setIsImageLegible] = useState(draft?.isImageLegible || false);
   const [isAgreedToTerms, setIsAgreedToTerms] = useState(draft?.isAgreedToTerms || false);
   const [signatureData, setSignatureData] = useState(draft?.signatureData || null);
   const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
@@ -54,7 +56,9 @@ export default function AgreementView() {
       try {
         sessionStorage.setItem(draftKey, JSON.stringify({
           formData,
-          idCardImageUrl,
+          idCardImageFront,
+          idCardImageBack,
+          isImageLegible,
           isAgreedToTerms,
           isNotTaxFree,
           isEditingProfile,
@@ -66,7 +70,9 @@ export default function AgreementView() {
         try {
           sessionStorage.setItem(draftKey, JSON.stringify({
             formData,
-            idCardImageUrl: null,
+            idCardImageFront: null,
+            idCardImageBack: null,
+            isImageLegible,
             isAgreedToTerms,
             isEditingProfile,
             signatureData: null
@@ -76,7 +82,7 @@ export default function AgreementView() {
         }
       }
     }
-  }, [formData, idCardImageUrl, isAgreedToTerms, isEditingProfile, signatureData, loading, queueId, draftKey]);
+  }, [formData, idCardImageFront, idCardImageBack, isImageLegible, isAgreedToTerms, isEditingProfile, signatureData, loading, queueId, draftKey]);
 
   // Remove the useEffect that loads from draft to sigCanvas on mount
   // because sigCanvas is now only rendered inside the modal when open.
@@ -136,11 +142,13 @@ export default function AgreementView() {
             accountNumber: data.accountNumber || '',
             accountName: data.accountName || '',
           });
-          if (data.agreements && data.agreements.length > 0 && data.agreements[0].idCardImageUrl) {
-            setIdCardImageUrl(data.agreements[0].idCardImageUrl);
+          if (data.agreements && data.agreements.length > 0 && data.agreements[0].idCardImageFront) {
+            setIdCardImageFront(data.agreements[0].idCardImageFront);
+            setIdCardImageBack(data.agreements[0].idCardImageBack || null);
+            setIsImageLegible(true);
           }
 
-          if (data.fullName && data.address && data.bankName && data.agreements && data.agreements.length > 0 && data.agreements[0].idCardImageUrl) {
+          if (data.fullName && data.address && data.bankName && data.agreements && data.agreements.length > 0 && data.agreements[0].idCardImageFront) {
             setIsEditingProfile(false);
           }
         }
@@ -157,12 +165,16 @@ export default function AgreementView() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleImageChange = (e) => {
+  const handleImageChange = (e, side) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setIdCardImageUrl(reader.result);
+        if (side === 'front') {
+          setIdCardImageFront(reader.result);
+        } else {
+          setIdCardImageBack(reader.result);
+        }
       };
       reader.readAsDataURL(file);
     }
@@ -254,9 +266,14 @@ export default function AgreementView() {
         }
       }
 
-      if (!idCardImageUrl) {
-        newErrors.idCardImageUrl = '身分証明書の画像をアップロードしてください。';
-        if (!firstErrorField) firstErrorField = 'idCardImageUrl';
+      if (!idCardImageFront) {
+        newErrors.idCardImageFront = '身分証明書（表面）の画像をアップロードしてください。';
+        if (!firstErrorField) firstErrorField = 'idCardImageFront';
+      }
+
+      if (!isImageLegible) {
+        newErrors.isImageLegible = '「文字がはっきりと読み取れることを確認しました」にチェックを入れてください。';
+        if (!firstErrorField) firstErrorField = 'isImageLegible';
       }
     }
 
@@ -289,7 +306,8 @@ export default function AgreementView() {
       queueId: parseInt(queueId),
       userId: profile.userId,
       userInfo: formData,
-      idCardImageUrl: idCardImageUrl,
+      idCardImageFront,
+      idCardImageBack,
       signatureData: signatureData,
       isAgreedToTerms: true,
       isInvoiceRegistered: false
@@ -449,21 +467,56 @@ export default function AgreementView() {
               </section>
 
               {/* 3. 身分証明書 */}
-              <section className="form-section" id="field-idCardImageUrl">
+              <section className="form-section" id="field-idCardImageFront">
                 <h2 className="section-title"><span className="section-badge">3</span>身分証明書アップロード</h2>
                 <p className="section-desc">運転免許証やマイナンバーカード等、現住所が確認できる身分証明書を撮影してアップロードしてください。</p>
-                <input 
-                  type="file" 
-                  accept="image/*" 
-                  onChange={handleImageChange}
-                  className={`file-input ${errors.idCardImageUrl ? 'input-error' : ''}`}
-                />
-                {errors.idCardImageUrl && <span className="error-msg" style={{marginBottom: '10px'}}>{errors.idCardImageUrl}</span>}
-                {idCardImageUrl && (
-                  <div className="preview-container">
-                    <img src={idCardImageUrl} alt="身分証プレビュー" className="preview-image" />
-                  </div>
-                )}
+                
+                <div style={{marginBottom: '20px'}}>
+                  <label style={{display: 'block', fontWeight: 'bold', marginBottom: '8px'}}>表面</label>
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={(e) => handleImageChange(e, 'front')}
+                    className={`file-input ${errors.idCardImageFront ? 'input-error' : ''}`}
+                  />
+                  {errors.idCardImageFront && <span className="error-msg" style={{marginBottom: '10px'}}>{errors.idCardImageFront}</span>}
+                  {idCardImageFront && (
+                    <div className="preview-container">
+                      <img src={idCardImageFront} alt="身分証表面プレビュー" className="preview-image" />
+                    </div>
+                  )}
+                </div>
+
+                <div style={{marginBottom: '20px'}}>
+                  <label style={{display: 'block', fontWeight: 'bold', marginBottom: '8px'}}>裏面</label>
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={(e) => handleImageChange(e, 'back')}
+                    className="file-input"
+                  />
+                  {idCardImageBack && (
+                    <div className="preview-container">
+                      <img src={idCardImageBack} alt="身分証裏面プレビュー" className="preview-image" />
+                    </div>
+                  )}
+                </div>
+
+                <div style={{marginTop: '16px', padding: '16px', backgroundColor: '#fee2e2', borderRadius: '8px', border: '1px solid #fca5a5'}}>
+                  <p style={{color: '#dc2626', fontWeight: 'bold', fontSize: '0.9rem', margin: '0 0 12px 0'}}>
+                    ※文字が読み取れない場合、受付ができない（再提出となる）場合があります。
+                  </p>
+                  <label id="field-isImageLegible" style={{display: 'flex', alignItems: 'flex-start', gap: '8px', cursor: 'pointer', fontSize: '0.9rem', color: '#1f2937'}}>
+                    <input 
+                      type="checkbox" 
+                      checked={isImageLegible}
+                      onChange={(e) => setIsImageLegible(e.target.checked)}
+                      style={{marginTop: '3px', width: '18px', height: '18px'}}
+                    />
+                    <span style={{fontWeight: 'bold'}}>文字がはっきりと読み取れることを確認しました</span>
+                  </label>
+                  {errors.isImageLegible && <span className="error-msg" style={{marginTop: '8px', display: 'block'}}>{errors.isImageLegible}</span>}
+                </div>
               </section>
             </>
           )}

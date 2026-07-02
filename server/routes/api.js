@@ -547,7 +547,7 @@ router.get('/user/:uid', async (req, res) => {
         agreements: {
           orderBy: { agreedAt: 'desc' },
           take: 1,
-          select: { idCardImageUrl: true }
+          select: { idCardImageFront: true, idCardImageBack: true }
         }
       }
     });
@@ -561,7 +561,7 @@ router.get('/user/:uid', async (req, res) => {
 // Submit Agreement
 router.post('/agreement', async (req, res) => {
   try {
-    const { queueId, userId, userInfo, idCardImageUrl, signatureData, isAgreedToTerms, isInvoiceRegistered } = req.body;
+    const { queueId, userId, userInfo, idCardImageFront, idCardImageBack, signatureData, isAgreedToTerms, isInvoiceRegistered } = req.body;
 
     if (!queueId || !userId) {
       return res.status(400).json({ error: 'Missing required fields' });
@@ -590,7 +590,8 @@ router.post('/agreement', async (req, res) => {
     const agreement = await prisma.agreement.upsert({
       where: { queueId: queueId },
       update: {
-        idCardImageUrl,
+        idCardImageFront,
+        idCardImageBack,
         signatureData,
         isAgreedToTerms,
         isInvoiceRegistered
@@ -598,7 +599,8 @@ router.post('/agreement', async (req, res) => {
       create: {
         queueId,
         userId,
-        idCardImageUrl,
+        idCardImageFront,
+        idCardImageBack,
         signatureData,
         isAgreedToTerms,
         isInvoiceRegistered

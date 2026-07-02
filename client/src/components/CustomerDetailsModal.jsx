@@ -142,15 +142,27 @@ function CustomerDetailsModal({ queueId, onClose }) {
                 <h3>本人確認画像・署名</h3>
                 <div className="image-grid">
                   <div className="image-box">
-                    <span className="label">身分証画像</span>
-                    {agreement?.idCardImageUrl ? (
+                    <span className="label">身分証（表面）</span>
+                    {agreement?.idCardImageFront ? (
                       <img 
-                        src={agreement.idCardImageUrl} 
-                        alt="身分証" 
-                        onClick={() => setFullscreenImage(agreement.idCardImageUrl)}
+                        src={agreement.idCardImageFront} 
+                        alt="身分証表面" 
+                        onClick={() => setFullscreenImage(agreement.idCardImageFront)}
                       />
                     ) : (
                       <div className="no-image">未提出</div>
+                    )}
+                  </div>
+                  <div className="image-box">
+                    <span className="label">身分証（裏面）</span>
+                    {agreement?.idCardImageBack ? (
+                      <img 
+                        src={agreement.idCardImageBack} 
+                        alt="身分証裏面" 
+                        onClick={() => setFullscreenImage(agreement.idCardImageBack)}
+                      />
+                    ) : (
+                      <div className="no-image">裏面画像なし</div>
                     )}
                   </div>
                   <div className="image-box">

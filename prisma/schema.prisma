@@ -47,7 +47,8 @@ model Agreement {
   queue               Queue    @relation(fields: [queueId], references: [id])
   userId              String
   user                User     @relation(fields: [userId], references: [lineUid])
-  idCardImageUrl      String?
+  idCardImageFront    String?
+  idCardImageBack     String?
   signatureData       String?  @db.Text
   agreedAt            DateTime @default(now())
   isInvoiceRegistered Boolean  @default(false)
