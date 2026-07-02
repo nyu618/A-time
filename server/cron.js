@@ -30,28 +30,7 @@ if (lineConfig.channelAccessToken && lineConfig.channelSecret && lineConfig.chan
 }
 
 function startCron() {
-  // Run every minute
-  cron.schedule('* * * * *', async () => {
-    try {
-      const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
-      
-      const expiredQueues = await prisma.queue.findMany({
-        where: {
-          status: 'CALLED',
-          calledAt: { lte: thirtyMinutesAgo }
-        }
-      });
-
-      for (const q of expiredQueues) {
-        const newQueue = await handleCancelAndRequeue(prisma, lineClient, q.id);
-        if (newQueue) {
-          console.log(`Auto-cancelled and requeued queue ${q.id} to ${newQueue.id} due to timeout.`);
-        }
-      }
-    } catch (error) {
-      console.error('Error in cron job:', error);
-    }
-  });
+  // 時間による自動キャンセル機能は廃止されました
 }
 
 module.exports = { startCron };

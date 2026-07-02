@@ -236,7 +236,7 @@ router.post('/admin/queue/:id/call', async (req, res) => {
           notificationDisabled: false,
           messages: [{
             type: 'text',
-            text: `【2.ご来店依頼】\n受付番号(整理券番号)『${queueItem.dailyNumber}番』のお客様、順番が近づきました。ご来店をお願いいたします。\n${deadlineStr} までに店にお戻りいただき、スタッフへ「受付番号(整理券番号)」をお伝えください。\n\n[${formatDateJp(queueItem.targetDate)}]`
+            text: `【2.ご来店依頼】\n受付番号(整理券番号)『${queueItem.dailyNumber}番』のお客様、順番が近づきました。ご来店をお願いいたします。\n早めにお戻りいただき、スタッフへ「受付番号(整理券番号)」をお伝えください。\n\n[${formatDateJp(queueItem.targetDate)}]`
           }]
         });
       } catch (err) {
@@ -337,7 +337,7 @@ router.post('/admin/queue/:id/post-assess-call', async (req, res) => {
           notificationDisabled: false,
           messages: [{
             type: 'text',
-            text: `【5.査定完了 ご来店依頼】\n受付番号(整理券番号)『${queue.dailyNumber}番』のお客様、お待たせいたしました。査定が完了いたしましたので、ご来店をお願いいたします。\n${deadlineStr} までに店にお戻りいただき、スタッフへお声がけいただき「受付番号(整理券番号)」をお伝えください。\n\n[${formatDateJp(queue.targetDate)}]`
+            text: `【5.査定完了 ご来店依頼】\n受付番号(整理券番号)『${queue.dailyNumber}番』のお客様、お待たせいたしました。査定が完了いたしましたので、ご来店をお願いいたします。\n早めにお戻りいただき、スタッフへお声がけいただき「受付番号(整理券番号)」をお伝えください。\n\n[${formatDateJp(queue.targetDate)}]`
           }]
         });
       } catch (err) {

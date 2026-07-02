@@ -43,7 +43,7 @@ async function callNextWaitingUser(prisma, lineClient, targetDate, excludeQueueI
           notificationDisabled: false,
           messages: [{
               type: 'text',
-              text: `【2.ご来店依頼】\n順番が来ましたので店舗へお越しください。\n${deadlineStr} までに店にお戻りいただき、スタッフへ「受付番号(整理券番号)」をお伝えください。\n\n[${formatDateJp(nextQueue.targetDate)}]`
+              text: `【2.ご来店依頼】\n順番が来ましたので店舗へお越しください。\n早めにお戻りいただき、スタッフへ「受付番号(整理券番号)」をお伝えください。\n\n[${formatDateJp(nextQueue.targetDate)}]`
             }]
           });
         } catch (err) {
