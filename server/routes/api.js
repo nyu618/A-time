@@ -716,8 +716,8 @@ router.get('/admin/agreements/csv', async (req, res) => {
         escapeCsv(a.isAgreedToTerms ? '同意済' : '未同意'),
         escapeCsv(a.agreedAt ? new Date(a.agreedAt).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }) : ''),
         escapeCsv(q.transferAmount ? `${q.transferAmount}円` : ''),
-        escapeCsv('□'),
         escapeCsv(''),
+        escapeCsv('                    '),
         escapeCsv(q.dailyNumber)
       ];
       csvContent += row.join(',') + '\n';
