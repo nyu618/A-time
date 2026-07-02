@@ -12,9 +12,15 @@ export default function AdminView() {
   const todayStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   const [selectedDate, setSelectedDate] = useState(todayStr);
 
-  const [completeModalOpen, setCompleteModalOpen] = useState(false);
-  const [completeTargetId, setCompleteTargetId] = useState(null);
+  const [modalState, setModalState] = useState({
+    isOpen: false,
+    type: null, // 'confirm' or 'complete'
+    id: null,
+    action: null,
+    message: ''
+  });
   const [transferAmount, setTransferAmount] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const fetchQueues = async (date) => {
     try {
@@ -48,37 +54,42 @@ export default function AdminView() {
   };
 
   const handleAction = async (id, action) => {
-    if (action === 'complete') {
-      setCompleteTargetId(id);
-      setTransferAmount('');
-      setCompleteModalOpen(true);
-      return;
-    }
     const message = actionMessages[action] || "本当にこの処理を実行しますか？";
-    if (!window.confirm(message)) return;
-    try {
-      await fetch(`/api/admin/queue/${id}/${action}`, { method: 'POST' });
-      fetchQueues(selectedDate);
-    } catch (err) {
-      console.error(err);
+    setErrorMessage('');
+    if (action === 'complete') {
+      setTransferAmount('');
+      setModalState({ isOpen: true, type: 'complete', id, action, message });
+    } else {
+      setModalState({ isOpen: true, type: 'confirm', id, action, message });
     }
   };
 
-  const submitComplete = async () => {
-    if (!transferAmount.trim()) {
-      alert('振込金額を入力してください。');
-      return;
-    }
-    try {
-      await fetch(`/api/admin/queue/${completeTargetId}/complete`, { 
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ transferAmount })
-      });
-      setCompleteModalOpen(false);
-      fetchQueues(selectedDate);
-    } catch (err) {
-      console.error(err);
+  const submitAction = async () => {
+    const { id, action, type } = modalState;
+    if (type === 'complete') {
+      if (!transferAmount.trim()) {
+        setErrorMessage('振込金額を入力してください。');
+        return;
+      }
+      try {
+        await fetch(`/api/admin/queue/${id}/complete`, { 
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ transferAmount })
+        });
+        setModalState({ ...modalState, isOpen: false });
+        fetchQueues(selectedDate);
+      } catch (err) {
+        console.error(err);
+      }
+    } else {
+      try {
+        await fetch(`/api/admin/queue/${id}/${action}`, { method: 'POST' });
+        setModalState({ ...modalState, isOpen: false });
+        fetchQueues(selectedDate);
+      } catch (err) {
+        console.error(err);
+      }
     }
   };
 
@@ -330,8 +341,8 @@ export default function AdminView() {
         <CustomerDetailsModal queueId={selectedQueueId} onClose={() => setSelectedQueueId(null)} />
       )}
 
-      {/* Complete Action Modal */}
-      {completeModalOpen && (
+      {/* Unified Action Modal */}
+      {modalState.isOpen && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
           backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', 
@@ -342,25 +353,40 @@ export default function AdminView() {
             width: '90%', maxWidth: '400px', color: 'white',
             boxShadow: '0 10px 25px rgba(0,0,0,0.5)'
           }}>
-            <h3 style={{marginTop: 0, marginBottom: '16px', fontSize: '1.25rem', fontWeight: 'bold'}}>本当に対応完了しますか？</h3>
-            <div style={{marginBottom: '20px'}}>
-              <label style={{display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: '#9ca3af'}}>振込金額（必須）</label>
-              <input 
-                type="number"
-                min="0"
-                value={transferAmount}
-                onChange={(e) => setTransferAmount(e.target.value.replace(/[^0-9]/g, ''))}
-                placeholder="例: 15000"
-                style={{
-                  width: '100%', padding: '10px', borderRadius: '6px', 
-                  border: '1px solid #4b5563', background: '#374151', color: 'white',
-                  fontSize: '1rem', boxSizing: 'border-box'
-                }}
-              />
-            </div>
+            <h3 style={{marginTop: 0, marginBottom: '16px', fontSize: '1.25rem', fontWeight: 'bold'}}>
+              {modalState.message}
+            </h3>
+            
+            {modalState.type === 'complete' && (
+              <div style={{marginBottom: '20px'}}>
+                <label style={{display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: '#9ca3af'}}>振込金額（必須）</label>
+                <input 
+                  type="number"
+                  min="0"
+                  value={transferAmount}
+                  onChange={(e) => {
+                    setTransferAmount(e.target.value.replace(/[^0-9]/g, ''));
+                    setErrorMessage('');
+                  }}
+                  placeholder="例: 15000"
+                  style={{
+                    width: '100%', padding: '10px', borderRadius: '6px', 
+                    border: '1px solid #4b5563', background: '#374151', color: 'white',
+                    fontSize: '1rem', boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+            )}
+
+            {errorMessage && (
+              <div style={{color: '#ef4444', marginBottom: '16px', fontSize: '0.9rem', fontWeight: 'bold'}}>
+                {errorMessage}
+              </div>
+            )}
+
             <div style={{display: 'flex', gap: '12px', justifyContent: 'flex-end'}}>
               <button 
-                onClick={() => setCompleteModalOpen(false)}
+                onClick={() => setModalState({ ...modalState, isOpen: false })}
                 style={{
                   padding: '8px 16px', borderRadius: '6px', border: 'none',
                   background: '#4b5563', color: 'white', cursor: 'pointer',
@@ -369,13 +395,13 @@ export default function AdminView() {
                 キャンセル
               </button>
               <button 
-                onClick={submitComplete}
+                onClick={submitAction}
                 style={{
                   padding: '8px 16px', borderRadius: '6px', border: 'none',
                   background: '#10b981', color: 'white', cursor: 'pointer',
                   fontWeight: '500'
                 }}>
-                OK（完了）
+                {modalState.type === 'complete' ? '完了して送信する' : '実行する'}
               </button>
             </div>
           </div>
