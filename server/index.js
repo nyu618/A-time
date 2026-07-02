@@ -52,6 +52,24 @@ if (process.env.NODE_ENV === 'production') {
 // Start Cron job
 startCron();
 
-app.listen(PORT, () => {
+const { PrismaClient } = require('@prisma/client');
+const { PrismaPg } = require('@prisma/adapter-pg');
+const { Pool } = require('pg');
+
+const connectionString = process.env.DATABASE_URL || "postgresql://dummy:dummy@localhost:5432/dummy";
+const pool = new Pool({ connectionString });
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
+
+app.listen(PORT, async () => {
   console.log(`Server is running on port ${PORT}`);
+  try {
+    const queueCount = await prisma.queue.count();
+    console.log(`[DEBUG] Total queues in database on startup: ${queueCount}`);
+    const todayStr = new Date().toISOString().split('T')[0];
+    const todayCount = await prisma.queue.count({ where: { targetDate: todayStr } });
+    console.log(`[DEBUG] Queues for today (${todayStr}): ${todayCount}`);
+  } catch (error) {
+    console.error("[DEBUG] Failed to count queues:", error);
+  }
 });

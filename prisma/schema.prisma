@@ -35,9 +35,10 @@ model Queue {
   targetDate  String     @default("") // e.g. "2023-10-01"
   dailyNumber Int        @default(0)
   cancelCount Int        @default(0)
-  createdAt   DateTime   @default(now())
-  calledAt    DateTime?
-  agreement   Agreement?
+  createdAt      DateTime   @default(now())
+  calledAt       DateTime?
+  agreement      Agreement?
+  transferAmount String?
 }
 
 model Agreement {

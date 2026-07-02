@@ -12,6 +12,10 @@ export default function AdminView() {
   const todayStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   const [selectedDate, setSelectedDate] = useState(todayStr);
 
+  const [completeModalOpen, setCompleteModalOpen] = useState(false);
+  const [completeTargetId, setCompleteTargetId] = useState(null);
+  const [transferAmount, setTransferAmount] = useState('');
+
   const fetchQueues = async (date) => {
     try {
       const res = await fetch(`/api/admin/queue?date=${date}`);
@@ -44,10 +48,34 @@ export default function AdminView() {
   };
 
   const handleAction = async (id, action) => {
+    if (action === 'complete') {
+      setCompleteTargetId(id);
+      setTransferAmount('');
+      setCompleteModalOpen(true);
+      return;
+    }
     const message = actionMessages[action] || "本当にこの処理を実行しますか？";
     if (!window.confirm(message)) return;
     try {
       await fetch(`/api/admin/queue/${id}/${action}`, { method: 'POST' });
+      fetchQueues(selectedDate);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const submitComplete = async () => {
+    if (!transferAmount.trim()) {
+      alert('振込金額を入力してください。');
+      return;
+    }
+    try {
+      await fetch(`/api/admin/queue/${completeTargetId}/complete`, { 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ transferAmount })
+      });
+      setCompleteModalOpen(false);
       fetchQueues(selectedDate);
     } catch (err) {
       console.error(err);
@@ -300,6 +328,57 @@ export default function AdminView() {
       )}
       {selectedQueueId && (
         <CustomerDetailsModal queueId={selectedQueueId} onClose={() => setSelectedQueueId(null)} />
+      )}
+
+      {/* Complete Action Modal */}
+      {completeModalOpen && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
+          backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', 
+          justifyContent: 'center', alignItems: 'center', zIndex: 1000
+        }}>
+          <div style={{
+            background: '#1f2937', padding: '24px', borderRadius: '12px', 
+            width: '90%', maxWidth: '400px', color: 'white',
+            boxShadow: '0 10px 25px rgba(0,0,0,0.5)'
+          }}>
+            <h3 style={{marginTop: 0, marginBottom: '16px', fontSize: '1.25rem', fontWeight: 'bold'}}>本当に対応完了しますか？</h3>
+            <div style={{marginBottom: '20px'}}>
+              <label style={{display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: '#9ca3af'}}>振込金額（必須）</label>
+              <input 
+                type="text" 
+                value={transferAmount}
+                onChange={(e) => setTransferAmount(e.target.value)}
+                placeholder="例: 15,000円"
+                style={{
+                  width: '100%', padding: '10px', borderRadius: '6px', 
+                  border: '1px solid #4b5563', background: '#374151', color: 'white',
+                  fontSize: '1rem', boxSizing: 'border-box'
+                }}
+              />
+            </div>
+            <div style={{display: 'flex', gap: '12px', justifyContent: 'flex-end'}}>
+              <button 
+                onClick={() => setCompleteModalOpen(false)}
+                style={{
+                  padding: '8px 16px', borderRadius: '6px', border: 'none',
+                  background: '#4b5563', color: 'white', cursor: 'pointer',
+                  fontWeight: '500'
+                }}>
+                キャンセル
+              </button>
+              <button 
+                onClick={submitComplete}
+                style={{
+                  padding: '8px 16px', borderRadius: '6px', border: 'none',
+                  background: '#10b981', color: 'white', cursor: 'pointer',
+                  fontWeight: '500'
+                }}>
+                OK（完了）
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

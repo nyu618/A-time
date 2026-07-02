@@ -378,6 +378,7 @@ router.post('/admin/queue/:id/assess-done', async (req, res) => {
 router.post('/admin/queue/:id/complete', async (req, res) => {
   try {
     const { id } = req.params;
+    const { transferAmount } = req.body;
     
     // First find the queue to get the user
     const queue = await prisma.queue.findUnique({ where: { id: parseInt(id) } });
@@ -385,7 +386,10 @@ router.post('/admin/queue/:id/complete', async (req, res) => {
 
     const queueItem = await prisma.queue.update({
       where: { id: parseInt(id) },
-      data: { status: 'COMPLETED' }
+      data: { 
+        status: 'COMPLETED',
+        transferAmount: transferAmount || null
+      }
     });
 
     // Increment user visit count
@@ -401,7 +405,7 @@ router.post('/admin/queue/:id/complete', async (req, res) => {
           notificationDisabled: false,
           messages: [{
             type: 'text',
-            text: `ご利用ありがとうございました！またのお越しをお待ちしております！`
+            text: `本日はご利用ありがとうございました！\n振込金額は${transferAmount || '未定'}になります。\n3営業日以内に指定の口座にお振込いたします。\nまたのお越しをお待ちしております！`
           }]
         });
       } catch (err) {
