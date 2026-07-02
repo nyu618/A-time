@@ -405,7 +405,7 @@ router.post('/admin/queue/:id/complete', async (req, res) => {
           notificationDisabled: false,
           messages: [{
             type: 'text',
-            text: `本日はご利用ありがとうございました！\n振込金額は${transferAmount || '未定'}になります。\n3営業日以内に指定の口座にお振込いたします。\nまたのお越しをお待ちしております！`
+            text: `本日はご利用ありがとうございました！\n振込金額は${transferAmount || '未定'}円になります。\n3営業日以内に指定の口座にお振込いたします。\nまたのお越しをお待ちしております！`
           }]
         });
       } catch (err) {

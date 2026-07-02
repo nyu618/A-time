@@ -346,10 +346,11 @@ export default function AdminView() {
             <div style={{marginBottom: '20px'}}>
               <label style={{display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: '#9ca3af'}}>振込金額（必須）</label>
               <input 
-                type="text" 
+                type="number"
+                min="0"
                 value={transferAmount}
-                onChange={(e) => setTransferAmount(e.target.value)}
-                placeholder="例: 15,000円"
+                onChange={(e) => setTransferAmount(e.target.value.replace(/[^0-9]/g, ''))}
+                placeholder="例: 15000"
                 style={{
                   width: '100%', padding: '10px', borderRadius: '6px', 
                   border: '1px solid #4b5563', background: '#374151', color: 'white',
