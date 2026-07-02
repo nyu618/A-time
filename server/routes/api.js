@@ -405,7 +405,7 @@ router.post('/admin/queue/:id/complete', async (req, res) => {
           notificationDisabled: false,
           messages: [{
             type: 'text',
-            text: `本日はご利用ありがとうございました！\n振込金額は${transferAmount || '未定'}円になります。\n3営業日以内に指定の口座にお振込いたします。\nまたのお越しをお待ちしております！`
+            text: `本日はご利用ありがとうございました！\n振込金額は${transferAmount || '未定'}円になります。\nできる限り即日、遅くても3営業日以内に指定の口座にお振込いたします。\nまたのお越しをお待ちしております！\n\nA-time川崎駅前店(株式会社エースタイル)`
           }]
         });
       } catch (err) {
