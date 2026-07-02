@@ -681,7 +681,8 @@ router.get('/admin/agreements/csv', async (req, res) => {
     // CSV Header
     const headers = [
       '受付番号', 'ステータス', '本名', 'フリガナ', '生年月日', '電話番号', '郵便番号', '住所', '職業', 
-      '銀行名', '支店名', '口座種類', '口座番号', '口座名義', '同意フラグ', '同意日時'
+      '銀行名', '支店名', '口座種類', '口座番号', '口座名義', '同意フラグ', '同意日時',
+      '振込金額', '振込済み', '振込日', '受付番号'
     ];
     
     // BOM for Excel
@@ -713,7 +714,11 @@ router.get('/admin/agreements/csv', async (req, res) => {
         escapeCsv(u.accountNumber),
         escapeCsv(u.accountName),
         escapeCsv(a.isAgreedToTerms ? '同意済' : '未同意'),
-        escapeCsv(a.agreedAt ? new Date(a.agreedAt).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }) : '')
+        escapeCsv(a.agreedAt ? new Date(a.agreedAt).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }) : ''),
+        escapeCsv(q.transferAmount ? `${q.transferAmount}円` : ''),
+        escapeCsv('□'),
+        escapeCsv(''),
+        escapeCsv(q.dailyNumber)
       ];
       csvContent += row.join(',') + '\n';
     }
