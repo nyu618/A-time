@@ -657,11 +657,10 @@ router.get('/admin/agreements/csv', async (req, res) => {
   try {
     const dateStr = req.query.date || new Date().toISOString().split('T')[0];
     
-    // Find all queues with agreements for the specified date
+    // Find all queues for the specified date (regardless of agreement submission)
     const queues = await prisma.queue.findMany({
       where: {
-        targetDate: dateStr,
-        agreement: { isNot: null }
+        targetDate: dateStr
       },
       include: {
         user: true,
@@ -672,7 +671,7 @@ router.get('/admin/agreements/csv', async (req, res) => {
 
     // CSV Header
     const headers = [
-      '受付番号', 'ステータス', '本名', 'フリガナ', '生年月日', '電話番号', '郵便番号', '住所', '職業', 
+      '受付番号', 'LINE名', '受付時間', 'ステータス', '本名', 'フリガナ', '生年月日', '電話番号', '郵便番号', '住所', '職業', 
       '銀行名', '支店名', '口座種類', '口座番号', '口座名義', '同意フラグ', '同意日時',
       '振込金額', '振込済み', '振込日', '受付番号'
     ];
@@ -685,13 +684,20 @@ router.get('/admin/agreements/csv', async (req, res) => {
       const a = q.agreement || {};
       
       const escapeCsv = (str) => {
-        if (str === null || str === undefined) return '""';
+        if (str === null || str === undefined || str === '') return '""';
         const s = String(str);
         return '"' + s.replace(/"/g, '""') + '"';
       };
 
+      const formatTime = (dateStr) => {
+        if (!dateStr) return '';
+        return new Date(dateStr).toLocaleTimeString('ja-JP', { timeZone: 'Asia/Tokyo', hour: '2-digit', minute:'2-digit' });
+      };
+
       const row = [
         escapeCsv(q.dailyNumber),
+        escapeCsv(q.displayName || u.displayName),
+        escapeCsv(formatTime(q.createdAt)),
         escapeCsv(q.status),
         escapeCsv(u.fullName),
         escapeCsv(u.fullNameKana),
@@ -705,8 +711,8 @@ router.get('/admin/agreements/csv', async (req, res) => {
         escapeCsv(u.accountType),
         escapeCsv(u.accountNumber),
         escapeCsv(u.accountName),
-        escapeCsv(a.isAgreedToTerms ? '同意済' : '未同意'),
-        escapeCsv(a.agreedAt ? new Date(a.agreedAt).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }) : ''),
+        escapeCsv(a.id ? (a.isAgreedToTerms ? '同意済' : '未同意') : '未提出'),
+        escapeCsv(a.id ? (a.agreedAt ? new Date(a.agreedAt).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }) : '') : 'フォーム未提出（スキップ）'),
         escapeCsv(q.transferAmount ? `${q.transferAmount}円` : ''),
         escapeCsv(''),
         escapeCsv('                    '),
