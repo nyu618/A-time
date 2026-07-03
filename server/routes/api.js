@@ -41,18 +41,8 @@ router.post('/webhook', async (req, res) => {
     if (events && events.length > 0) {
       for (const event of events) {
         if (event.type === 'follow') {
-          const liffUrl = `https://liff.line.me/${process.env.VITE_LIFF_ID || "2010494802-asj2kOFe"}`;
-          const msg = `受付予約はこちらからお願いします：\n${liffUrl}`;
-          
-          if (lineClient) {
-            await lineClient.replyMessage({
-              replyToken: event.replyToken,
-              messages: [{
-                type: 'text',
-                text: msg
-              }]
-            });
-          }
+          // No action needed on follow to avoid duplicate messages.
+          // The welcome message is sent via /send-entry-message when they scan the QR code.
         }
       }
     }
