@@ -226,10 +226,7 @@ export default function AgreementView() {
         }
       }
 
-      if (formData.fullNameKana && !/^[ァ-ヶー\s]+$/.test(formData.fullNameKana)) {
-        newErrors.fullNameKana = 'フリガナは全角カタカナで入力してください。';
-        if (!firstErrorField) firstErrorField = 'fullNameKana';
-      }
+      // Removed fullNameKana regex validation to allow foreign languages
       if (formData.phoneNumber && !/^[0-9]+$/.test(formData.phoneNumber)) {
         newErrors.phoneNumber = '電話番号は半角数字で入力してください（ハイフンなし）。';
         if (!firstErrorField) firstErrorField = 'phoneNumber';
@@ -242,8 +239,8 @@ export default function AgreementView() {
         newErrors.accountNumber = '口座番号は半角数字で入力してください。';
         if (!firstErrorField) firstErrorField = 'accountNumber';
       }
-      if (formData.accountName && !/^[ァ-ヶー\s]+$/.test(formData.accountName)) {
-        newErrors.accountName = '口座名義は全角カタカナで入力してください。';
+      if (formData.accountName && !/^[A-Z0-9A-Z０-９ァ-ヶー\uFF65-\uFF9F\s]+$/.test(formData.accountName)) {
+        newErrors.accountName = '※口座名義はカタカナまたはアルファベットで入力してください / Please enter in Katakana or Alphabet';
         if (!firstErrorField) firstErrorField = 'accountName';
       }
 
@@ -460,8 +457,8 @@ export default function AgreementView() {
                   {errors.accountNumber && <span className="error-msg">{errors.accountNumber}</span>}
                 </div>
                 <div className="form-group" id="field-accountName">
-                  <label>口座名義（カタカナ） <span className="required-mark">*</span></label>
-                  <input required type="text" name="accountName" value={formData.accountName} onChange={handleChange} className={`form-control ${errors.accountName ? 'input-error' : ''}`} placeholder="ヤマダ タロウ" />
+                  <label>口座名義（カタカナ or Alphabet） <span className="required-mark">*</span></label>
+                  <input required type="text" name="accountName" value={formData.accountName} onChange={handleChange} className={`form-control ${errors.accountName ? 'input-error' : ''}`} placeholder="ヤマダ タロウ / JOHN DOE" />
                   {errors.accountName && <span className="error-msg">{errors.accountName}</span>}
                 </div>
               </section>
