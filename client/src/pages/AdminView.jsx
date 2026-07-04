@@ -50,7 +50,8 @@ export default function AdminView() {
     complete: '本当に対応完了にしますか？',
     cancel: '本当にキャンセルしますか？',
     rollback: '本当に一つ前の状態に戻しますか？',
-    'post-assess-call': '本当に査定完了呼出にしますか？'
+    'post-assess-call': '本当に査定完了呼出にしますか？',
+    'finalize-transfer': '本当に振込完了にしますか？'
   };
 
   const handleAction = async (id, action) => {
@@ -98,7 +99,7 @@ export default function AdminView() {
   };
 
   const pendingQueues = queues.filter(q => q.status === 'PENDING');
-  const activeQueues = queues.filter(q => q.status === 'WAITING' || q.status === 'CALLED' || q.status === 'IN_STORE' || q.status === 'ASSESSING' || q.status === 'POST_ASSESS_CALL');
+  const activeQueues = queues.filter(q => q.status === 'WAITING' || q.status === 'CALLED' || q.status === 'IN_STORE' || q.status === 'ASSESSING' || q.status === 'POST_ASSESS_CALL' || q.status === 'AWAITING_TRANSFER');
   const historyQueues = queues.filter(q => q.status === 'COMPLETED' || q.status === 'CANCELED');
 
   const queuesWaiting = queues.filter(q => q.status === 'WAITING');
@@ -106,6 +107,7 @@ export default function AdminView() {
   const queuesInStore = queues.filter(q => q.status === 'IN_STORE');
   const queuesAssessing = queues.filter(q => q.status === 'ASSESSING');
   const queuesPostAssessCall = queues.filter(q => q.status === 'POST_ASSESS_CALL');
+  const queuesAwaitingTransfer = queues.filter(q => q.status === 'AWAITING_TRANSFER');
 
   const renderQueueItem = (q) => (
     <div key={q.id} className={`queue-item ${q.status.toLowerCase()}`}>
@@ -175,6 +177,14 @@ export default function AdminView() {
             </button>
           </>
         )}
+        {q.status === 'AWAITING_TRANSFER' && (
+          <>
+            <button className="action-btn arrive" onClick={() => handleAction(q.id, 'finalize-transfer')} title="振込完了" style={{backgroundColor: '#10b981', color: 'white'}}>
+              <UserCheck size={18} />
+              <span>振込完了</span>
+            </button>
+          </>
+        )}
         <button className="action-btn" onClick={() => handleAction(q.id, 'rollback')} title="戻る" style={{backgroundColor: '#9ca3af', color: 'white'}}>
           <Undo2 size={18} />
           <span>戻る</span>
@@ -216,6 +226,7 @@ export default function AdminView() {
           <span className="stat-badge" style={{backgroundColor: '#bae6fd', color: '#0369a1'}}>4.呼出後店内待機: {activeQueues.filter(q => q.status === 'IN_STORE').length}</span>
           <span className="stat-badge" style={{backgroundColor: '#ffedd5', color: '#c2410c'}}>5.査定受付呼出: {activeQueues.filter(q => q.status === 'ASSESSING').length}</span>
           <span className="stat-badge" style={{backgroundColor: '#fce7f3', color: '#be185d'}}>6.査定完了呼出中: {activeQueues.filter(q => q.status === 'POST_ASSESS_CALL').length}</span>
+          <span className="stat-badge" style={{backgroundColor: '#e0e7ff', color: '#4338ca'}}>7.振込み手続き待ち: {activeQueues.filter(q => q.status === 'AWAITING_TRANSFER').length}</span>
         </div>
       </header>
 
@@ -295,6 +306,13 @@ export default function AdminView() {
               <h3 style={{ marginTop: 0, color: '#be185d', borderBottom: '1px solid #fbcfe8', paddingBottom: '8px' }}>6.査定完了呼出中 ({queuesPostAssessCall.length}名)</h3>
               <div className="queue-list" style={{ marginTop: '10px' }}>
                 {queuesPostAssessCall.length === 0 ? <p className="empty-state" style={{margin:0, padding:'10px'}}>現在このステータスのお客様はいません。</p> : queuesPostAssessCall.map(renderQueueItem)}
+              </div>
+            </div>
+
+            <div className="status-block" style={{ borderLeft: '4px solid #4f46e5', paddingLeft: '10px', marginBottom: '20px', backgroundColor: '#eef2ff', padding: '15px', borderRadius: '8px' }}>
+              <h3 style={{ marginTop: 0, color: '#4338ca', borderBottom: '1px solid #c7d2fe', paddingBottom: '8px' }}>7.振込み手続き待ち ({queuesAwaitingTransfer.length}名)</h3>
+              <div className="queue-list" style={{ marginTop: '10px' }}>
+                {queuesAwaitingTransfer.length === 0 ? <p className="empty-state" style={{margin:0, padding:'10px'}}>現在このステータスのお客様はいません。</p> : queuesAwaitingTransfer.map(renderQueueItem)}
               </div>
             </div>
 

@@ -111,7 +111,8 @@ export default function UserView() {
                queueStatus.status === 'IN_STORE' ? '4.呼出後店内待機' : 
                queueStatus.status === 'ASSESSING' ? '5.査定受付呼出' : 
                queueStatus.status === 'POST_ASSESS_CALL' ? '6.査定完了呼出中' : 
-               '受付完了'}
+               queueStatus.status === 'AWAITING_TRANSFER' ? '7.振込み手続き待ち' : 
+               '対応完了'}
             </h2>
             <div className="queue-number">
               <span className="label">お客様の受付番号(整理券番号)</span>

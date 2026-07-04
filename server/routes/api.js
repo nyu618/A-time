@@ -377,7 +377,7 @@ router.post('/admin/queue/:id/complete', async (req, res) => {
     const queueItem = await prisma.queue.update({
       where: { id: parseInt(id) },
       data: { 
-        status: 'COMPLETED',
+        status: 'AWAITING_TRANSFER',
         transferAmount: transferAmount || null
       }
     });
@@ -405,6 +405,26 @@ router.post('/admin/queue/:id/complete', async (req, res) => {
 
     // Auto-call next waiting user
     await callNextWaitingUser(prisma, lineClient, queue.targetDate);
+
+    res.json(queueItem);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Admin: Mark as COMPLETED (振込完了)
+router.post('/admin/queue/:id/finalize-transfer', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const queue = await prisma.queue.findUnique({ where: { id: parseInt(id) } });
+    if (!queue) return res.status(404).json({ error: 'Not found' });
+
+    const queueItem = await prisma.queue.update({
+      where: { id: parseInt(id) },
+      data: { status: 'COMPLETED' }
+    });
 
     res.json(queueItem);
   } catch (error) {
@@ -698,7 +718,7 @@ router.get('/admin/agreements/csv', async (req, res) => {
         escapeCsv(q.dailyNumber),
         escapeCsv(q.displayName || u.displayName),
         escapeCsv(formatTime(q.createdAt)),
-        escapeCsv(q.status),
+        escapeCsv(q.status === 'AWAITING_TRANSFER' ? '振り込み手続き待ち' : q.status === 'COMPLETED' ? '振込完了' : q.status),
         escapeCsv(u.fullName),
         escapeCsv(u.fullNameKana),
         escapeCsv(u.birthDate),
