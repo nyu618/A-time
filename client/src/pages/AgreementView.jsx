@@ -240,7 +240,7 @@ export default function AgreementView() {
         if (!firstErrorField) firstErrorField = 'accountNumber';
       }
       if (formData.accountName && !/^[A-Z0-9A-Z０-９ァ-ヶー\uFF65-\uFF9F\s]+$/.test(formData.accountName)) {
-        newErrors.accountName = '※口座名義はカタカナまたはアルファベットで入力してください / Please enter in Katakana or Alphabet';
+        newErrors.accountName = '※口座名義はカタカナまたは大文字のアルファベットで入力してください / Please enter in Katakana or Uppercase Alphabet';
         if (!firstErrorField) firstErrorField = 'accountName';
       }
 
@@ -457,7 +457,7 @@ export default function AgreementView() {
                   {errors.accountNumber && <span className="error-msg">{errors.accountNumber}</span>}
                 </div>
                 <div className="form-group" id="field-accountName">
-                  <label>口座名義<span className="en-label">/ Account Name (Katakana or Alphabet only)</span> <span className="required-mark">*</span></label>
+                  <label>口座名義<span className="en-label">/ Account Name (Katakana or Uppercase Alphabet only)</span> <span className="required-mark">*</span></label>
                   <input required type="text" name="accountName" value={formData.accountName} onChange={handleChange} className={`form-control ${errors.accountName ? 'input-error' : ''}`} placeholder="ヤマダ タロウ / JOHN DOE" />
                   {errors.accountName && <span className="error-msg">{errors.accountName}</span>}
                 </div>
