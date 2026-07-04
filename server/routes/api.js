@@ -702,6 +702,18 @@ router.get('/admin/agreements/csv', async (req, res) => {
     // BOM for Excel
     let csvContent = '\uFEFF' + headers.join(',') + '\n';
 
+    const statusMap = {
+      'PENDING': '承認待ちリスト',
+      'WAITING': '整理券発行済',
+      'CALLED': '受付後呼出中',
+      'IN_STORE': '呼出後店内待機',
+      'ASSESSING': '査定受付呼出',
+      'POST_ASSESS_CALL': '査定完了呼出中',
+      'AWAITING_TRANSFER': '振込み手続き待ち',
+      'COMPLETED': '振込完了',
+      'CANCELED': 'キャンセル'
+    };
+
     for (const q of queues) {
       const u = q.user || {};
       const a = q.agreement || {};
@@ -721,7 +733,7 @@ router.get('/admin/agreements/csv', async (req, res) => {
         escapeCsv(q.dailyNumber),
         escapeCsv(q.displayName || u.displayName),
         escapeCsv(formatTime(q.createdAt)),
-        escapeCsv(q.status === 'AWAITING_TRANSFER' ? '振り込み手続き待ち' : q.status === 'COMPLETED' ? '振込完了' : q.status),
+        escapeCsv(statusMap[q.status] || q.status),
         escapeCsv(u.fullName),
         escapeCsv(u.fullNameKana),
         escapeCsv(u.birthDate),
