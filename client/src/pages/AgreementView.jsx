@@ -383,37 +383,37 @@ export default function AgreementView() {
                 <h2 className="section-title"><span className="section-badge">1</span>お客様情報</h2>
                 
                 <div className="form-group" id="field-fullName">
-                  <label>お名前（本名） <span className="required-mark">*</span></label>
+                  <label>お名前（本名）<span className="en-label">/ Full Name</span> <span className="required-mark">*</span></label>
                   <input required type="text" name="fullName" value={formData.fullName} onChange={handleChange} className={`form-control ${errors.fullName ? 'input-error' : ''}`} placeholder="山田 太郎" />
                   {errors.fullName && <span className="error-msg">{errors.fullName}</span>}
                 </div>
                 <div className="form-group" id="field-fullNameKana">
-                  <label>フリガナ <span className="required-mark">*</span></label>
+                  <label>フリガナ<span className="en-label">/ Phonetic Name (Kana/Alphabet)</span> <span className="required-mark">*</span></label>
                   <input required type="text" name="fullNameKana" value={formData.fullNameKana} onChange={handleChange} className={`form-control ${errors.fullNameKana ? 'input-error' : ''}`} placeholder="ヤマダ タロウ" />
                   {errors.fullNameKana && <span className="error-msg">{errors.fullNameKana}</span>}
                 </div>
                 <div className="form-group" id="field-birthDate">
-                  <label>生年月日 <span className="required-mark">*</span></label>
+                  <label>生年月日<span className="en-label">/ Date of Birth</span> <span className="required-mark">*</span></label>
                   <input required type="date" name="birthDate" value={formData.birthDate} onChange={handleChange} className={`form-control ${errors.birthDate ? 'input-error' : ''}`} />
                   {errors.birthDate && <span className="error-msg">{errors.birthDate}</span>}
                 </div>
                 <div className="form-group" id="field-phoneNumber">
-                  <label>電話番号 <span className="required-mark">*</span></label>
+                  <label>電話番号<span className="en-label">/ Phone Number</span> <span className="required-mark">*</span></label>
                   <input required type="tel" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} className={`form-control ${errors.phoneNumber ? 'input-error' : ''}`} placeholder="09012345678" />
                   {errors.phoneNumber && <span className="error-msg">{errors.phoneNumber}</span>}
                 </div>
                 <div className="form-group" id="field-postalCode">
-                  <label>郵便番号 <span className="required-mark">*</span></label>
+                  <label>郵便番号<span className="en-label">/ Postal Code</span> <span className="required-mark">*</span></label>
                   <input required type="text" name="postalCode" value={formData.postalCode} onChange={handleChange} className={`form-control ${errors.postalCode ? 'input-error' : ''}`} placeholder="1234567" />
                   {errors.postalCode && <span className="error-msg">{errors.postalCode}</span>}
                 </div>
                 <div className="form-group" id="field-address">
-                  <label>ご住所 <span className="required-mark">*</span></label>
+                  <label>ご住所<span className="en-label">/ Address</span> <span className="required-mark">*</span></label>
                   <input required type="text" name="address" value={formData.address} onChange={handleChange} className={`form-control ${errors.address ? 'input-error' : ''}`} placeholder="東京都渋谷区..." />
                   {errors.address && <span className="error-msg">{errors.address}</span>}
                 </div>
                 <div className="form-group" id="field-occupation">
-                  <label>ご職業 <span className="required-mark">*</span></label>
+                  <label>ご職業<span className="en-label">/ Occupation</span> <span className="required-mark">*</span></label>
                   <select required name="occupation" value={formData.occupation} onChange={handleChange} className={`form-control ${errors.occupation ? 'input-error' : ''}`}>
                     <option value="">選択してください</option>
                     <option value="会社員">会社員</option>
@@ -433,17 +433,17 @@ export default function AgreementView() {
                 <p className="section-desc">買取金額のお振込先をご入力ください。</p>
                 
                 <div className="form-group" id="field-bankName">
-                  <label>銀行名 <span className="required-mark">*</span></label>
+                  <label>銀行名<span className="en-label">/ Bank Name</span> <span className="required-mark">*</span></label>
                   <input required type="text" name="bankName" value={formData.bankName} onChange={handleChange} className={`form-control ${errors.bankName ? 'input-error' : ''}`} placeholder="〇〇銀行" />
                   {errors.bankName && <span className="error-msg">{errors.bankName}</span>}
                 </div>
                 <div className="form-group" id="field-branchName">
-                  <label>支店名 <span className="required-mark">*</span></label>
+                  <label>支店名<span className="en-label">/ Branch Name</span> <span className="required-mark">*</span></label>
                   <input required type="text" name="branchName" value={formData.branchName} onChange={handleChange} className={`form-control ${errors.branchName ? 'input-error' : ''}`} placeholder="〇〇支店" />
                   {errors.branchName && <span className="error-msg">{errors.branchName}</span>}
                 </div>
                 <div className="form-group" id="field-accountType">
-                  <label>口座種類 <span className="required-mark">*</span></label>
+                  <label>口座種類<span className="en-label">/ Account Type</span> <span className="required-mark">*</span></label>
                   <select required name="accountType" value={formData.accountType} onChange={handleChange} className={`form-control ${errors.accountType ? 'input-error' : ''}`}>
                     <option value="普通">普通</option>
                     <option value="当座">当座</option>
@@ -452,12 +452,12 @@ export default function AgreementView() {
                   {errors.accountType && <span className="error-msg">{errors.accountType}</span>}
                 </div>
                 <div className="form-group" id="field-accountNumber">
-                  <label>口座番号 <span className="required-mark">*</span></label>
+                  <label>口座番号<span className="en-label">/ Account Number</span> <span className="required-mark">*</span></label>
                   <input required type="text" name="accountNumber" value={formData.accountNumber} onChange={handleChange} className={`form-control ${errors.accountNumber ? 'input-error' : ''}`} placeholder="1234567" />
                   {errors.accountNumber && <span className="error-msg">{errors.accountNumber}</span>}
                 </div>
                 <div className="form-group" id="field-accountName">
-                  <label>口座名義（カタカナ or Alphabet） <span className="required-mark">*</span></label>
+                  <label>口座名義<span className="en-label">/ Account Name (Katakana or Alphabet only)</span> <span className="required-mark">*</span></label>
                   <input required type="text" name="accountName" value={formData.accountName} onChange={handleChange} className={`form-control ${errors.accountName ? 'input-error' : ''}`} placeholder="ヤマダ タロウ / JOHN DOE" />
                   {errors.accountName && <span className="error-msg">{errors.accountName}</span>}
                 </div>
@@ -469,7 +469,7 @@ export default function AgreementView() {
                 <p className="section-desc">運転免許証やマイナンバーカード等、現住所が確認できる身分証明書を撮影してアップロードしてください。</p>
                 
                 <div style={{marginBottom: '20px'}}>
-                  <label style={{display: 'block', fontWeight: 'bold', marginBottom: '8px'}}>表面</label>
+                  <label style={{display: 'block', fontWeight: 'bold', marginBottom: '8px'}}>表面 <span className="en-label" style={{fontWeight: 'normal'}}>/ Front</span></label>
                   <input 
                     type="file" 
                     accept="image/*" 
@@ -485,7 +485,7 @@ export default function AgreementView() {
                 </div>
 
                 <div style={{marginBottom: '20px'}}>
-                  <label style={{display: 'block', fontWeight: 'bold', marginBottom: '8px'}}>裏面</label>
+                  <label style={{display: 'block', fontWeight: 'bold', marginBottom: '8px'}}>裏面 <span className="en-label" style={{fontWeight: 'normal'}}>/ Back (Optional)</span></label>
                   <input 
                     type="file" 
                     accept="image/*" 
@@ -501,7 +501,8 @@ export default function AgreementView() {
 
                 <div style={{marginTop: '16px', padding: '16px', backgroundColor: '#fee2e2', borderRadius: '8px', border: '1px solid #fca5a5'}}>
                   <p style={{color: '#dc2626', fontWeight: 'bold', fontSize: '0.9rem', margin: '0 0 12px 0'}}>
-                    ※文字が読み取れない場合、受付ができない（再提出となる）場合があります。
+                    ※文字が読み取れない場合、受付ができない（再提出となる）場合があります。<br/>
+                    <span style={{fontSize: '0.8rem', fontWeight: 'normal'}}>*If the text is unreadable due to glare or blur, you will need to resubmit.</span>
                   </p>
                   <label id="field-isImageLegible" style={{display: 'flex', alignItems: 'flex-start', gap: '8px', cursor: 'pointer', fontSize: '0.9rem', color: '#1f2937'}}>
                     <input 
@@ -510,7 +511,9 @@ export default function AgreementView() {
                       onChange={(e) => setIsImageLegible(e.target.checked)}
                       style={{marginTop: '3px', width: '18px', height: '18px'}}
                     />
-                    <span style={{fontWeight: 'bold'}}>文字がはっきりと読み取れることを確認しました</span>
+                    <span style={{fontWeight: 'bold'}}>文字がはっきりと読み取れることを確認しました<br/>
+                      <span style={{fontSize: '0.8rem', color: '#6b7280', fontWeight: 'normal'}}>I confirm the text is clearly readable</span>
+                    </span>
                   </label>
                   {errors.isImageLegible && <span className="error-msg" style={{marginTop: '8px', display: 'block'}}>{errors.isImageLegible}</span>}
                 </div>
@@ -544,7 +547,10 @@ export default function AgreementView() {
                   onChange={(e) => setIsAgreedToTerms(e.target.checked)}
                   className="checkbox-input" 
                 />
-                <span className="checkbox-text">上記の免責事項をすべて確認し、同意します。</span>
+                <span className="checkbox-text">
+                  上記の免責事項をすべて確認し、同意します。<br/>
+                  <span style={{fontSize: '0.8rem', color: '#6b7280', marginTop: '4px', display: 'block'}}>I have read and agree to all the terms and conditions above.</span>
+                </span>
               </label>
             </div>
           </section>
@@ -586,7 +592,7 @@ export default function AgreementView() {
               disabled={submitting}
               className="submit-btn"
             >
-              {submitting ? '送信中...' : '買取申込を送信する'}
+              {submitting ? '送信中... / Submitting...' : '買取申込を送信する / Submit'}
             </button>
             <p className="submit-hint">送信ボタンを押すと受付完了となります。</p>
           </div>

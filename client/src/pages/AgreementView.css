@@ -423,3 +423,10 @@
 select.form-control {
   appearance: auto;
 }
+
+.en-label {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-left: 0.5rem;
+  font-weight: normal;
+}
