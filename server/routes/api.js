@@ -488,8 +488,11 @@ router.post('/admin/queue/:id/rollback', async (req, res) => {
       case 'POST_ASSESS_CALL':
         newStatus = 'ASSESSING';
         break;
-      case 'COMPLETED':
+      case 'AWAITING_TRANSFER':
         newStatus = 'POST_ASSESS_CALL';
+        break;
+      case 'COMPLETED':
+        newStatus = 'AWAITING_TRANSFER';
         break;
       case 'CANCELED':
         // Check if there is an active duplicate for this user
@@ -497,7 +500,7 @@ router.post('/admin/queue/:id/rollback', async (req, res) => {
           where: {
             lineUserId: queue.lineUserId,
             targetDate: queue.targetDate,
-            status: { in: ['PENDING', 'WAITING', 'CALLED', 'IN_STORE', 'ASSESSING', 'POST_ASSESS_CALL'] },
+            status: { in: ['PENDING', 'WAITING', 'CALLED', 'IN_STORE', 'ASSESSING', 'POST_ASSESS_CALL', 'AWAITING_TRANSFER'] },
             id: { not: queue.id }
           }
         });
