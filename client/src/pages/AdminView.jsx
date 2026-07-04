@@ -319,7 +319,7 @@ export default function AdminView() {
           </section>
 
           <section className="queue-section" style={{ marginTop: '40px' }}>
-            <h2>対応完了・履歴リスト</h2>
+            <h2>履歴リスト</h2>
             <div className="queue-list">
               {historyQueues.length === 0 ? (
                 <p className="empty-state">履歴はありません。</p>
