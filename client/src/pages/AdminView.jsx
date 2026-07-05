@@ -360,7 +360,7 @@ export default function AdminView() {
           queueId={selectedQueueId} 
           onClose={() => {
             setSelectedQueueId(null);
-            fetchQueues();
+            fetchQueues(selectedDate);
           }} 
         />
       )}
