@@ -207,7 +207,7 @@ export default function AdminView() {
     <div className="admin-container">
       <header className="admin-header">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h1>順番待ち管理パネル</h1>
+          <h1>受付管理システム</h1>
           <button 
             onClick={handleDownloadCsv}
             style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#6b7280', color: 'white', padding: '6px 12px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontSize: '0.85rem' }}
