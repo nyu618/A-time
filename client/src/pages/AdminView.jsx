@@ -26,10 +26,16 @@ export default function AdminView() {
     try {
       const res = await fetch(`/api/admin/queue?date=${date}`);
       const data = await res.json();
-      setQueues(data);
+      if (Array.isArray(data)) {
+        setQueues(data);
+      } else {
+        console.error("API returned non-array data:", data);
+        setQueues([]);
+      }
       setLoading(false);
     } catch (err) {
       console.error(err);
+      setQueues([]);
       setLoading(false);
     }
   };
@@ -189,9 +195,9 @@ export default function AdminView() {
           <Undo2 size={18} />
           <span>戻る</span>
         </button>
-        <button className="action-btn" onClick={() => setSelectedQueueId(q.id)} title={q.isCustomerInfoConfirmed ? "確認済" : "申込情報"} style={{backgroundColor: q.isCustomerInfoConfirmed ? '#22c55e' : (q.agreement ? '#0ea5e9' : '#4b5563'), color: 'white'}}>
+        <button className="action-btn" onClick={() => setSelectedQueueId(q.id)} title={q.isCustomerInfoConfirmed ? "申込情報確認済" : "申込情報"} style={{backgroundColor: q.isCustomerInfoConfirmed ? '#22c55e' : (q.agreement ? '#0ea5e9' : '#4b5563'), color: 'white'}}>
           {q.isCustomerInfoConfirmed ? <CheckCircle size={18} /> : <FileText size={18} />}
-          <span>{q.isCustomerInfoConfirmed ? "確認済" : "申込情報"}</span>
+          <span>{q.isCustomerInfoConfirmed ? "申込情報確認済" : "申込情報"}</span>
         </button>
       </div>
     </div>
@@ -260,9 +266,9 @@ export default function AdminView() {
                         <XCircle size={18} />
                         <span>拒否</span>
                       </button>
-                      <button className="action-btn" onClick={() => setSelectedQueueId(q.id)} title={q.isCustomerInfoConfirmed ? "確認済" : "申込情報"} style={{backgroundColor: q.isCustomerInfoConfirmed ? '#22c55e' : (q.agreement ? '#0ea5e9' : '#4b5563'), color: 'white'}}>
+                      <button className="action-btn" onClick={() => setSelectedQueueId(q.id)} title={q.isCustomerInfoConfirmed ? "申込情報確認済" : "申込情報"} style={{backgroundColor: q.isCustomerInfoConfirmed ? '#22c55e' : (q.agreement ? '#0ea5e9' : '#4b5563'), color: 'white'}}>
                         {q.isCustomerInfoConfirmed ? <CheckCircle size={18} /> : <FileText size={18} />}
-                        <span>{q.isCustomerInfoConfirmed ? "確認済" : "申込情報"}</span>
+                        <span>{q.isCustomerInfoConfirmed ? "申込情報確認済" : "申込情報"}</span>
                       </button>
                     </div>
                   </div>
@@ -343,9 +349,9 @@ export default function AdminView() {
                         <Undo2 size={18} />
                         <span>戻る</span>
                       </button>
-                      <button className="action-btn" onClick={() => setSelectedQueueId(q.id)} title={q.isCustomerInfoConfirmed ? "確認済" : "申込情報"} style={{backgroundColor: q.isCustomerInfoConfirmed ? '#22c55e' : (q.agreement ? '#0ea5e9' : '#4b5563'), color: 'white'}}>
+                      <button className="action-btn" onClick={() => setSelectedQueueId(q.id)} title={q.isCustomerInfoConfirmed ? "申込情報確認済" : "申込情報"} style={{backgroundColor: q.isCustomerInfoConfirmed ? '#22c55e' : (q.agreement ? '#0ea5e9' : '#4b5563'), color: 'white'}}>
                         {q.isCustomerInfoConfirmed ? <CheckCircle size={18} /> : <FileText size={18} />}
-                        <span>{q.isCustomerInfoConfirmed ? "確認済" : "申込情報"}</span>
+                        <span>{q.isCustomerInfoConfirmed ? "申込情報確認済" : "申込情報"}</span>
                       </button>
                     </div>
                   </div>
