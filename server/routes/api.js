@@ -241,6 +241,22 @@ router.post('/admin/queue/:id/call', async (req, res) => {
   }
 });
 
+// Admin: Update user memo
+router.put('/admin/user/:lineUid/memo', async (req, res) => {
+  try {
+    const { lineUid } = req.params;
+    const { memo } = req.body;
+    const updatedUser = await prisma.user.update({
+      where: { lineUid },
+      data: { memo }
+    });
+    res.json(updatedUser);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // Admin: Mark as IN_STORE
 router.post('/admin/queue/:id/instore', async (req, res) => {
   try {

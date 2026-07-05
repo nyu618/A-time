@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { UserCheck, PhoneCall, XCircle, Undo2, BellRing, FileDown, FileText, CheckCircle } from 'lucide-react';
+import { UserCheck, PhoneCall, XCircle, Undo2, BellRing, FileDown, FileText, CheckCircle, StickyNote } from 'lucide-react';
 import CustomerDetailsModal from '../components/CustomerDetailsModal';
 
 export default function AdminView() {
@@ -21,6 +21,7 @@ export default function AdminView() {
   });
   const [transferAmount, setTransferAmount] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [memoModal, setMemoModal] = useState({ isOpen: false, lineUid: null, currentMemo: '' });
 
   const fetchQueues = async (date) => {
     try {
@@ -97,6 +98,29 @@ export default function AdminView() {
       } catch (err) {
         console.error(err);
       }
+    }
+  };
+
+  const handleOpenMemo = (user) => {
+    setMemoModal({
+      isOpen: true,
+      lineUid: user.lineUid,
+      currentMemo: user.memo || ''
+    });
+  };
+
+  const handleSaveMemo = async () => {
+    try {
+      await fetch(`/api/admin/user/${memoModal.lineUid}/memo`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ memo: memoModal.currentMemo })
+      });
+      setMemoModal({ isOpen: false, lineUid: null, currentMemo: '' });
+      fetchQueues(selectedDate);
+    } catch (err) {
+      console.error(err);
+      alert('メモの保存に失敗しました');
     }
   };
 
@@ -200,6 +224,12 @@ export default function AdminView() {
           {q.isCustomerInfoConfirmed ? <CheckCircle size={18} /> : <FileText size={18} />}
           <span>{q.isCustomerInfoConfirmed ? "申込情報確認済" : "申込情報"}</span>
         </button>
+        {q.user && (
+          <button className="action-btn" onClick={() => handleOpenMemo(q.user)} title="顧客メモ" style={{backgroundColor: q.user.memo ? '#eab308' : '#6b7280', color: 'white'}}>
+            <StickyNote size={18} />
+            <span>メモ</span>
+          </button>
+        )}
       </div>
     </div>
   );
@@ -271,6 +301,12 @@ export default function AdminView() {
                         {q.isCustomerInfoConfirmed ? <CheckCircle size={18} /> : <FileText size={18} />}
                         <span>{q.isCustomerInfoConfirmed ? "申込情報確認済" : "申込情報"}</span>
                       </button>
+                      {q.user && (
+                        <button className="action-btn" onClick={() => handleOpenMemo(q.user)} title="顧客メモ" style={{backgroundColor: q.user.memo ? '#eab308' : '#6b7280', color: 'white'}}>
+                          <StickyNote size={18} />
+                          <span>メモ</span>
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))
@@ -355,6 +391,12 @@ export default function AdminView() {
                         {q.isCustomerInfoConfirmed ? <CheckCircle size={18} /> : <FileText size={18} />}
                         <span>{q.isCustomerInfoConfirmed ? "申込情報確認済" : "申込情報"}</span>
                       </button>
+                      {q.user && (
+                        <button className="action-btn" onClick={() => handleOpenMemo(q.user)} title="顧客メモ" style={{backgroundColor: q.user.memo ? '#eab308' : '#6b7280', color: 'white'}}>
+                          <StickyNote size={18} />
+                          <span>メモ</span>
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))
@@ -434,6 +476,61 @@ export default function AdminView() {
                   fontWeight: '500'
                 }}>
                 {modalState.type === 'complete' ? '完了して送信する' : '実行する'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Memo Modal */}
+      {memoModal.isOpen && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
+          background: 'rgba(0,0,0,0.6)', display: 'flex', 
+          justifyContent: 'center', alignItems: 'center', zIndex: 9999
+        }}>
+          <div style={{
+            background: '#ffffff', padding: '24px', borderRadius: '12px', 
+            width: '90%', maxWidth: '500px', color: '#1f2937',
+            boxShadow: '0 10px 25px rgba(0,0,0,0.2)'
+          }}>
+            <h3 style={{marginTop: 0, marginBottom: '16px', fontSize: '1.25rem', fontWeight: 'bold', color: '#111827', display: 'flex', alignItems: 'center', gap: '8px'}}>
+              <StickyNote size={20} color="#eab308" />
+              お客様メモの入力
+            </h3>
+            
+            <div style={{marginBottom: '20px'}}>
+              <textarea 
+                value={memoModal.currentMemo}
+                onChange={(e) => setMemoModal({ ...memoModal, currentMemo: e.target.value })}
+                placeholder="お客様に関する情報を自由に入力してください..."
+                rows={6}
+                style={{
+                  width: '100%', padding: '12px', borderRadius: '6px', 
+                  border: '1px solid #d1d5db', background: '#f9fafb', color: '#1f2937',
+                  fontSize: '1rem', boxSizing: 'border-box', resize: 'vertical'
+                }}
+              />
+            </div>
+
+            <div style={{display: 'flex', gap: '12px', justifyContent: 'flex-end'}}>
+              <button 
+                onClick={() => setMemoModal({ isOpen: false, lineUid: null, currentMemo: '' })}
+                style={{
+                  padding: '8px 16px', borderRadius: '6px', border: 'none',
+                  background: '#6b7280', color: 'white', cursor: 'pointer',
+                  fontWeight: '500'
+                }}>
+                キャンセル（閉じる）
+              </button>
+              <button 
+                onClick={handleSaveMemo}
+                style={{
+                  padding: '8px 16px', borderRadius: '6px', border: 'none',
+                  background: '#eab308', color: 'white', cursor: 'pointer',
+                  fontWeight: '500'
+                }}>
+                保存する
               </button>
             </div>
           </div>
