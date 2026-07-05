@@ -121,7 +121,7 @@ export default function AdminView() {
         <span className="q-number">#{q.dailyNumber}</span>
         <span className="q-name">{q.displayName || '名無しゲスト'}</span>
         {q.user && <span className="q-visit-count" style={{fontSize: '0.8rem', backgroundColor: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.3)', padding: '2px 8px', borderRadius: '12px', marginLeft: '10px', fontWeight: '500', letterSpacing: '0.5px'}}>来店: {q.user.visitCount}回目</span>}
-        {q.transferAmount ? <span className="q-transfer-amount" style={{fontSize: '0.8rem', backgroundColor: 'rgba(16, 185, 129, 0.15)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)', padding: '2px 8px', borderRadius: '12px', marginLeft: '10px', fontWeight: '500', letterSpacing: '0.5px'}}>振込金額: {Number(q.transferAmount).toLocaleString()}円</span> : null}
+        {(q.transferAmount && q.status === 'AWAITING_TRANSFER') ? <span className="q-transfer-amount" style={{fontSize: '0.8rem', backgroundColor: 'rgba(16, 185, 129, 0.15)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)', padding: '2px 8px', borderRadius: '12px', marginLeft: '10px', fontWeight: '500', letterSpacing: '0.5px'}}>振込金額: {Number(q.transferAmount).toLocaleString()}円</span> : null}
         {q.cancelCount > 0 && <span className="q-cancel-count" style={{fontSize: '0.8rem', backgroundColor: 'rgba(249, 115, 22, 0.15)', color: '#f97316', border: '1px solid rgba(249, 115, 22, 0.3)', padding: '2px 8px', borderRadius: '12px', marginLeft: '10px', fontWeight: '500'}}>再受付 (キャンセル{q.cancelCount}回)</span>}
         <span className="q-time">{new Date(q.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
       </div>
@@ -253,7 +253,6 @@ export default function AdminView() {
                       <span className="q-number">#{q.dailyNumber}</span>
                       <span className="q-name">{q.displayName || '名無しゲスト'}</span>
                       {q.user && <span className="q-visit-count" style={{fontSize: '0.8rem', backgroundColor: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.3)', padding: '2px 8px', borderRadius: '12px', marginLeft: '10px', fontWeight: '500', letterSpacing: '0.5px'}}>来店: {q.user.visitCount}回目</span>}
-                      {q.transferAmount ? <span className="q-transfer-amount" style={{fontSize: '0.8rem', backgroundColor: 'rgba(16, 185, 129, 0.15)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)', padding: '2px 8px', borderRadius: '12px', marginLeft: '10px', fontWeight: '500', letterSpacing: '0.5px'}}>振込金額: {Number(q.transferAmount).toLocaleString()}円</span> : null}
                       <span className="q-status pending" style={{color: '#ca8a04', fontWeight: 'bold'}}>
                         1.承認待ちリスト
                       </span>
