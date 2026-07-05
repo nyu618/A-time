@@ -129,10 +129,6 @@ export default function UserView() {
                   <span className="label">前に待っている組数</span>
                   <span className="value">{waitCount} 組</span>
                 </div>
-                <div className="info-box">
-                  <span className="label">ご案内目安時間</span>
-                  <span className="value">約 {waitCount * 5} 分</span>
-                </div>
               </div>
             )}
             {queueStatus.status === 'CALLED' && (
