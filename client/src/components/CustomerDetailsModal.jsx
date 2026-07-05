@@ -6,6 +6,8 @@ function CustomerDetailsModal({ queueId, onClose }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [fullscreenImage, setFullscreenImage] = useState(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [isConfirming, setIsConfirming] = useState(false);
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -48,15 +50,40 @@ function CustomerDetailsModal({ queueId, onClose }) {
     );
   }
 
-  const { user, agreement } = data || {};
+  const { user, agreement, isCustomerInfoConfirmed } = data || {};
   const hasAgreement = !!agreement;
+
+  const handleCloseClick = () => {
+    if (!hasAgreement || isCustomerInfoConfirmed) {
+      onClose();
+    } else {
+      setShowConfirmModal(true);
+    }
+  };
+
+  const handleConfirmInfo = async () => {
+    setIsConfirming(true);
+    try {
+      await fetch(`/api/admin/queue/${queueId}/confirm-info`, { method: 'POST' });
+      onClose(); // Parent should refetch on close
+    } catch (err) {
+      console.error(err);
+      alert('エラーが発生しました');
+    } finally {
+      setIsConfirming(false);
+    }
+  };
+
+  const handleJustClose = () => {
+    onClose();
+  };
 
   return (
     <div className="modal-overlay">
       <div className="modal-content">
         <div className="modal-header">
           <h2>承諾情報詳細 (受付番号: {data?.dailyNumber})</h2>
-          <button className="close-icon-btn" onClick={onClose}>&times;</button>
+          <button className="close-icon-btn" onClick={handleCloseClick}>&times;</button>
         </div>
 
         <div className="modal-body">
@@ -186,7 +213,7 @@ function CustomerDetailsModal({ queueId, onClose }) {
         </div>
 
         <div className="modal-footer">
-          <button className="close-btn" onClick={onClose}>閉じる</button>
+          <button className="close-btn" onClick={handleCloseClick}>閉じる</button>
         </div>
       </div>
 
@@ -195,6 +222,33 @@ function CustomerDetailsModal({ queueId, onClose }) {
         <div className="fullscreen-overlay" onClick={() => setFullscreenImage(null)}>
           <button className="close-fullscreen">&times;</button>
           <img src={fullscreenImage} alt="拡大画像" />
+        </div>
+      )}
+
+      {/* Confirmation Modal */}
+      {showConfirmModal && (
+        <div className="modal-overlay" style={{ zIndex: 2000 }}>
+          <div className="modal-content" style={{ maxWidth: '400px', textAlign: 'center', padding: '30px' }}>
+            <h3 style={{ marginTop: 0, marginBottom: '20px', fontSize: '1.2rem', color: '#1f2937' }}>
+              お客様情報の確認を済みにしますか？
+            </h3>
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '20px' }}>
+              <button 
+                onClick={handleJustClose} 
+                style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', backgroundColor: '#9ca3af', color: 'white', cursor: 'pointer', fontWeight: 'bold' }}
+                disabled={isConfirming}
+              >
+                キャンセル
+              </button>
+              <button 
+                onClick={handleConfirmInfo} 
+                style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', backgroundColor: '#22c55e', color: 'white', cursor: 'pointer', fontWeight: 'bold' }}
+                disabled={isConfirming}
+              >
+                {isConfirming ? '処理中...' : 'OK（済みにする）'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -39,6 +39,7 @@ model Queue {
   calledAt       DateTime?
   agreement      Agreement?
   transferAmount String?
+  isCustomerInfoConfirmed Boolean @default(false)
 }
 
 model Agreement {

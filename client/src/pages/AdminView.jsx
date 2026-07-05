@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { UserCheck, PhoneCall, XCircle, Undo2, BellRing, FileDown, FileText } from 'lucide-react';
+import { UserCheck, PhoneCall, XCircle, Undo2, BellRing, FileDown, FileText, CheckCircle } from 'lucide-react';
 import CustomerDetailsModal from '../components/CustomerDetailsModal';
 
 export default function AdminView() {
@@ -189,9 +189,9 @@ export default function AdminView() {
           <Undo2 size={18} />
           <span>戻る</span>
         </button>
-        <button className="action-btn" onClick={() => setSelectedQueueId(q.id)} title="申込情報" style={{backgroundColor: q.agreement ? '#0ea5e9' : '#4b5563', color: 'white'}}>
-          <FileText size={18} />
-          <span>申込情報</span>
+        <button className="action-btn" onClick={() => setSelectedQueueId(q.id)} title={q.isCustomerInfoConfirmed ? "確認済" : "申込情報"} style={{backgroundColor: q.isCustomerInfoConfirmed ? '#22c55e' : (q.agreement ? '#0ea5e9' : '#4b5563'), color: 'white'}}>
+          {q.isCustomerInfoConfirmed ? <CheckCircle size={18} /> : <FileText size={18} />}
+          <span>{q.isCustomerInfoConfirmed ? "確認済" : "申込情報"}</span>
         </button>
       </div>
     </div>
@@ -260,9 +260,9 @@ export default function AdminView() {
                         <XCircle size={18} />
                         <span>拒否</span>
                       </button>
-                      <button className="action-btn" onClick={() => setSelectedQueueId(q.id)} title="申込情報" style={{backgroundColor: q.agreement ? '#0ea5e9' : '#4b5563', color: 'white'}}>
-                        <FileText size={18} />
-                        <span>申込情報</span>
+                      <button className="action-btn" onClick={() => setSelectedQueueId(q.id)} title={q.isCustomerInfoConfirmed ? "確認済" : "申込情報"} style={{backgroundColor: q.isCustomerInfoConfirmed ? '#22c55e' : (q.agreement ? '#0ea5e9' : '#4b5563'), color: 'white'}}>
+                        {q.isCustomerInfoConfirmed ? <CheckCircle size={18} /> : <FileText size={18} />}
+                        <span>{q.isCustomerInfoConfirmed ? "確認済" : "申込情報"}</span>
                       </button>
                     </div>
                   </div>
@@ -343,9 +343,9 @@ export default function AdminView() {
                         <Undo2 size={18} />
                         <span>戻る</span>
                       </button>
-                      <button className="action-btn" onClick={() => setSelectedQueueId(q.id)} title="申込情報" style={{backgroundColor: q.agreement ? '#0ea5e9' : '#4b5563', color: 'white'}}>
-                        <FileText size={18} />
-                        <span>申込情報</span>
+                      <button className="action-btn" onClick={() => setSelectedQueueId(q.id)} title={q.isCustomerInfoConfirmed ? "確認済" : "申込情報"} style={{backgroundColor: q.isCustomerInfoConfirmed ? '#22c55e' : (q.agreement ? '#0ea5e9' : '#4b5563'), color: 'white'}}>
+                        {q.isCustomerInfoConfirmed ? <CheckCircle size={18} /> : <FileText size={18} />}
+                        <span>{q.isCustomerInfoConfirmed ? "確認済" : "申込情報"}</span>
                       </button>
                     </div>
                   </div>
@@ -356,7 +356,13 @@ export default function AdminView() {
         </div>
       )}
       {selectedQueueId && (
-        <CustomerDetailsModal queueId={selectedQueueId} onClose={() => setSelectedQueueId(null)} />
+        <CustomerDetailsModal 
+          queueId={selectedQueueId} 
+          onClose={() => {
+            setSelectedQueueId(null);
+            fetchQueues();
+          }} 
+        />
       )}
 
       {/* Unified Action Modal */}

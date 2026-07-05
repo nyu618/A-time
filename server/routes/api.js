@@ -413,6 +413,26 @@ router.post('/admin/queue/:id/complete', async (req, res) => {
   }
 });
 
+// Admin: Mark customer info as confirmed (申込情報確認済み)
+router.post('/admin/queue/:id/confirm-info', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const queue = await prisma.queue.findUnique({ where: { id: parseInt(id) } });
+    if (!queue) return res.status(404).json({ error: 'Not found' });
+
+    const queueItem = await prisma.queue.update({
+      where: { id: parseInt(id) },
+      data: { isCustomerInfoConfirmed: true }
+    });
+
+    res.json(queueItem);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // Admin: Mark as COMPLETED (振込完了)
 router.post('/admin/queue/:id/finalize-transfer', async (req, res) => {
   try {
