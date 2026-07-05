@@ -503,7 +503,7 @@ export default function AdminView() {
               <textarea 
                 value={memoModal.currentMemo}
                 onChange={(e) => setMemoModal({ ...memoModal, currentMemo: e.target.value })}
-                placeholder="お客様に関する情報を自由に入力してください..."
+                placeholder=""
                 rows={6}
                 style={{
                   width: '100%', padding: '12px', borderRadius: '6px', 
