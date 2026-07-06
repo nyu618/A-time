@@ -22,6 +22,7 @@ export default function AdminView() {
   const [transferAmount, setTransferAmount] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [memoModal, setMemoModal] = useState({ isOpen: false, lineUid: null, currentMemo: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchQueues = async (date) => {
     try {
@@ -73,12 +74,14 @@ export default function AdminView() {
   };
 
   const submitAction = async () => {
+    if (isSubmitting) return;
     const { id, action, type } = modalState;
     if (type === 'complete') {
       if (!transferAmount.trim()) {
         setErrorMessage('振込金額を入力してください。');
         return;
       }
+      setIsSubmitting(true);
       try {
         await fetch(`/api/admin/queue/${id}/complete`, { 
           method: 'POST',
@@ -89,14 +92,19 @@ export default function AdminView() {
         fetchQueues(selectedDate);
       } catch (err) {
         console.error(err);
+      } finally {
+        setIsSubmitting(false);
       }
     } else {
+      setIsSubmitting(true);
       try {
         await fetch(`/api/admin/queue/${id}/${action}`, { method: 'POST' });
         setModalState({ ...modalState, isOpen: false });
         fetchQueues(selectedDate);
       } catch (err) {
         console.error(err);
+      } finally {
+        setIsSubmitting(false);
       }
     }
   };
@@ -470,12 +478,13 @@ export default function AdminView() {
               </button>
               <button 
                 onClick={submitAction}
+                disabled={isSubmitting}
                 style={{
                   padding: '8px 16px', borderRadius: '6px', border: 'none',
-                  background: '#10b981', color: 'white', cursor: 'pointer',
+                  background: isSubmitting ? '#9ca3af' : '#10b981', color: 'white', cursor: isSubmitting ? 'not-allowed' : 'pointer',
                   fontWeight: '500'
                 }}>
-                {modalState.type === 'complete' ? '完了して送信する' : '実行する'}
+                {isSubmitting ? '送信中...' : (modalState.type === 'complete' ? '完了して送信する' : '実行する')}
               </button>
             </div>
           </div>

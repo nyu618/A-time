@@ -390,6 +390,10 @@ router.post('/admin/queue/:id/complete', async (req, res) => {
     const queue = await prisma.queue.findUnique({ where: { id: parseInt(id) } });
     if (!queue) return res.status(404).json({ error: 'Not found' });
 
+    if (queue.status === 'AWAITING_TRANSFER' || queue.status === 'COMPLETED') {
+      return res.status(400).json({ error: 'Already processed' });
+    }
+
     const queueItem = await prisma.queue.update({
       where: { id: parseInt(id) },
       data: { 
