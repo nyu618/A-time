@@ -261,7 +261,7 @@ export default function AdminView() {
           <span className="stat-badge" style={{backgroundColor: '#d1fae5', color: '#047857'}}>2.整理券発行済: {activeQueues.filter(q => q.status === 'WAITING').length}</span>
           <span className="stat-badge" style={{backgroundColor: '#fef3c7', color: '#b45309'}}>3.受付後呼出中: {activeQueues.filter(q => q.status === 'CALLED').length}</span>
           <span className="stat-badge" style={{backgroundColor: '#bae6fd', color: '#0369a1'}}>4.呼出後店内待機: {activeQueues.filter(q => q.status === 'IN_STORE').length}</span>
-          <span className="stat-badge" style={{backgroundColor: '#ffedd5', color: '#c2410c'}}>5.査定受付呼出: {activeQueues.filter(q => q.status === 'ASSESSING').length}</span>
+          <span className="stat-badge" style={{backgroundColor: '#ffedd5', color: '#c2410c'}}>5.査定受付呼出[査定中]: {activeQueues.filter(q => q.status === 'ASSESSING').length}</span>
           <span className="stat-badge" style={{backgroundColor: '#fce7f3', color: '#be185d'}}>6.査定完了呼出中: {activeQueues.filter(q => q.status === 'POST_ASSESS_CALL').length}</span>
           <span className="stat-badge" style={{backgroundColor: '#e0e7ff', color: '#4338ca'}}>7.振込み手続き待ち: {activeQueues.filter(q => q.status === 'AWAITING_TRANSFER').length}</span>
         </div>
@@ -339,7 +339,7 @@ export default function AdminView() {
             </div>
 
             <div className="status-block" style={{ borderLeft: '4px solid #ea580c', paddingLeft: '10px', marginBottom: '20px', backgroundColor: '#fff7ed', padding: '15px', borderRadius: '8px' }}>
-              <h3 style={{ marginTop: 0, color: '#c2410c', borderBottom: '1px solid #fed7aa', paddingBottom: '8px' }}>5.査定受付呼出 ({queuesAssessing.length}名)</h3>
+              <h3 style={{ marginTop: 0, color: '#c2410c', borderBottom: '1px solid #fed7aa', paddingBottom: '8px' }}>5.査定受付呼出[査定中] ({queuesAssessing.length}名)</h3>
               <div className="queue-list" style={{ marginTop: '10px' }}>
                 {queuesAssessing.length === 0 ? <p className="empty-state" style={{margin:0, padding:'10px'}}>現在このステータスのお客様はいません。</p> : queuesAssessing.map(renderQueueItem)}
               </div>
