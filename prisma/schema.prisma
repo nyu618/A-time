@@ -41,6 +41,7 @@ model Queue {
   agreement      Agreement?
   transferAmount String?
   isCustomerInfoConfirmed Boolean @default(false)
+  paperSignatureImage     String?
 }
 
 model Agreement {

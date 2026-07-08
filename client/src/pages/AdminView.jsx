@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { UserCheck, PhoneCall, XCircle, Undo2, BellRing, FileDown, FileText, CheckCircle, StickyNote } from 'lucide-react';
+import { UserCheck, PhoneCall, XCircle, Undo2, BellRing, FileDown, FileText, CheckCircle, StickyNote, Camera, CheckSquare } from 'lucide-react';
 import CustomerDetailsModal from '../components/CustomerDetailsModal';
 
 export default function AdminView() {
@@ -22,6 +22,7 @@ export default function AdminView() {
   const [transferAmount, setTransferAmount] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [memoModal, setMemoModal] = useState({ isOpen: false, lineUid: null, currentMemo: '' });
+  const [signatureModal, setSignatureModal] = useState({ isOpen: false, queueId: null, imageData: null });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchQueues = async (date) => {
@@ -118,6 +119,8 @@ export default function AdminView() {
   };
 
   const handleSaveMemo = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     try {
       await fetch(`/api/admin/user/${memoModal.lineUid}/memo`, {
         method: 'PUT',
@@ -129,6 +132,70 @@ export default function AdminView() {
     } catch (err) {
       console.error(err);
       alert('メモの保存に失敗しました');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const compressImage = (file) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 800;
+          const MAX_HEIGHT = 800;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', 0.7));
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleSignatureFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const base64 = await compressImage(file);
+      setSignatureModal(prev => ({ ...prev, imageData: base64 }));
+    }
+  };
+
+  const handleSaveSignature = async () => {
+    if (!signatureModal.imageData) return;
+    setIsSubmitting(true);
+    try {
+      await fetch(`/api/admin/queue/${signatureModal.queueId}/paper-signature`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: signatureModal.imageData })
+      });
+      setSignatureModal({ isOpen: false, queueId: null, imageData: null });
+      fetchQueues(selectedDate);
+    } catch (err) {
+      console.error(err);
+      alert('保存に失敗しました');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -232,6 +299,15 @@ export default function AdminView() {
           {q.isCustomerInfoConfirmed ? <CheckCircle size={18} /> : <FileText size={18} />}
           <span>{q.isCustomerInfoConfirmed ? "申込情報確認済" : "申込情報"}</span>
         </button>
+        <button 
+          className="action-btn" 
+          onClick={() => setSignatureModal({ isOpen: true, queueId: q.id, imageData: null })} 
+          title="紙サイン画像" 
+          style={{backgroundColor: q.paperSignatureImage ? '#22c55e' : '#4b5563', color: 'white'}}
+        >
+          {q.paperSignatureImage ? <CheckSquare size={18} /> : <Camera size={18} />}
+          <span>サイン</span>
+        </button>
         {q.user && (
           <button className="action-btn" onClick={() => handleOpenMemo(q.user)} title="顧客メモ" style={{backgroundColor: q.user.memo ? '#eab308' : '#6b7280', color: 'white'}}>
             <StickyNote size={18} />
@@ -308,6 +384,15 @@ export default function AdminView() {
                       <button className="action-btn" onClick={() => setSelectedQueueId(q.id)} title={q.isCustomerInfoConfirmed ? "申込情報確認済" : "申込情報"} style={{backgroundColor: q.isCustomerInfoConfirmed ? '#22c55e' : (q.agreement ? '#0ea5e9' : '#4b5563'), color: 'white'}}>
                         {q.isCustomerInfoConfirmed ? <CheckCircle size={18} /> : <FileText size={18} />}
                         <span>{q.isCustomerInfoConfirmed ? "申込情報確認済" : "申込情報"}</span>
+                      </button>
+                      <button 
+                        className="action-btn" 
+                        onClick={() => setSignatureModal({ isOpen: true, queueId: q.id, imageData: null })} 
+                        title="紙サイン画像" 
+                        style={{backgroundColor: q.paperSignatureImage ? '#22c55e' : '#4b5563', color: 'white'}}
+                      >
+                        {q.paperSignatureImage ? <CheckSquare size={18} /> : <Camera size={18} />}
+                        <span>サイン</span>
                       </button>
                       {q.user && (
                         <button className="action-btn" onClick={() => handleOpenMemo(q.user)} title="顧客メモ" style={{backgroundColor: q.user.memo ? '#eab308' : '#6b7280', color: 'white'}}>
@@ -398,6 +483,15 @@ export default function AdminView() {
                       <button className="action-btn" onClick={() => setSelectedQueueId(q.id)} title={q.isCustomerInfoConfirmed ? "申込情報確認済" : "申込情報"} style={{backgroundColor: q.isCustomerInfoConfirmed ? '#22c55e' : (q.agreement ? '#0ea5e9' : '#4b5563'), color: 'white'}}>
                         {q.isCustomerInfoConfirmed ? <CheckCircle size={18} /> : <FileText size={18} />}
                         <span>{q.isCustomerInfoConfirmed ? "申込情報確認済" : "申込情報"}</span>
+                      </button>
+                      <button 
+                        className="action-btn" 
+                        onClick={() => setSignatureModal({ isOpen: true, queueId: q.id, imageData: null })} 
+                        title="紙サイン画像" 
+                        style={{backgroundColor: q.paperSignatureImage ? '#22c55e' : '#4b5563', color: 'white'}}
+                      >
+                        {q.paperSignatureImage ? <CheckSquare size={18} /> : <Camera size={18} />}
+                        <span>サイン</span>
                       </button>
                       {q.user && (
                         <button className="action-btn" onClick={() => handleOpenMemo(q.user)} title="顧客メモ" style={{backgroundColor: q.user.memo ? '#eab308' : '#6b7280', color: 'white'}}>
@@ -540,6 +634,69 @@ export default function AdminView() {
                   fontWeight: '500'
                 }}>
                 保存する
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Signature Modal */}
+      {signatureModal.isOpen && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
+          background: 'rgba(0,0,0,0.6)', display: 'flex', 
+          justifyContent: 'center', alignItems: 'center', zIndex: 9999
+        }}>
+          <div style={{
+            background: '#ffffff', padding: '24px', borderRadius: '12px', 
+            width: '90%', maxWidth: '500px', color: '#1f2937',
+            boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
+            maxHeight: '90vh', overflowY: 'auto'
+          }}>
+            <h3 style={{marginTop: 0, marginBottom: '16px', fontSize: '1.25rem', fontWeight: 'bold', color: '#111827', display: 'flex', alignItems: 'center', gap: '8px'}}>
+              <Camera size={20} color="#0ea5e9" />
+              紙サイン画像のアップロード
+            </h3>
+            
+            <div style={{marginBottom: '20px'}}>
+              <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>カメラで撮影または画像を選択</label>
+              <input 
+                type="file" 
+                accept="image/*" 
+                capture="environment"
+                onChange={handleSignatureFileChange}
+                style={{
+                  width: '100%', padding: '12px', borderRadius: '6px', 
+                  border: '1px solid #d1d5db', background: '#f9fafb', color: '#1f2937'
+                }}
+              />
+              {signatureModal.imageData && (
+                <div style={{marginTop: '16px', textAlign: 'center'}}>
+                  <p style={{margin: '0 0 8px 0', fontSize: '0.9rem', color: '#4b5563'}}>プレビュー:</p>
+                  <img src={signatureModal.imageData} alt="サインプレビュー" style={{maxWidth: '100%', maxHeight: '250px', border: '1px solid #e5e7eb', borderRadius: '8px'}} />
+                </div>
+              )}
+            </div>
+
+            <div style={{display: 'flex', gap: '12px', justifyContent: 'flex-end'}}>
+              <button 
+                onClick={() => setSignatureModal({ isOpen: false, queueId: null, imageData: null })}
+                style={{
+                  padding: '8px 16px', borderRadius: '6px', border: 'none',
+                  background: '#6b7280', color: 'white', cursor: 'pointer',
+                  fontWeight: '500'
+                }}>
+                キャンセル（閉じる）
+              </button>
+              <button 
+                onClick={handleSaveSignature}
+                disabled={isSubmitting || !signatureModal.imageData}
+                style={{
+                  padding: '8px 16px', borderRadius: '6px', border: 'none',
+                  background: (isSubmitting || !signatureModal.imageData) ? '#9ca3af' : '#22c55e', color: 'white', cursor: (isSubmitting || !signatureModal.imageData) ? 'not-allowed' : 'pointer',
+                  fontWeight: '500'
+                }}>
+                {isSubmitting ? '保存中...' : 'アップロードして保存'}
               </button>
             </div>
           </div>

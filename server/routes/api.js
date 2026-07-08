@@ -257,6 +257,22 @@ router.put('/admin/user/:lineUid/memo', async (req, res) => {
   }
 });
 
+// Admin: Update queue paper signature
+router.put('/admin/queue/:id/paper-signature', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { image } = req.body;
+    const updatedQueue = await prisma.queue.update({
+      where: { id: parseInt(id) },
+      data: { paperSignatureImage: image }
+    });
+    res.json(updatedQueue);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // Admin: Mark as IN_STORE
 router.post('/admin/queue/:id/instore', async (req, res) => {
   try {
