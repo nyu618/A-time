@@ -22,7 +22,7 @@ export default function AdminView() {
   const [transferAmount, setTransferAmount] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [memoModal, setMemoModal] = useState({ isOpen: false, lineUid: null, currentMemo: '' });
-  const [signatureModal, setSignatureModal] = useState({ isOpen: false, queueId: null, imageData: null });
+  const [signatureModal, setSignatureModal] = useState({ isOpen: false, queueId: null, imageData: null, isEditing: false });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchQueues = async (date) => {
@@ -301,7 +301,7 @@ export default function AdminView() {
         </button>
         <button 
           className="action-btn" 
-          onClick={() => setSignatureModal({ isOpen: true, queueId: q.id, imageData: null })} 
+          onClick={() => setSignatureModal({ isOpen: true, queueId: q.id, imageData: q.paperSignatureImage || null, isEditing: !q.paperSignatureImage })} 
           title="紙サイン画像" 
           style={{backgroundColor: q.paperSignatureImage ? '#22c55e' : '#4b5563', color: 'white'}}
         >
@@ -387,7 +387,7 @@ export default function AdminView() {
                       </button>
                       <button 
                         className="action-btn" 
-                        onClick={() => setSignatureModal({ isOpen: true, queueId: q.id, imageData: null })} 
+                        onClick={() => setSignatureModal({ isOpen: true, queueId: q.id, imageData: q.paperSignatureImage || null, isEditing: !q.paperSignatureImage })} 
                         title="紙サイン画像" 
                         style={{backgroundColor: q.paperSignatureImage ? '#22c55e' : '#4b5563', color: 'white'}}
                       >
@@ -486,7 +486,7 @@ export default function AdminView() {
                       </button>
                       <button 
                         className="action-btn" 
-                        onClick={() => setSignatureModal({ isOpen: true, queueId: q.id, imageData: null })} 
+                        onClick={() => setSignatureModal({ isOpen: true, queueId: q.id, imageData: q.paperSignatureImage || null, isEditing: !q.paperSignatureImage })} 
                         title="紙サイン画像" 
                         style={{backgroundColor: q.paperSignatureImage ? '#22c55e' : '#4b5563', color: 'white'}}
                       >
@@ -659,28 +659,36 @@ export default function AdminView() {
             </h3>
             
             <div style={{marginBottom: '20px'}}>
-              <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>カメラで撮影または画像を選択</label>
-              <input 
-                type="file" 
-                accept="image/*" 
-                capture="environment"
-                onChange={handleSignatureFileChange}
-                style={{
-                  width: '100%', padding: '12px', borderRadius: '6px', 
-                  border: '1px solid #d1d5db', background: '#f9fafb', color: '#1f2937'
-                }}
-              />
-              {signatureModal.imageData && (
-                <div style={{marginTop: '16px', textAlign: 'center'}}>
-                  <p style={{margin: '0 0 8px 0', fontSize: '0.9rem', color: '#4b5563'}}>プレビュー:</p>
-                  <img src={signatureModal.imageData} alt="サインプレビュー" style={{maxWidth: '100%', maxHeight: '250px', border: '1px solid #e5e7eb', borderRadius: '8px'}} />
+              {!signatureModal.isEditing ? (
+                <div style={{textAlign: 'center'}}>
+                  <p style={{margin: '0 0 12px 0', fontWeight: 'bold'}}>保存済みの画像</p>
+                  <img src={signatureModal.imageData} alt="サイン画像" style={{maxWidth: '100%', maxHeight: '350px', border: '1px solid #e5e7eb', borderRadius: '8px'}} />
                 </div>
+              ) : (
+                <>
+                  <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>カメラで撮影または画像を選択</label>
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={handleSignatureFileChange}
+                    style={{
+                      width: '100%', padding: '12px', borderRadius: '6px', 
+                      border: '1px solid #d1d5db', background: '#f9fafb', color: '#1f2937'
+                    }}
+                  />
+                  {signatureModal.imageData && (
+                    <div style={{marginTop: '16px', textAlign: 'center'}}>
+                      <p style={{margin: '0 0 8px 0', fontSize: '0.9rem', color: '#4b5563'}}>プレビュー:</p>
+                      <img src={signatureModal.imageData} alt="サインプレビュー" style={{maxWidth: '100%', maxHeight: '250px', border: '1px solid #e5e7eb', borderRadius: '8px'}} />
+                    </div>
+                  )}
+                </>
               )}
             </div>
 
             <div style={{display: 'flex', gap: '12px', justifyContent: 'flex-end'}}>
               <button 
-                onClick={() => setSignatureModal({ isOpen: false, queueId: null, imageData: null })}
+                onClick={() => setSignatureModal({ isOpen: false, queueId: null, imageData: null, isEditing: false })}
                 style={{
                   padding: '8px 16px', borderRadius: '6px', border: 'none',
                   background: '#6b7280', color: 'white', cursor: 'pointer',
@@ -688,16 +696,28 @@ export default function AdminView() {
                 }}>
                 キャンセル（閉じる）
               </button>
-              <button 
-                onClick={handleSaveSignature}
-                disabled={isSubmitting || !signatureModal.imageData}
-                style={{
-                  padding: '8px 16px', borderRadius: '6px', border: 'none',
-                  background: (isSubmitting || !signatureModal.imageData) ? '#9ca3af' : '#22c55e', color: 'white', cursor: (isSubmitting || !signatureModal.imageData) ? 'not-allowed' : 'pointer',
-                  fontWeight: '500'
-                }}>
-                {isSubmitting ? '保存中...' : 'アップロードして保存'}
-              </button>
+              {!signatureModal.isEditing ? (
+                <button 
+                  onClick={() => setSignatureModal(prev => ({ ...prev, isEditing: true }))}
+                  style={{
+                    padding: '8px 16px', borderRadius: '6px', border: 'none',
+                    background: '#0ea5e9', color: 'white', cursor: 'pointer',
+                    fontWeight: '500'
+                  }}>
+                  画像を変更する
+                </button>
+              ) : (
+                <button 
+                  onClick={handleSaveSignature}
+                  disabled={isSubmitting || !signatureModal.imageData}
+                  style={{
+                    padding: '8px 16px', borderRadius: '6px', border: 'none',
+                    background: (isSubmitting || !signatureModal.imageData) ? '#9ca3af' : '#22c55e', color: 'white', cursor: (isSubmitting || !signatureModal.imageData) ? 'not-allowed' : 'pointer',
+                    fontWeight: '500'
+                  }}>
+                  {isSubmitting ? '保存中...' : 'アップロードして保存'}
+                </button>
+              )}
             </div>
           </div>
         </div>
