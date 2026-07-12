@@ -295,18 +295,18 @@ export default function AdminView() {
           <Undo2 size={18} />
           <span>戻る</span>
         </button>
-        <button className="action-btn" onClick={() => setSelectedQueueId(q.id)} title={q.isCustomerInfoConfirmed ? "申込情報確認済" : "申込情報"} style={{backgroundColor: q.isCustomerInfoConfirmed ? '#22c55e' : (q.agreement ? '#0ea5e9' : '#4b5563'), color: 'white'}}>
+        <button className="action-btn" onClick={() => setSelectedQueueId(q.id)} title="申込情報" style={{backgroundColor: q.isCustomerInfoConfirmed ? '#22c55e' : (q.agreement ? '#0ea5e9' : '#4b5563'), color: 'white'}}>
           {q.isCustomerInfoConfirmed ? <CheckCircle size={18} /> : <FileText size={18} />}
-          <span>{q.isCustomerInfoConfirmed ? "申込情報確認済" : "申込情報"}</span>
+          <span>申込情報</span>
         </button>
         <button 
           className="action-btn" 
           onClick={() => setSignatureModal({ isOpen: true, queueId: q.id, imageData: q.paperSignatureImage || null, isEditing: !q.paperSignatureImage })} 
-          title="紙サイン画像" 
+          title="査定結果写真" 
           style={{backgroundColor: q.paperSignatureImage ? '#22c55e' : '#4b5563', color: 'white'}}
         >
           {q.paperSignatureImage ? <CheckSquare size={18} /> : <Camera size={18} />}
-          <span>サイン</span>
+          <span>査定結果写真</span>
         </button>
         {q.user && (
           <button className="action-btn" onClick={() => handleOpenMemo(q.user)} title="顧客メモ" style={{backgroundColor: q.user.memo ? '#eab308' : '#6b7280', color: 'white'}}>
@@ -381,18 +381,18 @@ export default function AdminView() {
                         <XCircle size={18} />
                         <span>拒否</span>
                       </button>
-                      <button className="action-btn" onClick={() => setSelectedQueueId(q.id)} title={q.isCustomerInfoConfirmed ? "申込情報確認済" : "申込情報"} style={{backgroundColor: q.isCustomerInfoConfirmed ? '#22c55e' : (q.agreement ? '#0ea5e9' : '#4b5563'), color: 'white'}}>
+                      <button className="action-btn" onClick={() => setSelectedQueueId(q.id)} title="申込情報" style={{backgroundColor: q.isCustomerInfoConfirmed ? '#22c55e' : (q.agreement ? '#0ea5e9' : '#4b5563'), color: 'white'}}>
                         {q.isCustomerInfoConfirmed ? <CheckCircle size={18} /> : <FileText size={18} />}
-                        <span>{q.isCustomerInfoConfirmed ? "申込情報確認済" : "申込情報"}</span>
+                        <span>申込情報</span>
                       </button>
                       <button 
                         className="action-btn" 
                         onClick={() => setSignatureModal({ isOpen: true, queueId: q.id, imageData: q.paperSignatureImage || null, isEditing: !q.paperSignatureImage })} 
-                        title="紙サイン画像" 
+                        title="査定結果写真" 
                         style={{backgroundColor: q.paperSignatureImage ? '#22c55e' : '#4b5563', color: 'white'}}
                       >
                         {q.paperSignatureImage ? <CheckSquare size={18} /> : <Camera size={18} />}
-                        <span>サイン</span>
+                        <span>査定結果写真</span>
                       </button>
                       {q.user && (
                         <button className="action-btn" onClick={() => handleOpenMemo(q.user)} title="顧客メモ" style={{backgroundColor: q.user.memo ? '#eab308' : '#6b7280', color: 'white'}}>
@@ -480,18 +480,18 @@ export default function AdminView() {
                         <Undo2 size={18} />
                         <span>戻る</span>
                       </button>
-                      <button className="action-btn" onClick={() => setSelectedQueueId(q.id)} title={q.isCustomerInfoConfirmed ? "申込情報確認済" : "申込情報"} style={{backgroundColor: q.isCustomerInfoConfirmed ? '#22c55e' : (q.agreement ? '#0ea5e9' : '#4b5563'), color: 'white'}}>
+                      <button className="action-btn" onClick={() => setSelectedQueueId(q.id)} title="申込情報" style={{backgroundColor: q.isCustomerInfoConfirmed ? '#22c55e' : (q.agreement ? '#0ea5e9' : '#4b5563'), color: 'white'}}>
                         {q.isCustomerInfoConfirmed ? <CheckCircle size={18} /> : <FileText size={18} />}
-                        <span>{q.isCustomerInfoConfirmed ? "申込情報確認済" : "申込情報"}</span>
+                        <span>申込情報</span>
                       </button>
                       <button 
                         className="action-btn" 
                         onClick={() => setSignatureModal({ isOpen: true, queueId: q.id, imageData: q.paperSignatureImage || null, isEditing: !q.paperSignatureImage })} 
-                        title="紙サイン画像" 
+                        title="査定結果写真" 
                         style={{backgroundColor: q.paperSignatureImage ? '#22c55e' : '#4b5563', color: 'white'}}
                       >
                         {q.paperSignatureImage ? <CheckSquare size={18} /> : <Camera size={18} />}
-                        <span>サイン</span>
+                        <span>査定結果写真</span>
                       </button>
                       {q.user && (
                         <button className="action-btn" onClick={() => handleOpenMemo(q.user)} title="顧客メモ" style={{backgroundColor: q.user.memo ? '#eab308' : '#6b7280', color: 'white'}}>
@@ -655,7 +655,7 @@ export default function AdminView() {
           }}>
             <h3 style={{marginTop: 0, marginBottom: '16px', fontSize: '1.25rem', fontWeight: 'bold', color: '#111827', display: 'flex', alignItems: 'center', gap: '8px'}}>
               <Camera size={20} color="#0ea5e9" />
-              紙サイン画像のアップロード
+              査定結果写真のアップロード
             </h3>
             
             <div style={{marginBottom: '20px'}}>
