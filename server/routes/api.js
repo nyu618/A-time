@@ -261,10 +261,21 @@ router.put('/admin/user/:lineUid/memo', async (req, res) => {
 router.put('/admin/queue/:id/paper-signature', async (req, res) => {
   try {
     const { id } = req.params;
-    const { image } = req.body;
+    const { images } = req.body;
+    let dataToSave = null;
+
+    if (Array.isArray(images) && images.length > 0) {
+      dataToSave = JSON.stringify(images);
+    } else if (Array.isArray(images) && images.length === 0) {
+      dataToSave = null;
+    } else if (req.body.image) {
+      // Fallback for old client version
+      dataToSave = JSON.stringify([req.body.image]);
+    }
+
     const updatedQueue = await prisma.queue.update({
       where: { id: parseInt(id) },
-      data: { paperSignatureImage: image }
+      data: { paperSignatureImage: dataToSave }
     });
     res.json(updatedQueue);
   } catch (error) {
