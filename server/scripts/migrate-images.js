@@ -5,6 +5,9 @@ const cloudinary = require('cloudinary').v2;
 const dotenv = require('dotenv');
 const path = require('path');
 
+// Helper to pause execution
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 // Load environment variables from server/.env
 dotenv.config({ path: path.join(__dirname, '../.env') });
 
@@ -41,7 +44,7 @@ const uploadToCloudinary = async (base64String, folderName) => {
 
 async function migrateAgreements() {
   console.log("--- Starting Agreement Migration ---");
-  const batchSize = 100;
+  const batchSize = 5; // Reduced from 100 to prevent OOM
   let skip = 0;
   let hasMore = true;
 
@@ -96,15 +99,25 @@ async function migrateAgreements() {
       }
     }
 
+      // GC Hints for large strings
+      agreement.idCardImageFront = null;
+      agreement.idCardImageBack = null;
+      agreement.signatureData = null;
+    }
+
+    // Clear array from memory explicitly
+    agreements.length = 0;
+
     skip += batchSize;
-    console.log(`Processed ${skip} Agreement records...`);
+    console.log(`Processed ${skip} Agreement records... waiting 3 seconds to free memory...`);
+    await sleep(3000); // 3 seconds interval
   }
   console.log("--- Finished Agreement Migration ---");
 }
 
 async function migrateQueues() {
   console.log("--- Starting Queue Migration ---");
-  const batchSize = 100;
+  const batchSize = 5; // Reduced from 100 to prevent OOM
   let skip = 0;
   let hasMore = true;
 
@@ -160,8 +173,16 @@ async function migrateQueues() {
       }
     }
 
+      // GC hint
+      queue.paperSignatureImage = null;
+    }
+
+    // Clear array explicitly
+    queues.length = 0;
+
     skip += batchSize;
-    console.log(`Processed ${skip} Queue records...`);
+    console.log(`Processed ${skip} Queue records... waiting 3 seconds to free memory...`);
+    await sleep(3000);
   }
   console.log("--- Finished Queue Migration ---");
 }
