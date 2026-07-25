@@ -4,9 +4,33 @@ const { Pool } = require('pg');
 const { PrismaPg } = require('@prisma/adapter-pg');
 const line = require('@line/bot-sdk');
 const dotenv = require('dotenv');
+const cloudinary = require('cloudinary').v2;
 const { callNextWaitingUser, handleCancelAndRequeue, formatDateJp } = require('../queueHelper');
 
 dotenv.config();
+
+// Cloudinaryの設定
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+// Base64画像をCloudinaryにアップロードし、URLを返す関数
+const uploadToCloudinary = async (base64String, folderName) => {
+  if (!base64String || !base64String.startsWith('data:image')) {
+    return base64String;
+  }
+  try {
+    const result = await cloudinary.uploader.upload(base64String, {
+      folder: folderName
+    });
+    return result.secure_url;
+  } catch (error) {
+    console.error("Cloudinary upload error:", error);
+    throw error;
+  }
+};
 
 const router = express.Router();
 
@@ -265,12 +289,15 @@ router.put('/admin/queue/:id/paper-signature', async (req, res) => {
     let dataToSave = null;
 
     if (Array.isArray(images) && images.length > 0) {
-      dataToSave = JSON.stringify(images);
+      const uploadPromises = images.map(img => uploadToCloudinary(img, 'paper_signatures'));
+      const secureUrls = await Promise.all(uploadPromises);
+      dataToSave = JSON.stringify(secureUrls);
     } else if (Array.isArray(images) && images.length === 0) {
       dataToSave = null;
     } else if (req.body.image) {
       // Fallback for old client version
-      dataToSave = JSON.stringify([req.body.image]);
+      const secureUrl = await uploadToCloudinary(req.body.image, 'paper_signatures');
+      dataToSave = JSON.stringify([secureUrl]);
     }
 
     const updatedQueue = await prisma.queue.update({
@@ -647,6 +674,11 @@ router.post('/agreement', async (req, res) => {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
+    // 画像をCloudinaryへアップロード
+    const frontUrl = await uploadToCloudinary(idCardImageFront, 'id_cards');
+    const backUrl = await uploadToCloudinary(idCardImageBack, 'id_cards');
+    const sigUrl = await uploadToCloudinary(signatureData, 'signatures');
+
     // 1. Update User with new info
     await prisma.user.update({
       where: { lineUid: userId },
@@ -670,18 +702,18 @@ router.post('/agreement', async (req, res) => {
     const agreement = await prisma.agreement.upsert({
       where: { queueId: queueId },
       update: {
-        idCardImageFront,
-        idCardImageBack,
-        signatureData,
+        idCardImageFront: frontUrl,
+        idCardImageBack: backUrl,
+        signatureData: sigUrl,
         isAgreedToTerms,
         isInvoiceRegistered
       },
       create: {
         queueId,
         userId,
-        idCardImageFront,
-        idCardImageBack,
-        signatureData,
+        idCardImageFront: frontUrl,
+        idCardImageBack: backUrl,
+        signatureData: sigUrl,
         isAgreedToTerms,
         isInvoiceRegistered
       }
