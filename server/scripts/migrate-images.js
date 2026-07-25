@@ -27,9 +27,16 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
+// "http"から始まらず、かつ文字数が1000文字以上ならBase64などの画像データと判定する
+const isBase64Data = (str) => {
+  if (!str) return false;
+  if (typeof str !== 'string') return false;
+  return !str.startsWith('http') && str.length > 1000;
+};
+
 const uploadToCloudinary = async (base64String, folderName) => {
-  if (!base64String || !base64String.startsWith('data:image')) {
-    return base64String;
+  if (!isBase64Data(base64String)) {
+    return base64String; // すでにURLならそのまま返す
   }
   try {
     const result = await cloudinary.uploader.upload(base64String, {
@@ -42,9 +49,42 @@ const uploadToCloudinary = async (base64String, folderName) => {
   }
 };
 
+async function checkAndLogCounts() {
+  console.log("=== 実行前: 対象レコードの集計 ===");
+
+  // Agreement
+  const totalAgreements = await prisma.agreement.count();
+  const targetAgreements = await prisma.agreement.count({
+    where: {
+      OR: [
+        { idCardImageFront: { not: { startsWith: 'http' }, not: null } },
+        { idCardImageBack: { not: { startsWith: 'http' }, not: null } },
+        { signatureData: { not: { startsWith: 'http' }, not: null } }
+      ]
+    }
+  });
+
+  // Queue
+  const totalQueues = await prisma.queue.count();
+  const targetQueues = await prisma.queue.count({
+    where: {
+      paperSignatureImage: { not: { startsWith: 'http' }, not: { startsWith: '["http' }, not: null }
+    }
+  });
+
+  console.log(`[Agreementモデル] 全レコード数: ${totalAgreements}件 / うち未移行（対象）: ${targetAgreements}件`);
+  console.log(`[Queueモデル] 全レコード数: ${totalQueues}件 / うち未移行（対象）: ${targetQueues}件`);
+  console.log("===================================\n");
+  
+  if (targetAgreements === 0 && targetQueues === 0) {
+    console.log("※すべてのデータがすでにCloudinaryへ移行済み（または対象外）のため、処理を終了します。");
+    process.exit(0);
+  }
+}
+
 async function migrateAgreements() {
   console.log("--- Starting Agreement Migration ---");
-  const batchSize = 5; // Reduced from 100 to prevent OOM
+  const batchSize = 5; // OOM対策: 5件ずつ取得
   let skip = 0;
   let hasMore = true;
 
@@ -66,23 +106,23 @@ async function migrateAgreements() {
         const updateData = {};
 
         // 1. idCardImageFront
-        if (agreement.idCardImageFront && agreement.idCardImageFront.startsWith('data:image')) {
+        if (isBase64Data(agreement.idCardImageFront)) {
           console.log(`Migrating Agreement ID ${agreement.id}: idCardImageFront`);
-          updateData.idCardImageFront = await uploadToCloudinary(agreement.idCardImageFront, 'id_cards');
+          updateData.idCardImageFront = await uploadToCloudinary(agreement.idCardImageFront, 'a-time-archive/id_cards');
           updated = true;
         }
 
         // 2. idCardImageBack
-        if (agreement.idCardImageBack && agreement.idCardImageBack.startsWith('data:image')) {
+        if (isBase64Data(agreement.idCardImageBack)) {
           console.log(`Migrating Agreement ID ${agreement.id}: idCardImageBack`);
-          updateData.idCardImageBack = await uploadToCloudinary(agreement.idCardImageBack, 'id_cards');
+          updateData.idCardImageBack = await uploadToCloudinary(agreement.idCardImageBack, 'a-time-archive/id_cards');
           updated = true;
         }
 
         // 3. signatureData
-        if (agreement.signatureData && agreement.signatureData.startsWith('data:image')) {
+        if (isBase64Data(agreement.signatureData)) {
           console.log(`Migrating Agreement ID ${agreement.id}: signatureData`);
-          updateData.signatureData = await uploadToCloudinary(agreement.signatureData, 'signatures');
+          updateData.signatureData = await uploadToCloudinary(agreement.signatureData, 'a-time-archive/signatures');
           updated = true;
         }
 
@@ -93,31 +133,27 @@ async function migrateAgreements() {
           });
           console.log(`Successfully updated Agreement ID ${agreement.id}`);
         }
+
+        // GC Hints
+        agreement.idCardImageFront = null;
+        agreement.idCardImageBack = null;
+        agreement.signatureData = null;
       } catch (err) {
         console.error(`Error processing Agreement ID ${agreement.id}:`, err);
-        // Continue to next record even if this one fails
       }
     }
 
-      // GC Hints for large strings
-      agreement.idCardImageFront = null;
-      agreement.idCardImageBack = null;
-      agreement.signatureData = null;
-    }
-
-    // Clear array from memory explicitly
-    agreements.length = 0;
-
+    agreements.length = 0; // Clear array explicitly
     skip += batchSize;
-    console.log(`Processed ${skip} Agreement records... waiting 3 seconds to free memory...`);
-    await sleep(3000); // 3 seconds interval
+    console.log(`Processed up to ${skip} Agreement records... waiting 3 seconds to free memory...`);
+    await sleep(3000); // OOM対策: インターバル
   }
-  console.log("--- Finished Agreement Migration ---");
+  console.log("--- Finished Agreement Migration ---\n");
 }
 
 async function migrateQueues() {
   console.log("--- Starting Queue Migration ---");
-  const batchSize = 5; // Reduced from 100 to prevent OOM
+  const batchSize = 5; // OOM対策: 5件ずつ取得
   let skip = 0;
   let hasMore = true;
 
@@ -139,9 +175,11 @@ async function migrateQueues() {
 
         let images = [];
         try {
+          // JSON配列として保存されている場合を考慮
           images = JSON.parse(queue.paperSignatureImage);
           if (!Array.isArray(images)) images = [queue.paperSignatureImage];
         } catch {
+          // パースできない場合は単一の文字列として扱う
           images = [queue.paperSignatureImage];
         }
 
@@ -149,13 +187,13 @@ async function migrateQueues() {
         const newImages = [];
 
         for (const img of images) {
-          if (img && img.startsWith('data:image')) {
+          if (isBase64Data(img)) {
             console.log(`Migrating Queue ID ${queue.id}: paperSignatureImage`);
-            const url = await uploadToCloudinary(img, 'paper_signatures');
+            const url = await uploadToCloudinary(img, 'a-time-archive/paper_signatures');
             newImages.push(url);
             updated = true;
           } else {
-            newImages.push(img); // Already a URL or empty
+            newImages.push(img); // すでにURLの場合はそのまま保持
           }
         }
 
@@ -167,21 +205,15 @@ async function migrateQueues() {
           console.log(`Successfully updated Queue ID ${queue.id}`);
         }
 
+        queue.paperSignatureImage = null; // GC Hint
       } catch (err) {
         console.error(`Error processing Queue ID ${queue.id}:`, err);
-        // Continue
       }
     }
 
-      // GC hint
-      queue.paperSignatureImage = null;
-    }
-
-    // Clear array explicitly
-    queues.length = 0;
-
+    queues.length = 0; // Clear array explicitly
     skip += batchSize;
-    console.log(`Processed ${skip} Queue records... waiting 3 seconds to free memory...`);
+    console.log(`Processed up to ${skip} Queue records... waiting 3 seconds to free memory...`);
     await sleep(3000);
   }
   console.log("--- Finished Queue Migration ---");
@@ -189,6 +221,7 @@ async function migrateQueues() {
 
 async function main() {
   try {
+    await checkAndLogCounts(); // 実行前の件数確認
     await migrateAgreements();
     await migrateQueues();
     console.log("All migrations completed successfully!");
