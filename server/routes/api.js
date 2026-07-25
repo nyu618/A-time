@@ -289,14 +289,14 @@ router.put('/admin/queue/:id/paper-signature', async (req, res) => {
     let dataToSave = null;
 
     if (Array.isArray(images) && images.length > 0) {
-      const uploadPromises = images.map(img => uploadToCloudinary(img, 'paper_signatures'));
+      const uploadPromises = images.map(img => uploadToCloudinary(img, 'a-time-archive/paper_signatures'));
       const secureUrls = await Promise.all(uploadPromises);
       dataToSave = JSON.stringify(secureUrls);
     } else if (Array.isArray(images) && images.length === 0) {
       dataToSave = null;
     } else if (req.body.image) {
       // Fallback for old client version
-      const secureUrl = await uploadToCloudinary(req.body.image, 'paper_signatures');
+      const secureUrl = await uploadToCloudinary(req.body.image, 'a-time-archive/paper_signatures');
       dataToSave = JSON.stringify([secureUrl]);
     }
 
@@ -675,9 +675,9 @@ router.post('/agreement', async (req, res) => {
     }
 
     // 画像をCloudinaryへアップロード
-    const frontUrl = await uploadToCloudinary(idCardImageFront, 'id_cards');
-    const backUrl = await uploadToCloudinary(idCardImageBack, 'id_cards');
-    const sigUrl = await uploadToCloudinary(signatureData, 'signatures');
+    const frontUrl = await uploadToCloudinary(idCardImageFront, 'a-time-archive/id_cards');
+    const backUrl = await uploadToCloudinary(idCardImageBack, 'a-time-archive/id_cards');
+    const sigUrl = await uploadToCloudinary(signatureData, 'a-time-archive/signatures');
 
     // 1. Update User with new info
     await prisma.user.update({
